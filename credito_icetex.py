@@ -15,6 +15,8 @@ with st.form(key='credito_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
+    tasa_nominal = st.number_input("Tasa de Interés Anual (%)", min_value=0.0, step=0.1, value=10.0)
+    opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
     submit_button = st.form_submit_button(label='Enviar Solicitud')
 
 # Función para calcular la viabilidad del crédito
@@ -22,7 +24,7 @@ def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
     if ingresos == 0:
         return False, 0  # Previene división por cero
     cuota_maxima = ingresos * 0.3  # 30% de los ingresos como cuota máxima sugerida
-    cuota_calculada = valor_solicitado / (cantidad_periodos * 12)  # Cuota mensual estimada
+    cuota_calculada = valor_solicitado / (cantidad_periodos * 6)  # Cuota mensual estimada (6 meses por periodo)
     return cuota_calculada <= cuota_maxima, cuota_calculada
 
 # Función para generar el PDF
@@ -53,7 +55,7 @@ def simular_pago(valor_solicitado, tasa_interes, plazo):
 def precalificar(ingresos, valor_solicitado, cantidad_periodos):
     if ingresos == 0:
         return False  # Previene división por cero
-    ratio_ingresos = valor_solicitado / (ingresos * cantidad_periodos)
+    ratio_ingresos = valor_solicitado / (ingresos * cantidad_periodos * 6)  # Total a financiar / total ingresos durante el período
     return ratio_ingresos < 3  # Regla arbitraria para precalificación
 
 # Función para calcular desembolso total
@@ -97,7 +99,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     
     # Simulación de tablas
     data_mientras_estudias = {
-        "Semestre": [f"Semestre {i+1}" for i in range(cantidad_periodos)],
+        "Semestre": [f"Semestre {i+1}" for i in range(cantidad_periodos)] * 6,
         "Mes": [i+1 for i in range(cantidad_periodos * 6)],
         "Cuota Mensual": [ingresos_mensuales] * (cantidad_periodos * 6),
         "Abono Capital": [ingresos_mensuales * (0 if opcion_pago == "0%" else 0.2)] * (cantidad_periodos * 6),
@@ -133,27 +135,24 @@ if submit_button:
     
     # Simulación de diferentes escenarios de pago
     st.header("Simulación de Diferentes Escenarios de Pago")
-    tasa_nominal = 10.0  # Tasa de interés anual fija al 10%
-    plazo = st.slider("Plazo del crédito en años:", min_value=1, max_value=10, value=5, step=1)
+    plazo = st.slider("Plazo del crédito en años:", min_value=1, max_value=10, value=5)
+    cuota_mensual_simulada = simular_pago(valor_solicitado, tasa_nominal, plazo)
+    st.write(f"Cuota mensual simulada para un plazo de {plazo} años: ${cuota_mensual_simulada:,.2f}")
     
-    cuota_simulada = simular_pago(valor_solicitado, tasa_nominal, plazo)
-    st.write(f"Con una tasa de interés anual del {tasa_nominal}% y un plazo de {plazo} años, la cuota mensual estimada es ${cuota_simulada:,.2f}")
-    
-    # Generar PDF
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
-    
-    # Simulación de plan de pagos
+    # Simulación del plan de pagos
     st.header("Simulación del Plan de Pagos")
-    opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
-    
     df_mientras_estudias, df_finalizado_estudios, total_a_cobro = simular_plan_pagos(
         valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago, tasa_nominal)
     
-    st.write(f"Total a cobrar al finalizar el crédito: ${total_a_cobro:,.2f}")
+    st.write(f"Total a cobrar al final del periodo: ${total_a_cobro:,.2f}")
     
-    st.write("Plan de pagos durante el estudio:")
+    st.subheader("Tabla de pagos mientras estudias")
     st.dataframe(df_mientras_estudias)
     
-    st.write("Plan de pagos después de finalizar estudios:")
+    st.subheader("Tabla de pagos al finalizar estudios")
     st.dataframe(df_finalizado_estudios)
+    
+    # Generar PDF
+    if st.button('Generar PDF'):
+        generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
 
