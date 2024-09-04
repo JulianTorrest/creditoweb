@@ -56,46 +56,56 @@ def calcular_pago_minimo(valor_solicitado, cantidad_periodos):
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago):
-    # Variables base
     meses_gracia = 6  # Ejemplo de meses de periodo de gracia
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
     afim = 10.0  # Ejemplo de AFIM en porcentaje
 
-    # Cálculos
-    desembolso_total = valor_solicitado * cantidad_periodos
-    capital_a_cobro = desembolso_total * (1 + afim / 100)
-    interes_a_cobro = capital_a_cobro * 0 / 100 * cantidad_periodos * 6  # Tasa de interés 0 durante estudios
-    interes_periodo_gracia = capital_a_cobro * 0 / 100 * meses_gracia  # Tasa de interés 0 durante gracia
-    total_a_cobro = capital_a_cobro + interes_a_cobro + interes_periodo_gracia
+    # Inicialización
+    saldo_periodo = valor_solicitado
+    saldo_final = 0
+
+    # Dataframe durante los estudios
+    data_mientras_estudias = []
+    for semestre in range(cantidad_periodos):
+        for mes in range(6):  # 6 meses por semestre
+            intereses = saldo_periodo * afim / 100 / 12  # Intereses mensuales
+            cuota_pago = ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)  # Abono de pago
+            saldo_periodo = saldo_periodo - cuota_pago + intereses
+            
+            if mes == 5:  # En el último mes de cada semestre, añadir nuevo saldo
+                saldo_periodo += valor_solicitado
+            
+            data_mientras_estudias.append({
+                "Semestre": f"Semestre {semestre+1}",
+                "Mes": mes + 1 + semestre * 6,
+                "Cuota Mensual": cuota_pago,
+                "Abono Capital": cuota_pago,
+                "Abono Intereses": intereses,
+                "AFIM": afim,
+                "Saldo": saldo_periodo
+            })
     
-    # Cuota mensual al final de los estudios
-    valor_cuota_final = total_a_cobro / num_cuotas_finales
+    # Saldo final después de estudios para uso en la sección final
+    saldo_final = saldo_periodo
+
+    # Dataframe después de finalizar estudios
+    valor_cuota_final = saldo_final / num_cuotas_finales
+    data_finalizado_estudios = []
+    for mes in range(num_cuotas_finales):
+        intereses = saldo_final * afim / 100 / 12  # Intereses mensuales
+        cuota_pago_final = valor_cuota_final
+        saldo_final = saldo_final - cuota_pago_final + intereses
+        data_finalizado_estudios.append({
+            "Mes": mes + 1,
+            "Cuota Mensual": cuota_pago_final,
+            "Abono Capital": cuota_pago_final * 0.7,  # Suponiendo 70% para el capital
+            "Abono Intereses": cuota_pago_final * 0.3,  # Suponiendo 30% para intereses
+            "AFIM": afim,
+            "Saldo": saldo_final
+        })
     
-    # Simulación de tablas
-    saldo = desembolso_total
-    data_mientras_estudias = {
-        "Semestre": [f"Semestre {i+1}" for i in range(cantidad_periodos) for _ in range(6)],
-        "Mes": [i+1 + 6 * (s) for s in range(cantidad_periodos) for i in range(6)],
-        "Cuota Mensual": [ingresos_mensuales] * (cantidad_periodos * 6),
-        "Abono Capital": [ingresos_mensuales * (0 if opcion_pago == "0%" else 0.2)] * (cantidad_periodos * 6),
-        "Abono Intereses": [ingresos_mensuales * (1 if opcion_pago == "0%" else 0.8)] * (cantidad_periodos * 6),
-        "AFIM": [afim] * (cantidad_periodos * 6),
-        "Saldo": [saldo - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * i for i in range(cantidad_periodos * 6)]
-    }
-    
-    saldo_final = saldo - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * (cantidad_periodos * 6)
-    
-    data_finalizado_estudios = {
-        "Mes": [i+1 for i in range(num_cuotas_finales)],
-        "Cuota Mensual": [valor_cuota_final] * num_cuotas_finales,
-        "Abono Capital": [valor_cuota_final * 0.7] * num_cuotas_finales,
-        "Abono Intereses": [valor_cuota_final * 0.3] * num_cuotas_finales,
-        "AFIM": [afim] * num_cuotas_finales,
-        "Saldo": [total_a_cobro - (valor_cuota_final * i) for i in range(num_cuotas_finales)]
-    }
-    
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro, saldo_final
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
@@ -103,12 +113,10 @@ if submit_button:
     
     if viable:
         st.success("La solicitud es viable con los ingresos actuales.")
-        saldo_final = 0
     else:
         st.error("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
         minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
         st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.")
-        saldo_final = None  # Indicar que el saldo final no será 0 en este caso
     
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable)
@@ -125,18 +133,14 @@ if submit_button:
     
     # Simular el plan de pagos
     st.header("Simulación de Plan de Pagos")
-    df_mientras_estudias, df_finalizado_estudios, total_a_cobro, saldo_final = simular_plan_pagos(
+    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
         opcion_pago
     )
     
-    st.write(f"El total a pagar al finalizar el crédito es ${total_a_cobro:.2f}.")
-    if saldo_final == 0:
-        st.write("Tu saldo final es 0, lo que significa que has cubierto todos los pagos durante el periodo de gracia.")
-    else:
-        st.write(f"Tu saldo final es ${saldo_final:.2f}.")
+    st.write(f"El saldo final después de los estudios es ${saldo_final:.2f}.")
     
     st.subheader("Durante los estudios")
     st.dataframe(df_mientras_estudias)
@@ -147,3 +151,4 @@ if submit_button:
 # Manejo del botón de limpiar
 if clear_button:
     st.experimental_rerun()
+
