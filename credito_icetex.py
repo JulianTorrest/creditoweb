@@ -136,19 +136,21 @@ def prefactibilidad():
 if submit_button:
     viabilidad, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
+    # Mostrar siempre las tablas, sin importar la viabilidad
+    data_mientras_estudias, data_finalizado_estudios, total_a_cobro = simular_plan_pagos(
+        valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago
+    )
+    
+    st.write("**Simulación mientras estudias:**")
+    st.dataframe(data_mientras_estudias)
+    
+    st.write("**Simulación después de finalizar estudios:**")
+    st.dataframe(data_finalizado_estudios)
+    
+    st.write(f"**Total a pagar al final del período de gracia:** ${total_a_cobro:,.2f}")
+    
     if viabilidad:
         st.success("Tu solicitud es viable. Calculando simulación...")
-        data_mientras_estudias, data_finalizado_estudios, total_a_cobro = simular_plan_pagos(
-            valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago)
-        
-        st.write("**Simulación mientras estudias:**")
-        st.dataframe(data_mientras_estudias)
-        
-        st.write("**Simulación después de finalizar estudios:**")
-        st.dataframe(data_finalizado_estudios)
-        
-        st.write(f"**Total a pagar al final del período de gracia:** ${total_a_cobro:,.2f}")
-        
         generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
     else:
-        st.error("La solicitud no es viable con los ingresos actuales.")
+        st.warning("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
