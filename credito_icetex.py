@@ -5,11 +5,6 @@ from fpdf import FPDF
 # Título de la página
 st.title("Solicitud de Crédito Educativo - ICETEX")
 
-# Descripción
-st.write("""
-Por favor, completa el siguiente formulario para solicitar un crédito educativo con ICETEX.
-""")
-
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
@@ -150,4 +145,9 @@ if submit_button:
 
 # Lógica para limpiar los datos
 if clear_button:
+    # Limpia todos los campos del formulario
+    valor_solicitado = 0
+    cantidad_periodos = 0
+    ingresos_mensuales = 0
+    opcion_pago = "0%"
     st.experimental_rerun()
