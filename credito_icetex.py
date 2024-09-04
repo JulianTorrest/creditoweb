@@ -28,7 +28,7 @@ def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
     return cuota_calculada <= cuota_maxima, cuota_calculada
 
 # Función para generar el PDF
-def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada):
+def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, opcion_pago):
     pdf = FPDF()
     pdf.add_page()
     
@@ -40,9 +40,10 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_c
     pdf.cell(200, 10, txt=f"Cantidad de periodos a financiar: {cantidad_periodos}", ln=True)
     pdf.cell(200, 10, txt=f"Cuota mensual estimada: ${cuota_calculada:,.2f}", ln=True)
     pdf.cell(200, 10, txt=f"Pago mensual mientras estudias: ${ingresos_mensuales:,}", ln=True)
+    pdf.cell(200, 10, txt=f"Opción de pago durante estudios: {opcion_pago}", ln=True)
     
     pdf.output("resumen_credito.pdf")
-    st.success("PDF generado exitosamente.")
+    st.success("PDF generado exitosamente. Puedes descargarlo [aquí](resumen_credito.pdf).")
 
 # Función para simular diferentes escenarios de pago
 def simular_pago(valor_solicitado, tasa_interes, plazo):
@@ -117,42 +118,29 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Saldo": [total_a_cobro - (valor_cuota_final * i) for i in range(num_cuotas_finales)]
     }
     
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios)
 
-# Al enviar el formulario
+# Lógica de presentación de datos
 if submit_button:
-    st.success(f"Solicitud enviada exitosamente. Valor solicitado: ${valor_solicitado:,}. "
-               f"Periodos a financiar: {cantidad_periodos}. Pago mensual: ${ingresos_mensuales:,}.")
+    viabilidad, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
-    # Sección de viabilidad del crédito
-    st.header("Cálculo de Viabilidad del Crédito")
-    es_viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
-    
-    if es_viable:
-        st.success(f"El crédito es viable. Cuota mensual estimada: ${cuota_calculada:,.2f}")
+    if viabilidad:
+        st.success("La solicitud es viable.")
+        st.write(f"Cuota mensual estimada: ${cuota_calculada:,.2f}")
+        
+        # Generar y mostrar PDF
+        if st.button('Generar PDF'):
+            generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, opcion_pago)
+        
+        # Mostrar tablas de simulación
+        df_mientras_estudias, df_finalizado_estudios = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago, tasa_nominal)
+        
+        st.write("Simulación del Plan de Pagos mientras estudias:")
+        st.dataframe(df_mientras_estudias)
+        
+        st.write("Simulación del Plan de Pagos al finalizar estudios:")
+        st.dataframe(df_finalizado_estudios)
+        
     else:
-        st.error(f"El crédito no es viable con los ingresos actuales. Cuota mensual estimada: ${cuota_calculada:,.2f}")
-    
-    # Simulación de diferentes escenarios de pago
-    st.header("Simulación de Diferentes Escenarios de Pago")
-    plazo = st.slider("Plazo del crédito en años:", min_value=1, max_value=10, value=5)
-    cuota_mensual_simulada = simular_pago(valor_solicitado, tasa_nominal, plazo)
-    st.write(f"Cuota mensual simulada para un plazo de {plazo} años: ${cuota_mensual_simulada:,.2f}")
-    
-    # Simulación del plan de pagos
-    st.header("Simulación del Plan de Pagos")
-    df_mientras_estudias, df_finalizado_estudios, total_a_cobro = simular_plan_pagos(
-        valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago, tasa_nominal)
-    
-    st.write(f"Total a cobrar al final del periodo: ${total_a_cobro:,.2f}")
-    
-    st.subheader("Tabla de pagos mientras estudias")
-    st.dataframe(df_mientras_estudias)
-    
-    st.subheader("Tabla de pagos al finalizar estudios")
-    st.dataframe(df_finalizado_estudios)
-    
-    # Generar PDF
-    if st.button('Generar PDF'):
-        generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
+        st.error("La solicitud no es viable según los parámetros ingresados.")
 
