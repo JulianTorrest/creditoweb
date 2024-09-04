@@ -17,6 +17,7 @@ with st.form(key='credito_y_simulacion_form'):
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
     opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
     submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
+    clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
@@ -138,11 +139,15 @@ if submit_button:
     
     st.write(f"El total a pagar al finalizar el crédito es ${total_a_cobro:.2f}.")
     if saldo_final == 0:
-        st.success("El saldo final al terminar el crédito es 0. El plan de pagos es viable.")
+        st.success("La simulación muestra que el saldo es 0 al finalizar el crédito.")
     else:
-        st.error(f"El saldo final al terminar el crédito es ${saldo_final:.2f}. El plan de pagos no es viable.")
+        st.error("La simulación muestra un saldo pendiente al finalizar el crédito.")
     
     st.write("Simulación mientras estudias:")
     st.write(df_mientras_estudias)
     st.write("Simulación al finalizar estudios:")
     st.write(df_finalizado_estudios)
+
+# Lógica para limpiar los datos
+if clear_button:
+    st.experimental_rerun()
