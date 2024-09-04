@@ -151,4 +151,3 @@ if submit_button:
 # Manejo del botón de limpiar
 if clear_button:
     st.experimental_rerun()
-
