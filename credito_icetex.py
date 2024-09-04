@@ -5,12 +5,22 @@ from fpdf import FPDF
 # Título de la página
 st.title("Solicitud de Crédito Educativo - ICETEX")
 
+# Variables para los datos del formulario
+if 'valor_solicitado' not in st.session_state:
+    st.session_state.valor_solicitado = 0
+if 'cantidad_periodos' not in st.session_state:
+    st.session_state.cantidad_periodos = 0
+if 'ingresos_mensuales' not in st.session_state:
+    st.session_state.ingresos_mensuales = 0
+if 'opcion_pago' not in st.session_state:
+    st.session_state.opcion_pago = "0%"
+
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
-    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
-    cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
-    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
+    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000, value=st.session_state.valor_solicitado)
+    cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1, value=st.session_state.cantidad_periodos)
+    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000, value=st.session_state.ingresos_mensuales)
+    opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"], index=["0%", "20%"].index(st.session_state.opcion_pago))
     submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
@@ -99,6 +109,11 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
 
 # Ejecutar la lógica del formulario
 if submit_button:
+    st.session_state.valor_solicitado = valor_solicitado
+    st.session_state.cantidad_periodos = cantidad_periodos
+    st.session_state.ingresos_mensuales = ingresos_mensuales
+    st.session_state.opcion_pago = opcion_pago
+
     viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
     if viable:
@@ -106,48 +121,26 @@ if submit_button:
         saldo_final = 0
     else:
         st.error("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
-        minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
-        st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.")
-        saldo_final = None  # Indicar que el saldo final no será 0 en este caso
+        saldo_final = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
+    
+    st.write(f"Cuota mensual estimada: ${cuota_calculada:,.2f}")
     
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable)
+    st.download_button(label="Descargar PDF", data=open("resumen_credito.pdf", "rb").read(), file_name="resumen_credito.pdf")
     
-    # Mostrar opción de descarga de PDF
-    st.write("Haz clic en el siguiente enlace para descargar el PDF:")
-    with open("resumen_credito.pdf", "rb") as pdf_file:
-        st.download_button(
-            label="Descargar PDF",
-            data=pdf_file,
-            file_name="resumen_credito.pdf",
-            mime="application/pdf"
-        )
-    
-    # Simular el plan de pagos
-    st.header("Simulación de Plan de Pagos")
-    df_mientras_estudias, df_finalizado_estudios, total_a_cobro, saldo_final = simular_plan_pagos(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        opcion_pago
-    )
-    
-    st.write(f"El total a pagar al finalizar el crédito es ${total_a_cobro:.2f}.")
-    if saldo_final == 0:
-        st.success("La simulación muestra que el saldo es 0 al finalizar el crédito.")
-    else:
-        st.error("La simulación muestra un saldo pendiente al finalizar el crédito.")
-    
-    st.write("Simulación mientras estudias:")
+    # Mostrar tabla
+    df_mientras_estudias, df_finalizado_estudios, total_a_cobro, saldo_final = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago)
+    st.write("Tabla de pagos mientras estudias:")
     st.write(df_mientras_estudias)
-    st.write("Simulación al finalizar estudios:")
+    st.write("Tabla de pagos después de finalizar los estudios:")
     st.write(df_finalizado_estudios)
 
-# Lógica para limpiar los datos
+# Limpiar datos
 if clear_button:
-    # Limpia todos los campos del formulario
-    valor_solicitado = 0
-    cantidad_periodos = 0
-    ingresos_mensuales = 0
-    opcion_pago = "0%"
+    st.session_state.valor_solicitado = 0
+    st.session_state.cantidad_periodos = 0
+    st.session_state.ingresos_mensuales = 0
+    st.session_state.opcion_pago = "0%"
     st.experimental_rerun()
+
