@@ -10,13 +10,13 @@ st.write("""
 Por favor, completa el siguiente formulario para solicitar un crédito educativo con ICETEX.
 """)
 
-# Formulario principal
-with st.form(key='credito_form'):
+# Formulario combinado
+with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
     opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
-    submit_button = st.form_submit_button(label='Enviar Solicitud')
+    submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
 
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
@@ -44,6 +44,8 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_c
         pdf.cell(200, 10, txt="La solicitud es viable con los ingresos actuales.", ln=True)
     else:
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
+        minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
+        pdf.cell(200, 10, txt=f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.", ln=True)
     
     pdf.output("resumen_credito.pdf")
 
@@ -56,44 +58,6 @@ def calcular_pago_minimo(valor_solicitado, cantidad_periodos):
     else:
         return cuota_maxima
 
-# Función para simular diferentes escenarios de pago
-def simular_pago(valor_solicitado, tasa_interes, plazo):
-    tasa_mensual = tasa_interes / 12 / 100
-    n = plazo * 12
-    cuota_mensual = valor_solicitado * (tasa_mensual * (1 + tasa_mensual) ** n) / ((1 + tasa_mensual) ** n - 1)
-    return cuota_mensual
-
-# Función para precalificación
-def precalificar(ingresos, valor_solicitado, cantidad_periodos):
-    if ingresos == 0:
-        return False  # Previene división por cero
-    ratio_ingresos = valor_solicitado / (ingresos * cantidad_periodos * 6)  # Total a financiar / total ingresos durante el período
-    return ratio_ingresos < 3  # Regla arbitraria para precalificación
-
-# Función para calcular desembolso total
-def calcular_desembolso_total(valor_solicitado, cantidad_periodos):
-    return valor_solicitado * cantidad_periodos
-
-# Función para calcular el capital a cobro
-def calcular_capital_a_cobro(desembolso_total, afim):
-    return desembolso_total * (1 + afim / 100)
-
-# Función para calcular el interés a cobro
-def calcular_interes_a_cobro(capital_a_cobro, tasa_nominal, meses):
-    return capital_a_cobro * tasa_nominal / 100 * meses / 12
-
-# Función para calcular el interés durante el periodo de gracia
-def calcular_interes_periodo_gracia(capital_a_cobro, tasa_nominal, meses_gracia):
-    return capital_a_cobro * tasa_nominal / 100 * meses_gracia / 12
-
-# Función para calcular el total a cobro
-def calcular_total_a_cobro(capital_a_cobro, interes_a_cobro, interes_periodo_gracia):
-    return capital_a_cobro + interes_a_cobro + interes_periodo_gracia
-
-# Función para calcular la cuota mensual al terminar estudios
-def calcular_cuota_final(total_a_cobro, num_cuotas):
-    return total_a_cobro / num_cuotas
-
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago):
     # Variables base
@@ -103,12 +67,12 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     afim = 10.0  # Ejemplo de AFIM en porcentaje
     
     # Cálculos
-    desembolso_total = calcular_desembolso_total(valor_solicitado, cantidad_periodos)
-    capital_a_cobro = calcular_capital_a_cobro(desembolso_total, afim)
-    interes_a_cobro = calcular_interes_a_cobro(capital_a_cobro, 0, cantidad_periodos * 6)  # Tasa de interés 0 durante estudios
-    interes_periodo_gracia = calcular_interes_periodo_gracia(capital_a_cobro, 0, meses_gracia)  # Tasa de interés 0 durante gracia
-    total_a_cobro = calcular_total_a_cobro(capital_a_cobro, interes_a_cobro, interes_periodo_gracia)
-    valor_cuota_final = calcular_cuota_final(total_a_cobro, num_cuotas_finales)
+    desembolso_total = valor_solicitado * cantidad_periodos
+    capital_a_cobro = desembolso_total * (1 + afim / 100)
+    interes_a_cobro = capital_a_cobro * 0 / 100 * cantidad_periodos * 6  # Tasa de interés 0 durante estudios
+    interes_periodo_gracia = capital_a_cobro * 0 / 100 * meses_gracia  # Tasa de interés 0 durante gracia
+    total_a_cobro = capital_a_cobro + interes_a_cobro + interes_periodo_gracia
+    valor_cuota_final = total_a_cobro / num_cuotas_finales
     
     # Simulación de tablas
     data_mientras_estudias = {
@@ -121,6 +85,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Saldo": [desembolso_total - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * i for i in range(cantidad_periodos * 6)]
     }
     
+    saldo_final = saldo - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * (cantidad_periodos * 6)
+    
     data_finalizado_estudios = {
         "Mes": [i+1 for i in range(num_cuotas_finales)],
         "Cuota Mensual": [valor_cuota_final] * num_cuotas_finales,
@@ -130,19 +96,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Saldo": [total_a_cobro - (valor_cuota_final * i) for i in range(num_cuotas_finales)]
     }
     
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro
-
-# Función de prefactibilidad
-def prefactibilidad():
-    st.header("Módulo de Prefactibilidad")
-    
-    valor_solicitado = st.number_input("Valor solicitado:", min_value=0)
-    tasa_interes = st.number_input("Tasa de interés anual (%):", min_value=0.0, step=0.1)
-    plazo = st.number_input("Plazo en años:", min_value=1, max_value=20, step=1)
-    
-    if st.button("Simular"):
-        cuota_mensual = simular_pago(valor_solicitado, tasa_interes, plazo)
-        st.write(f"La cuota mensual para un valor solicitado de ${valor_solicitado} a una tasa de interés de {tasa_interes}% y un plazo de {plazo} años es ${cuota_mensual:.2f}.")
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro, saldo_final
 
 # Ejecutar la lógica del formulario
 if submit_button:
@@ -150,12 +104,12 @@ if submit_button:
     
     if viable:
         st.success("La solicitud es viable con los ingresos actuales.")
+        saldo_final = 0
     else:
         st.error("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
-        
-        # Calcular mínimo necesario
         minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
         st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.")
+        saldo_final = None  # Indicar que el saldo final no será 0 en este caso
     
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable)
@@ -169,31 +123,26 @@ if submit_button:
             file_name="resumen_credito.pdf",
             mime="application/pdf"
         )
-
-# Agregar simulación de plan de pagos
-st.header("Simulación de Plan de Pagos")
-form = st.form(key='simulacion_form')
-form.valor_solicitado = form.number_input("Valor solicitado por periodo académico:", min_value=0, step=100000)
-form.cantidad_periodos = form.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
-form.ingresos_mensuales = form.number_input("Pago mensual mientras estudias:", min_value=0, step=10000)
-form.opcion_pago = form.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
-submit_simulacion = form.form_submit_button("Simular")
-
-if submit_simulacion:
-    df_mientras_estudias, df_finalizado_estudios, total_a_cobro = simular_plan_pagos(
-        form.valor_solicitado,
-        form.cantidad_periodos,
-        form.ingresos_mensuales,
-        form.opcion_pago
+    
+    # Simular el plan de pagos
+    st.header("Simulación de Plan de Pagos")
+    df_mientras_estudias, df_finalizado_estudios, total_a_cobro, saldo_final = simular_plan_pagos(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        opcion_pago
     )
     
     st.write(f"El total a pagar al finalizar el crédito es ${total_a_cobro:.2f}.")
+    if saldo_final == 0:
+        st.success("El saldo final al terminar el crédito es 0. El plan de pagos es viable.")
+    else:
+        st.error(f"El saldo final al terminar el crédito es ${saldo_final:.2f}. El plan de pagos no es viable.")
+    
     st.write("Simulación mientras estudias:")
     st.write(df_mientras_estudias)
     st.write("Simulación al finalizar estudios:")
     st.write(df_finalizado_estudios)
 
-    # Agregar simulación de prefactibilidad
-    prefactibilidad()
 
 
