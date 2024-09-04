@@ -9,7 +9,7 @@ st.write("""
 Por favor, completa el siguiente formulario para solicitar un crédito educativo con ICETEX.
 """)
 
-# Formulario
+# Formulario de solicitud de crédito
 with st.form(key='credito_form'):
     # Campo 1: Valor solicitado por periodo académico
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
@@ -31,7 +31,6 @@ if submit_button:
 # Botón para simular el plan de pagos
 if st.button("Simular Plan de Pagos"):
     # Ejemplo de cálculo simplificado
-    # Aquí puedes agregar tu lógica de cálculo más avanzada
     meses_estudio = cantidad_periodos * 6  # Suponiendo que cada periodo dura 6 meses
     meses_post_estudio = 24  # Ejemplo de 2 años de pago después de estudiar
     tasa_interes = 0.01  # 1% mensual como ejemplo
@@ -64,4 +63,31 @@ if st.button("Simular Plan de Pagos"):
     
     st.write("### Finalizado Estudios")
     st.table(df_post_estudio)
+
+# Botón para abrir el formulario de datos personales
+if st.button("Ingresar Datos del Solicitante"):
+    # Formulario de datos personales
+    with st.form(key='datos_personales_form'):
+        # Campos de datos personales
+        nombre = st.text_input("Nombre")
+        apellido = st.text_input("Apellido")
+        correo = st.text_input("Correo Electrónico")
+        direccion = st.text_input("Dirección")
+        ciudad = st.text_input("Ciudad")
+        departamento = st.text_input("Departamento")
+        pais = st.text_input("País")
+        ingresos = st.selectbox("Rango de Ingresos Mensuales",
+                                ["Menos de 1 millón", "1-2 millones", "2-3 millones", "3-4 millones",
+                                 "4-5 millones", "5-6 millones", "6-7 millones", "7-8 millones",
+                                 "8-9 millones", "9-10 millones", "10-15 millones", "15-20 millones",
+                                 "Más de 20 millones"])
+
+        # Botón de enviar datos personales
+        submit_datos_personales = st.form_submit_button(label='Enviar Datos Personales')
+
+    # Al enviar el formulario de datos personales
+    if submit_datos_personales:
+        st.success(f"Datos personales enviados exitosamente. Nombre: {nombre} {apellido}. "
+                   f"Correo: {correo}. Dirección: {direccion}, {ciudad}, {departamento}, {pais}. "
+                   f"Ingresos: {ingresos}.")
 
