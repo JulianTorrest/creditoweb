@@ -10,26 +10,17 @@ st.write("""
 Por favor, completa el siguiente formulario para solicitar un crédito educativo con ICETEX.
 """)
 
-# Definir tasas de interés
-tasas_interes = {
-    "6.28% + 0.51% adicionales": 6.28 + 0.51,
-    "6.28% + 1.04% adicionales": 6.28 + 1.04,
-    "6.28% + 1.16% adicionales": 6.28 + 1.16,
-    "6.28% + 1.23% adicionales": 6.28 + 1.23,
-    "6.28% + 1.46% adicionales": 6.28 + 1.46
-}
+# Definir tasas de interés fijas
+tasa_interes_corriente = 13.19  # Tasa de interés corriente efectiva en %
+tasa_interes_mora = 19.03  # Tasa de interés de mora efectiva en %
 
 # Formulario de solicitud de crédito
 with st.form(key='credito_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    tasa_interes_opcion = st.selectbox("Selecciona la Tasa de Interés Anual:", list(tasas_interes.keys()))
     opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
     submit_button = st.form_submit_button(label='Enviar Solicitud')
-
-# Obtener la tasa de interés seleccionada
-tasa_interes = tasas_interes[tasa_interes_opcion]
 
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
@@ -52,7 +43,6 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_c
     pdf.cell(200, 10, txt=f"Cantidad de periodos a financiar: {cantidad_periodos}", ln=True)
     pdf.cell(200, 10, txt=f"Cuota mensual estimada: ${cuota_calculada:,.2f}", ln=True)
     pdf.cell(200, 10, txt=f"Pago mensual mientras estudias: ${ingresos_mensuales:,}", ln=True)
-    pdf.cell(200, 10, txt=f"Tasa de Interés Anual seleccionada: {tasa_interes_opcion}", ln=True)
     
     pdf.output("resumen_credito.pdf")
     st.success("PDF generado exitosamente.")
@@ -105,8 +95,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     # Cálculos
     desembolso_total = calcular_desembolso_total(valor_solicitado, cantidad_periodos)
     capital_a_cobro = calcular_capital_a_cobro(desembolso_total, afim)
-    interes_a_cobro = calcular_interes_a_cobro(capital_a_cobro, tasa_nominal, cantidad_periodos * 6)
-    interes_periodo_gracia = calcular_interes_periodo_gracia(capital_a_cobro, tasa_nominal, meses_gracia)
+    interes_a_cobro = calcular_interes_a_cobro(capital_a_cobro, tasa_interes_corriente, cantidad_periodos * 6)
+    interes_periodo_gracia = calcular_interes_periodo_gracia(capital_a_cobro, tasa_interes_corriente, meses_gracia)
     total_a_cobro = calcular_total_a_cobro(capital_a_cobro, interes_a_cobro, interes_periodo_gracia)
     valor_cuota_final = calcular_cuota_final(total_a_cobro, num_cuotas_finales)
     
@@ -130,27 +120,34 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Saldo": [total_a_cobro - (valor_cuota_final * i) for i in range(num_cuotas_finales)]
     }
     
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios)
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro
 
+# Al enviar el formulario
 if submit_button:
-    viabilidad, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
-    if viabilidad:
-        # Mostrar información
-        st.write(f"Cuota mensual estimada durante el estudio: ${cuota_calculada:,.2f}")
-        st.write(f"Tasa de Interés Anual seleccionada: {tasa_interes_opcion}")
-
-        # Generar y mostrar el PDF
-        generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
-
-        # Simulación del plan de pagos
-        df_mientras_estudias, df_finalizado_estudios = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago, tasa_interes)
-        
-        st.write("### Tabla de Pagos Durante el Estudio")
-        st.dataframe(df_mientras_estudias)
-        
-        st.write("### Tabla de Pagos al Finalizar Estudios")
-        st.dataframe(df_finalizado_estudios)
+    st.success(f"Solicitud enviada exitosamente. Valor solicitado: ${valor_solicitado:,}. "
+               f"Periodos a financiar: {cantidad_periodos}. Pago mensual: ${ingresos_mensuales:,}.")
+    
+    # Sección de viabilidad del crédito
+    st.header("Cálculo de Viabilidad del Crédito")
+    es_viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
+    if es_viable:
+        st.success(f"El crédito es viable. La cuota mensual estimada es ${cuota_calculada:,.2f}.")
     else:
-        st.error("La cuota mensual estimada excede el 30% de los ingresos disponibles. Considera ajustar el valor solicitado o la cantidad de periodos.")
-
+        st.error("El crédito no es viable. La cuota mensual estimada supera el límite sugerido.")
+    
+    # Simulación de plan de pagos
+    st.header("Simulación de Plan de Pagos")
+    df_mientras_estudias, df_finalizado_estudios, total_a_cobro = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago, tasa_interes_corriente)
+    
+    st.subheader("Plan de Pagos Durante Estudios")
+    st.write(df_mientras_estudias)
+    
+    st.subheader("Plan de Pagos al Finalizar Estudios")
+    st.write(df_finalizado_estudios)
+    
+    st.write(f"Total a cobrar al finalizar: ${total_a_cobro:,.2f}")
+    
+    # Generar PDF
+    if st.button('Generar PDF'):
+        generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
 
