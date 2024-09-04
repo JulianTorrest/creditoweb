@@ -97,7 +97,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     
     return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), total_a_cobro, saldo_final
 
-# Ejecutar la lógica del formulario
+# Lógica para ejecutar y mostrar resultados
 if submit_button:
     viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
@@ -134,20 +134,16 @@ if submit_button:
     
     st.write(f"El total a pagar al finalizar el crédito es ${total_a_cobro:.2f}.")
     if saldo_final == 0:
-        st.success("La simulación muestra que el saldo es 0 al finalizar el crédito.")
+        st.write("Tu saldo final es 0, lo que significa que has cubierto todos los pagos durante el periodo de gracia.")
     else:
-        st.error("La simulación muestra un saldo pendiente al finalizar el crédito.")
+        st.write(f"Tu saldo final es ${saldo_final:.2f}.")
     
-    st.write("Simulación mientras estudias:")
-    st.write(df_mientras_estudias)
-    st.write("Simulación al finalizar estudios:")
-    st.write(df_finalizado_estudios)
+    st.subheader("Durante los estudios")
+    st.dataframe(df_mientras_estudias)
+    
+    st.subheader("Después de finalizar los estudios")
+    st.dataframe(df_finalizado_estudios)
 
-# Lógica para limpiar los datos
+# Manejo del botón de limpiar
 if clear_button:
-    # Limpia todos los campos del formulario
-    valor_solicitado = 0
-    cantidad_periodos = 0
-    ingresos_mensuales = 0
-    opcion_pago = "0%"
     st.experimental_rerun()
