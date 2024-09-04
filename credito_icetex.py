@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from fpdf import FPDF
 
 # Título de la página
 st.title("Solicitud de Crédito Educativo - ICETEX")
@@ -28,66 +29,91 @@ if submit_button:
     st.success(f"Solicitud enviada exitosamente. Valor solicitado: ${valor_solicitado:,}. "
                f"Periodos a financiar: {cantidad_periodos}. Pago mensual: ${pago_mensual:,}.")
 
-# Botón para simular el plan de pagos
-if st.button("Simular Plan de Pagos"):
-    # Ejemplo de cálculo simplificado
-    meses_estudio = cantidad_periodos * 6  # Suponiendo que cada periodo dura 6 meses
-    meses_post_estudio = 24  # Ejemplo de 2 años de pago después de estudiar
-    tasa_interes = 0.01  # 1% mensual como ejemplo
-    
-    # Mientras estudias
-    data_estudio = []
-    saldo = valor_solicitado * cantidad_periodos
-    for mes in range(1, meses_estudio + 1):
-        interes = saldo * tasa_interes
-        abono_capital = max(0, pago_mensual - interes)
-        saldo -= abono_capital
-        data_estudio.append([mes, pago_mensual, abono_capital, interes, saldo])
-    
-    df_estudio = pd.DataFrame(data_estudio, columns=["Mes", "Cuota Mensual", "Abono Capital", "Abono Intereses", "Saldo"])
-    
-    # Finalizado estudios
-    data_post_estudio = []
-    cuota_post_estudio = saldo / meses_post_estudio
-    for mes in range(1, meses_post_estudio + 1):
-        interes = saldo * tasa_interes
-        abono_capital = cuota_post_estudio - interes
-        saldo -= abono_capital
-        data_post_estudio.append([mes, cuota_post_estudio, abono_capital, interes, saldo])
-    
-    df_post_estudio = pd.DataFrame(data_post_estudio, columns=["Mes", "Cuota Mensual", "Abono Capital", "Abono Intereses", "Saldo"])
+# Función para calcular la viabilidad del crédito
+def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
+    cuota_maxima = ingresos * 0.3  # 30% de los ingresos como cuota máxima sugerida
+    cuota_calculada = valor_solicitado / (cantidad_periodos * 12)  # Cuota mensual estimada
+    if cuota_calculada <= cuota_maxima:
+        return True, cuota_calculada
+    else:
+        return False, cuota_calculada
 
-    # Mostrar tablas
-    st.write("### Mientras Estudias")
-    st.table(df_estudio)
+# Función para generar el PDF
+def generar_pdf(valor_solicitado, cantidad_periodos, pago_mensual, cuota_calculada):
+    pdf = FPDF()
+    pdf.add_page()
     
-    st.write("### Finalizado Estudios")
-    st.table(df_post_estudio)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Resumen de Solicitud de Crédito Educativo - ICETEX", ln=True, align='C')
+    pdf.ln(10)
+    
+    pdf.cell(200, 10, txt=f"Valor solicitado por periodo académico: ${valor_solicitado:,}", ln=True)
+    pdf.cell(200, 10, txt=f"Cantidad de periodos a financiar: {cantidad_periodos}", ln=True)
+    pdf.cell(200, 10, txt=f"Cuota mensual estimada: ${cuota_calculada:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Pago mensual mientras estudias: ${pago_mensual:,}", ln=True)
+    
+    pdf.output("resumen_credito.pdf")
+    st.success("PDF generado exitosamente.")
 
-# Botón para abrir el formulario de datos personales
-if st.button("Ingresar Datos del Solicitante"):
-    # Formulario de datos personales
-    with st.form(key='datos_personales_form'):
-        # Campos de datos personales
-        nombre = st.text_input("Nombre")
-        apellido = st.text_input("Apellido")
-        correo = st.text_input("Correo Electrónico")
-        direccion = st.text_input("Dirección")
-        ciudad = st.text_input("Ciudad")
-        departamento = st.text_input("Departamento")
-        pais = st.text_input("País")
-        ingresos = st.selectbox("Rango de Ingresos Mensuales",
-                                ["Menos de 1 millón", "1-2 millones", "2-3 millones", "3-4 millones",
-                                 "4-5 millones", "5-6 millones", "6-7 millones", "7-8 millones",
-                                 "8-9 millones", "9-10 millones", "10-15 millones", "15-20 millones",
-                                 "Más de 20 millones"])
+# Función para simular diferentes escenarios de pago
+def simular_pago(valor_solicitado, tasa_interes, plazo):
+    tasa_mensual = tasa_interes / 12 / 100
+    n = plazo * 12
+    cuota_mensual = valor_solicitado * (tasa_mensual * (1 + tasa_mensual) ** n) / ((1 + tasa_mensual) ** n - 1)
+    return cuota_mensual
 
-        # Botón de enviar datos personales
-        submit_datos_personales = st.form_submit_button(label='Enviar Datos Personales')
+# Función para precalificación
+def precalificar(ingresos, valor_solicitado, cantidad_periodos):
+    ratio_ingresos = valor_solicitado / (ingresos * cantidad_periodos)
+    if ratio_ingresos < 3:  # Regla arbitraria para precalificación
+        return True
+    else:
+        return False
 
-    # Al enviar el formulario de datos personales
-    if submit_datos_personales:
-        st.success(f"Datos personales enviados exitosamente. Nombre: {nombre} {apellido}. "
-                   f"Correo: {correo}. Dirección: {direccion}, {ciudad}, {departamento}, {pais}. "
-                   f"Ingresos: {ingresos}.")
+# Sección de viabilidad del crédito
+st.header("Cálculo de Viabilidad del Crédito")
+ingresos = st.number_input("Ingresos mensuales:", min_value=0, step=100000)
+es_viable, cuota_calculada = calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos)
+
+# Mostrar resultado de viabilidad
+if es_viable:
+    st.success(f"El crédito es viable. Cuota mensual estimada: ${cuota_calculada:,.2f}")
+else:
+    st.error(f"El crédito no es viable con los ingresos actuales. Cuota mensual estimada: ${cuota_calculada:,.2f}")
+
+# Botón para generar PDF
+if st.button("Generar PDF"):
+    generar_pdf(valor_solicitado, cantidad_periodos, pago_mensual, cuota_calculada)
+
+# Simulación de diferentes escenarios de pago
+st.header("Simulación de Diferentes Escenarios de Pago")
+tasa_interes = st.slider("Tasa de interés anual (%):", 1.0, 20.0, 5.0)
+plazo = st.slider("Plazo (años):", 1, 15, 5)
+cuota_simulada = simular_pago(valor_solicitado, tasa_interes, plazo)
+st.write(f"Con una tasa de interés de {tasa_interes}% y un plazo de {plazo} años, la cuota mensual sería: ${cuota_simulada:,.2f}")
+
+# Precalificación automática
+st.header("Precalificación Automática")
+precalificado = precalificar(ingresos, valor_solicitado, cantidad_periodos)
+
+# Mostrar resultado de la precalificación
+if precalificado:
+    st.success("Precalificación aprobada.")
+else:
+    st.error("Precalificación no aprobada.")
+
+# Comparador de créditos
+st.header("Comparador de Créditos")
+comparacion_creditos = {
+    "Entidad": ["Banco A", "Banco B", "ICETEX"],
+    "Tasa de Interés (%)": [8.5, 9.0, 7.5],
+    "Cuota Mensual Estimada ($)": [
+        simular_pago(valor_solicitado, 8.5, plazo),
+        simular_pago(valor_solicitado, 9.0, plazo),
+        simular_pago(valor_solicitado, 7.5, plazo)
+    ]
+}
+df_comparacion = pd.DataFrame(comparacion_creditos)
+st.write("Comparación de Opciones de Crédito:")
+st.dataframe(df_comparacion)
 
