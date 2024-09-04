@@ -10,7 +10,7 @@ st.write("""
 Por favor, completa el siguiente formulario para solicitar un crédito educativo con ICETEX.
 """)
 
-# Formulario de solicitud de crédito
+# Formulario principal
 with st.form(key='credito_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
@@ -136,7 +136,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
 def prefactibilidad():
     st.header("Módulo de Prefactibilidad")
     
-    cantidad_anos = st.number_input("Cantidad de años del crédito:", min_value=1, max_value=10, step=1)
+    valor_solicitado = st.number_input("Valor solicitado:", min_value=0)
     tasa_interes = st.number_input("Tasa de interés anual (%):", min_value=0.0, step=0.1)
     plazo = st.number_input("Plazo en años:", min_value=1, max_value=20, step=1)
     
@@ -144,7 +144,7 @@ def prefactibilidad():
         cuota_mensual = simular_pago(valor_solicitado, tasa_interes, plazo)
         st.write(f"La cuota mensual para un valor solicitado de ${valor_solicitado} a una tasa de interés de {tasa_interes}% y un plazo de {plazo} años es ${cuota_mensual:.2f}.")
 
-# Lógica de la solicitud
+# Ejecutar la lógica del formulario
 if submit_button:
     viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
@@ -156,7 +156,7 @@ if submit_button:
         # Calcular mínimo necesario
         minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
         st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.")
-        
+    
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable)
     
@@ -195,4 +195,5 @@ if submit_simulacion:
 
     # Agregar simulación de prefactibilidad
     prefactibilidad()
+
 
