@@ -103,7 +103,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Cuota Mensual": [ingresos_mensuales] * (cantidad_periodos * 6),
         "Abono Capital": [ingresos_mensuales * (0 if opcion_pago == "0%" else 0.2)] * (cantidad_periodos * 6),
         "Abono Intereses": [ingresos_mensuales * (1 if opcion_pago == "0%" else 0.8)] * (cantidad_periodos * 6),
-        "AFIM": [afim * desembolso_total / (cantidad_periodos * 6)] * (cantidad_periodos * 6),
+        "AFIM": [afim] * (cantidad_periodos * 6),
         "Saldo": [desembolso_total - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * i for i in range(cantidad_periodos * 6)]
     }
     
@@ -112,7 +112,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Cuota Mensual": [valor_cuota_final] * num_cuotas_finales,
         "Abono Capital": [valor_cuota_final * 0.7] * num_cuotas_finales,
         "Abono Intereses": [valor_cuota_final * 0.3] * num_cuotas_finales,
-        "AFIM": [afim * total_a_cobro / num_cuotas_finales] * num_cuotas_finales,
+        "AFIM": [afim] * num_cuotas_finales,
         "Saldo": [total_a_cobro - (valor_cuota_final * i) for i in range(num_cuotas_finales)]
     }
     
@@ -127,36 +127,28 @@ def prefactibilidad():
     
     # Tasa nominal de ejemplo
     tasa_nominal = 13.19  # Ejemplo de tasa nominal
-    num_cuotas = cantidad_anos * 12  # Total de cuotas en años
+    num_cuotas = cantidad_anos * 12  # Asumiendo cuotas mensuales
     
     cuota_mensual = simular_pago(valor_solicitado, tasa_nominal, cantidad_anos)
-    st.write(f"Valor de crédito mensual: ${cuota_mensual:,.2f}")
+    
+    st.write(f"Cuota mensual aproximada: ${cuota_mensual:.2f}")
 
-# Si el formulario se envía
 if submit_button:
-    viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
+    viabilidad, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
-    if viable:
-        st.success("La solicitud es viable.")
+    if viabilidad:
+        st.success("Tu solicitud es viable. Calculando simulación...")
+        data_mientras_estudias, data_finalizado_estudios, total_a_cobro = simular_plan_pagos(
+            valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago)
         
-        if opcion_pago == "0%":
-            # Simulación de Plan de Pagos durante estudios
-            df_mientras_estudias, df_finalizado_estudios, total_a_cobro = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago)
-            
-            st.write("**Plan de Pagos Durante Estudios:**")
-            st.dataframe(df_mientras_estudias)
-            
-            st.write("**Plan de Pagos Finalizado Estudios:**")
-            st.dataframe(df_finalizado_estudios)
-            
-            st.write(f"**Total a Cobro:** ${total_a_cobro:,.2f}")
-            
-        # Módulo de prefactibilidad
-        prefactibilidad()
+        st.write("**Simulación mientras estudias:**")
+        st.dataframe(data_mientras_estudias)
         
-        # Generar PDF
-        if st.button("Generar PDF"):
-            generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
-    
+        st.write("**Simulación después de finalizar estudios:**")
+        st.dataframe(data_finalizado_estudios)
+        
+        st.write(f"**Total a pagar al final del período de gracia:** ${total_a_cobro:,.2f}")
+        
+        generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada)
     else:
-        st.error("La solicitud no es viable con los datos ingresados.")
+        st.error("La solicitud no es viable con los ingresos actuales.")
