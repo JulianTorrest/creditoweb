@@ -65,16 +65,19 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
     afim = 10.0  # Ejemplo de AFIM en porcentaje
-    
+
     # Cálculos
     desembolso_total = valor_solicitado * cantidad_periodos
     capital_a_cobro = desembolso_total * (1 + afim / 100)
     interes_a_cobro = capital_a_cobro * 0 / 100 * cantidad_periodos * 6  # Tasa de interés 0 durante estudios
     interes_periodo_gracia = capital_a_cobro * 0 / 100 * meses_gracia  # Tasa de interés 0 durante gracia
     total_a_cobro = capital_a_cobro + interes_a_cobro + interes_periodo_gracia
+    
+    # Cuota mensual al final de los estudios
     valor_cuota_final = total_a_cobro / num_cuotas_finales
     
     # Simulación de tablas
+    saldo = desembolso_total
     data_mientras_estudias = {
         "Semestre": [f"Semestre {i+1}" for i in range(cantidad_periodos) for _ in range(6)],
         "Mes": [i+1 + 6 * (s) for s in range(cantidad_periodos) for i in range(6)],
@@ -82,7 +85,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         "Abono Capital": [ingresos_mensuales * (0 if opcion_pago == "0%" else 0.2)] * (cantidad_periodos * 6),
         "Abono Intereses": [ingresos_mensuales * (1 if opcion_pago == "0%" else 0.8)] * (cantidad_periodos * 6),
         "AFIM": [afim] * (cantidad_periodos * 6),
-        "Saldo": [desembolso_total - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * i for i in range(cantidad_periodos * 6)]
+        "Saldo": [saldo - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * i for i in range(cantidad_periodos * 6)]
     }
     
     saldo_final = saldo - (ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)) * (cantidad_periodos * 6)
@@ -143,6 +146,3 @@ if submit_button:
     st.write(df_mientras_estudias)
     st.write("Simulación al finalizar estudios:")
     st.write(df_finalizado_estudios)
-
-
-
