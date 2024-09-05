@@ -73,9 +73,10 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses - abono_capital
             else:
+                # Si la cuota mensual es cero
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = 0
-                cuota_mensual = 0  # Si no se paga nada, la cuota también es cero
+                cuota_mensual = 0  # Cuota mensual es cero
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses
             
