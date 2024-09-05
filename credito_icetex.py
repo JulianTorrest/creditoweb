@@ -145,19 +145,20 @@ if submit_button:
 
     # Calcular la suma de todas las cuotas y su promedio
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    viable, promedio_cuota = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas)
+    promedio_cuota = total_cuotas / (cantidad_periodos * 6 + len(df_finalizado_estudios))
+
+    viable, promedio_requerido = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas)
 
     if viable:
         st.success("La solicitud es viable con los ingresos actuales.")
     else:
         st.error("La solicitud no es viable con los ingresos actuales.")
-        st.warning(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota:,.2f} mensualmente.")
+        st.warning(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_requerido:,.2f} mensualmente.")
 
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
 
-    # Mostrar opción de descarga de PDF
-    st.write("Haz clic en el siguiente enlace para descargar el PDF:")
+    # Mostrar el botón para descargar el PDF
     with open("resumen_credito.pdf", "rb") as pdf_file:
         st.download_button(
             label="Descargar Resumen en PDF",
@@ -173,5 +174,8 @@ if submit_button:
     st.subheader("Detalles después de finalizar los estudios")
     st.dataframe(df_finalizado_estudios)
 
-    st.subheader("Detalles con saldo remanente distribuido")
-    st.dataframe(df_remanente_distribuido)
+    # Checkbox para mostrar/ocultar la tabla de saldo remanente distribuido
+    show_remanente = st.checkbox("Mostrar detalles con saldo remanente distribuido", value=False)
+    if show_remanente:
+        st.subheader("Detalles con saldo remanente distribuido")
+        st.dataframe(df_remanente_distribuido)
