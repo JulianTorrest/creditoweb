@@ -60,13 +60,15 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = max(0, ingresos_mensuales - intereses)  # El abono a capital es la cuota mensual menos los intereses
                 saldo_periodo = saldo_periodo - abono_capital + intereses  # Ajuste del saldo
+
+                # Solo en el último mes de cada semestre no se añade el nuevo saldo
+                if mes != 5:
+                    saldo_periodo += valor_solicitado  # Añadir el valor solicitado al saldo
+
             else:
                 intereses = 0
                 abono_capital = 0
                 saldo_periodo += intereses  # Solo se acumulan intereses sin abono de capital
-
-            if mes == 5:  # En el último mes de cada semestre, añadir nuevo saldo
-                saldo_periodo += valor_solicitado
 
             data_mientras_estudias.append({
                 "Semestre": f"Semestre {semestre+1}",
