@@ -101,10 +101,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     # Saldo final después de estudios
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
-    saldo_final_total = saldo_final  # Saldo final a ajustar
-
-    # Calcular saldo inicial para después de estudios
     saldo_inicial_post_estudios = saldo_final
+    saldo_total_final = saldo_inicial_post_estudios
 
     for mes in range(num_cuotas_finales):
         if saldo_inicial_post_estudios <= 0:
@@ -122,21 +120,21 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             "Saldo": saldo_inicial_post_estudios
         })
 
-    # Si queda saldo remanente, distribuirlo equitativamente en las cuotas
-    if saldo_final_total > 0 and len(data_finalizado_estudios) > 0:
-        cuota_extra = saldo_final_total / len(data_finalizado_estudios)
-        for entry in data_finalizado_estudios:
-            entry["Cuota Mensual"] += cuota_extra
-            # Recalcular los abonos
-            intereses = entry["Saldo"] * tasa_interes_mensual
-            entry["Abono Intereses"] = intereses
-            entry["Abono Capital"] = entry["Cuota Mensual"] - intereses
-            entry["Saldo"] -= entry["Abono Capital"]
-            # Asegurarse que el saldo no sea negativo
-            if entry["Saldo"] < 0:
-                entry["Saldo"] = 0
-                entry["Cuota Mensual"] = entry["Abono Capital"] + entry["Abono Intereses"]
-                break  # Salir del bucle si el saldo es 0
+    # Verificar que sólo el último saldo pueda ser cero
+    if len(data_finalizado_estudios) > 0:
+        last_entry = data_finalizado_estudios[-1]
+        if last_entry["Saldo"] == 0:
+            # Asegurarnos que el último saldo es cero
+            last_entry["Cuota Mensual"] = last_entry["Abono Capital"] + last_entry["Abono Intereses"]
+        else:
+            # Ajustar el saldo final para asegurar que el último saldo es cero
+            last_entry["Saldo"] = 0
+            last_entry["Cuota Mensual"] = last_entry["Abono Capital"] + last_entry["Abono Intereses"]
+
+    for i in range(len(data_finalizado_estudios) - 1):
+        if data_finalizado_estudios[i]["Saldo"] == 0:
+            # Si algún saldo que no sea el último es cero, corregirlo
+            data_finalizado_estudios[i]["Saldo"] = data_finalizado_estudios[i-1]["Saldo"] + data_finalizado_estudios[i-1]["Cuota Mensual"] - data_finalizado_estudios[i-1]["Abono Capital"]
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
@@ -172,7 +170,24 @@ if submit_button:
     st.write("Resumen de pagos después de finalizar los estudios:")
     st.dataframe(df_finalizado_estudios)
     
-    # Generar PDF con los datos
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
+    st.write("Resumen de pagos después de distribución:")
+    st.dataframe(df_remanente_distribuido)
+    
+    # Generar PDF
+    generar_pdf(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        promedio_cuota,
+        viable
+    )
 
-    st.write("¡El PDF ha sido generado correctamente!")
+    # Mensaje de viabilidad
+    if viable:
+        st.success("La solicitud es viable con los ingresos actuales.")
+    else:
+        st.warning("La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia.")
+    
+# Limpiar datos si se presiona el botón de limpiar
+if clear_button:
+    st.experimental_rerun()
