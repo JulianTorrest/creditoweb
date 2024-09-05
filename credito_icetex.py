@@ -122,22 +122,26 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             "Saldo": saldo_inicial_post_estudios
         })
 
-    # Si queda saldo remanente, distribuirlo entre las últimas cuotas
-    if saldo_inicial_post_estudios > 0:
-        ajuste = saldo_inicial_post_estudios / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
+    # Si queda saldo remanente, distribuirlo equitativamente en las cuotas
+    if saldo_final_total > 0 and len(data_finalizado_estudios) > 0:
+        cuota_extra = saldo_final_total / len(data_finalizado_estudios)
         for entry in data_finalizado_estudios:
-            entry["Cuota Mensual"] += ajuste
-            entry["Saldo"] = max(0, entry["Saldo"] - ajuste)
+            entry["Cuota Mensual"] += cuota_extra
+            # Recalcular los abonos
+            intereses = entry["Saldo"] * tasa_interes_mensual
+            entry["Abono Intereses"] = intereses
+            entry["Abono Capital"] = entry["Cuota Mensual"] - intereses
+            entry["Saldo"] -= entry["Abono Capital"]
+            # Asegurarse que el saldo no sea negativo
+            if entry["Saldo"] < 0:
+                entry["Saldo"] = 0
 
-    # Nueva tabla con el saldo remanente distribuido
-    remanente_distribuido = []
-    if saldo_final_total > 0:
-        cuota_adicional = saldo_final_total / len(data_finalizado_estudios)
-        for entry in data_finalizado_estudios:
-            entry["Cuota Mensual"] += cuota_adicional
-            remanente_distribuido.append(entry)
-    
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), pd.DataFrame(remanente_distribuido), saldo_final
+    # Convertir las listas en DataFrames
+    df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
+    df_finalizado_estudios = pd.DataFrame(data_finalizado_estudios)
+    df_remanente_distribuido = pd.DataFrame(data_finalizado_estudios)  # Para mostrar después de distribución
+
+    return df_mientras_estudias, df_finalizado_estudios, df_remanente_distribuido, saldo_final
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
@@ -149,7 +153,7 @@ if submit_button:
         cuota_mensual_post_estudios
     )
 
-    # Calcular la suma de todas las cuotas y su promedio
+    # Calcular el promedio de cuota
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
     total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
     promedio_cuota_calculado = total_cuotas / total_meses if total_meses > 0 else 0
