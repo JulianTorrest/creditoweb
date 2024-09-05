@@ -1,8 +1,3 @@
-
-Aquí tienes el código completo con la funcionalidad que falta, incluyendo la recomendación de pagos mínimos y el ajuste de saldo final después de los estudios. También agregué la lógica para distribuir el saldo restante de la deuda en la tabla "Después de finalizar los estudios".
-
-python
-Copiar código
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
