@@ -72,6 +72,14 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, df_mien
     pdf.ln(5)
     
     pdf.set_font("Arial", size=10)
+    pdf.cell(40, 10, txt="Semestre", border=1)
+    pdf.cell(30, 10, txt="Mes", border=1)
+    pdf.cell(40, 10, txt="Cuota Mensual", border=1)
+    pdf.cell(40, 10, txt="Abono Capital", border=1)
+    pdf.cell(40, 10, txt="Abono Intereses", border=1)
+    pdf.cell(40, 10, txt="Saldo", border=1)
+    pdf.ln()
+    
     for index, row in df_mientras_estudias.iterrows():
         pdf.cell(40, 10, txt=str(row['Semestre']), border=1)
         pdf.cell(30, 10, txt=str(row['Mes']), border=1)
@@ -87,6 +95,13 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, df_mien
     pdf.ln(5)
     
     pdf.set_font("Arial", size=10)
+    pdf.cell(30, 10, txt="Mes", border=1)
+    pdf.cell(40, 10, txt="Cuota Mensual", border=1)
+    pdf.cell(40, 10, txt="Abono Capital", border=1)
+    pdf.cell(40, 10, txt="Abono Intereses", border=1)
+    pdf.cell(40, 10, txt="Saldo", border=1)
+    pdf.ln()
+    
     for index, row in df_finalizado_estudios.iterrows():
         pdf.cell(30, 10, txt=str(row['Mes']), border=1)
         pdf.cell(40, 10, txt=f"${row['Cuota Mensual']:.2f}", border=1)
@@ -143,26 +158,24 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             
             # Actualizar la tabla
             data_mientras_estudias.append({
-                "Semestre": f"Semestre {semestre+1}",
-                "Mes": mes + 1 + semestre * 6,
+                "Semestre": semestre + 1,
+                "Mes": mes + 1,
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": abono_intereses,
                 "Saldo": saldo_periodo
             })
-
-    # Saldo final después de estudios
-    saldo_final = saldo_periodo
+        
+        # Fin del semestre
+        saldo_periodo += valor_solicitado  # Aumentar el saldo por cada semestre
+        
+    # Dataframe después de finalizar estudios
+    saldo_final = saldo_periodo  # Saldo al final del periodo de estudios
     data_finalizado_estudios = []
-    saldo_final_total = saldo_final  # Saldo final a ajustar
-
-    # Calcular saldo inicial para después de estudios
-    saldo_inicial_post_estudios = saldo_final
-
-    for mes in range(tiempo_credito_maximo * 6):  # 6 meses por semestre
+    for mes in range(num_cuotas_finales):
         if saldo_final <= 0:
             break  # No hacer cálculos si el saldo es cero o negativo
-
+        
         if cuota_mensual_post_estudios > 0:
             intereses = saldo_final * tasa_interes_mensual  # Intereses mensuales
             if cuota_mensual_post_estudios >= intereses:
