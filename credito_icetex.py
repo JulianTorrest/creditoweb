@@ -2,17 +2,25 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 
-# Título de la página
+# Título de la página con imagen
+st.image("logo.png", width=200)  # Reemplaza con el nombre de tu imagen/logo
 st.title("Solicitud de Crédito Educativo - ICETEX")
+st.markdown("<hr>", unsafe_allow_html=True)
 
-# Formulario combinado
+# Formulario combinado con estilo
 with st.form(key='credito_y_simulacion_form'):
-    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
+    st.subheader("Datos de la Solicitud")
+    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000, format="%d")
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
-    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000)
-    submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
-    clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
+    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000, format="%d")
+    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000, format="%d")
+    
+    # Botones de acción
+    col1, col2 = st.columns(2)
+    with col1:
+        submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación', help="Haz clic aquí para enviar la solicitud y ver la simulación.")
+    with col2:
+        clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario.")
 
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas):
@@ -154,28 +162,24 @@ if submit_button:
         total_cuotas
     )
     
-    # Mostrar DataFrames
-    st.write("Resumen de pagos durante los estudios:")
-    st.dataframe(df_mientras_estudias)
+    # Mostrar DataFrames con estilos
+    st.markdown("### Resumen de pagos durante los estudios:")
+    st.dataframe(df_mientras_estudias.style.format({"Cuota Mensual": "${:,.2f}", "Abono Capital": "${:,.2f}", "Abono Intereses": "${:,.2f}", "Saldo": "${:,.2f}"}))
     
-    st.write("Resumen de pagos después de finalizar los estudios:")
-    st.dataframe(df_finalizado_estudios)
-    
-    # Generar PDF
-    generar_pdf(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        promedio_cuota,
-        viable
-    )
+    st.markdown("### Resumen de pagos después de finalizar los estudios:")
+    st.dataframe(df_finalizado_estudios.style.format({"Cuota Mensual": "${:,.2f}", "Abono Capital": "${:,.2f}", "Abono Intereses": "${:,.2f}", "Saldo": "${:,.2f}"}))
 
-    # Mensaje de viabilidad
+    # Generar PDF
+    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
+
+    # Mostrar mensaje de viabilidad
     if viable:
-        st.success("La solicitud es viable con los ingresos actuales.")
+        st.success(f"La solicitud es viable. El pago mensual promedio es ${promedio_cuota:,.2f}.")
     else:
-        st.warning("La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia.")
+        st.warning(f"La solicitud no es viable con los ingresos actuales. El pago mensual promedio es ${promedio_cuota:,.2f}.")
     
+    st.markdown(f"El saldo final después de los estudios es ${saldo_final:,.2f}.")
+
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
     st.experimental_rerun()
