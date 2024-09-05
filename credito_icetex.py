@@ -68,25 +68,16 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            if ingresos_mensuales > 0:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-                if ingresos_mensuales >= intereses:
-                    abono_capital = ingresos_mensuales - intereses  # Abono a capital
-                    cuota_mensual = ingresos_mensuales
-                else:
-                    abono_capital = 0
-                    cuota_mensual = intereses  # Cuota solo cubre intereses
-                # Ajustar el saldo
-                saldo_periodo = saldo_periodo + intereses - abono_capital
-                abono_intereses = intereses
+            intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+            if ingresos_mensuales >= intereses:
+                abono_capital = ingresos_mensuales - intereses  # Abono a capital
+                cuota_mensual = ingresos_mensuales
             else:
-                # Si la cuota mensual es cero
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = 0
-                cuota_mensual = 0  # Cuota mensual es cero
-                abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
-                # Ajustar el saldo
-                saldo_periodo = saldo_periodo + intereses
+                cuota_mensual = intereses  # Cuota solo cubre intereses
+            # Ajustar el saldo
+            saldo_periodo = saldo_periodo + intereses - abono_capital
+            abono_intereses = intereses
             
             # Actualizar la tabla
             data_mientras_estudias.append({
@@ -95,17 +86,15 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": abono_intereses,
-                "Saldo": saldo_periodo
+                "Saldo": max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
             })
 
     # Saldo final después de estudios
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
-    saldo_final_total = saldo_final  # Saldo final a ajustar
-
-    # Calcular saldo inicial para después de estudios
     saldo_inicial_post_estudios = saldo_final
 
+    # Calcular cuotas después de los estudios
     for mes in range(num_cuotas_finales):
         if saldo_inicial_post_estudios <= 0:
             break
@@ -119,36 +108,19 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             "Cuota Mensual": cuota_pago_final,
             "Abono Capital": abono_capital,
             "Abono Intereses": intereses,
-            "Saldo": saldo_inicial_post_estudios
+            "Saldo": max(saldo_inicial_post_estudios, 0)  # Asegurar que el saldo no sea negativo
         })
-
-    # Si queda saldo remanente, distribuirlo equitativamente en las cuotas
-    if saldo_final_total > 0 and len(data_finalizado_estudios) > 0:
-        cuota_extra = saldo_final_total / len(data_finalizado_estudios)
-        for entry in data_finalizado_estudios:
-            entry["Cuota Mensual"] += cuota_extra
-            # Recalcular los abonos
-            intereses = entry["Saldo"] * tasa_interes_mensual
-            entry["Abono Intereses"] = intereses
-            entry["Abono Capital"] = entry["Cuota Mensual"] - intereses
-            entry["Saldo"] -= entry["Abono Capital"]
-            # Asegurarse que el saldo no sea negativo
-            if entry["Saldo"] < 0:
-                entry["Saldo"] = 0
-                entry["Cuota Mensual"] = entry["Abono Capital"] + entry["Abono Intereses"]
-                break  # Salir del bucle si el saldo es 0
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
     df_finalizado_estudios = pd.DataFrame(data_finalizado_estudios)
-    df_remanente_distribuido = pd.DataFrame(data_finalizado_estudios)  # Para mostrar después de distribución
 
-    return df_mientras_estudias, df_finalizado_estudios, df_remanente_distribuido, saldo_final
+    return df_mientras_estudias, df_finalizado_estudios, saldo_final
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
     # Simular el plan de pagos
-    df_mientras_estudias, df_finalizado_estudios, df_remanente_distribuido, saldo_final = simular_plan_pagos(
+    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
@@ -157,21 +129,54 @@ if submit_button:
 
     # Calcular el promedio de cuota
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    viable, promedio_cuota = calcular_viabilidad(
+    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
+    promedio_cuota_calculado = total_cuotas / total_meses if total_meses > 0 else 0
+
+    # Verificar viabilidad del crédito
+    viable, promedio_cuota_calculado = calcular_viabilidad(
         ingresos_mensuales,
         valor_solicitado,
         cantidad_periodos,
         cuota_mensual_post_estudios,
         total_cuotas
     )
+
+    # Generar el PDF
+    generar_pdf(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        promedio_cuota_calculado,
+        viable
+    )
+
+    # Mostrar la viabilidad del crédito
+    if viable:
+        st.success("¡La solicitud es viable con los ingresos actuales!")
+    else:
+        st.warning("La solicitud no es viable con los ingresos actuales. Verifica la simulación para más detalles.")
     
-    # Mostrar DataFrames
-    st.write("Resumen de pagos durante los estudios:")
+    st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota_calculado:,.2f} mensualmente.")
+    
+    # Mostrar el botón para descargar el PDF
+    with open("resumen_credito.pdf", "rb") as pdf_file:
+        st.download_button(
+            label="Descargar Resumen en PDF",
+            data=pdf_file,
+            file_name="resumen_credito.pdf",
+            mime="application/pdf"
+        )
+
+    # Mostrar las tablas
+    st.subheader("Detalles durante los estudios")
     st.dataframe(df_mientras_estudias)
-    
-    st.write("Resumen de pagos después de los estudios:")
+
+    st.subheader("Detalles después de finalizar los estudios")
     st.dataframe(df_finalizado_estudios)
-    
-    # Generar PDF
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
-    st.success("PDF generado exitosamente. Revisa 'resumen_credito.pdf' en la carpeta de tu proyecto.")
+
+    # Checkbox para mostrar/ocultar la tabla de saldo remanente distribuido
+    show_remanente = st.checkbox("Mostrar detalles con saldo remanente distribuido", value=False)
+    if show_remanente:
+        st.subheader("Detalles con saldo remanente distribuido")
+        st.dataframe(df_finalizado_estudios)  # Mostrar tabla final con saldo distribuido
+
