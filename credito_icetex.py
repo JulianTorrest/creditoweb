@@ -169,9 +169,10 @@ if submit_button:
     st.write("Resumen de pagos durante los estudios:")
     st.dataframe(df_mientras_estudias)
     
-    st.write("Resumen de pagos después de los estudios:")
+    st.write("Resumen de pagos después de finalizar los estudios:")
     st.dataframe(df_finalizado_estudios)
     
-    # Generar PDF
+    # Generar PDF con los datos
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
-    st.success("PDF generado exitosamente. Revisa 'resumen_credito.pdf' en la carpeta de tu proyecto.")
+
+    st.write("¡El PDF ha sido generado correctamente!")
