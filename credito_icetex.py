@@ -151,10 +151,8 @@ if submit_button:
 
     # Calcular la suma de todas las cuotas y su promedio
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    total_meses_estudios = cantidad_periodos * 6
-    total_meses_post_estudios = len(df_finalizado_estudios)
-    total_meses = total_meses_estudios + total_meses_post_estudios
-    promedio_cuota = total_cuotas / total_meses if total_meses > 0 else 0
+    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
+    promedio_cuota_calculado = total_cuotas / total_meses if total_meses > 0 else 0
 
     # Verificar viabilidad del crédito
     viable, promedio_cuota_calculado = calcular_viabilidad(
