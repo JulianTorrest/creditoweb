@@ -180,7 +180,6 @@ if submit_button:
         st.subheader("Detalles con saldo remanente distribuido")
         st.dataframe(df_finalizado_estudios)  # Mostrar tabla final con saldo distribuido
 
-    
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
     st.success("PDF generado exitosamente. Revisa 'resumen_credito.pdf' en la carpeta de tu proyecto.")
