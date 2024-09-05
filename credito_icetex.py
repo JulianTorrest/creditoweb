@@ -18,7 +18,13 @@ with st.form(key='credito_y_simulacion_form'):
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas):
     if ingresos == 0:
         return False, 0  # Previene división por cero
-    promedio_cuota = total_cuotas / (cantidad_periodos * 6 + (total_cuotas / 6))  # Promedio de las cuotas mensuales
+    # Total meses durante los estudios
+    total_meses_estudios = cantidad_periodos * 6  # 6 meses por semestre
+    # Total meses después de estudios (depende de la cantidad de cuotas finales)
+    total_meses_post_estudios = len(df_finalizado_estudios)
+    # Total meses en el crédito
+    total_meses = total_meses_estudios + total_meses_post_estudios
+    promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
 # Función para generar el PDF
@@ -145,19 +151,37 @@ if submit_button:
 
     # Calcular la suma de todas las cuotas y su promedio
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    promedio_cuota = total_cuotas / (cantidad_periodos * 6 + len(df_finalizado_estudios))
+    total_meses_estudios = cantidad_periodos * 6
+    total_meses_post_estudios = len(df_finalizado_estudios)
+    total_meses = total_meses_estudios + total_meses_post_estudios
+    promedio_cuota = total_cuotas / total_meses if total_meses > 0 else 0
 
-    viable, promedio_requerido = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas)
+    # Verificar viabilidad del crédito
+    viable, promedio_cuota_calculado = calcular_viabilidad(
+        ingresos_mensuales,
+        valor_solicitado,
+        cantidad_periodos,
+        cuota_mensual_post_estudios,
+        total_cuotas
+    )
 
+    # Generar el PDF
+    generar_pdf(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        promedio_cuota_calculado,
+        viable
+    )
+
+    # Mostrar la viabilidad del crédito
     if viable:
-        st.success("La solicitud es viable con los ingresos actuales.")
+        st.success("¡La solicitud es viable con los ingresos actuales!")
     else:
-        st.error("La solicitud no es viable con los ingresos actuales.")
-        st.warning(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_requerido:,.2f} mensualmente.")
-
-    # Generar PDF
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
-
+        st.warning("La solicitud no es viable con los ingresos actuales. Verifica la simulación para más detalles.")
+    
+    st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota_calculado:,.2f} mensualmente.")
+    
     # Mostrar el botón para descargar el PDF
     with open("resumen_credito.pdf", "rb") as pdf_file:
         st.download_button(
