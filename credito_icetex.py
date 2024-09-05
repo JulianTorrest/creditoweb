@@ -68,16 +68,16 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            if ingresos_mensuales <= 0:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-                cuota_mensual = 0  # La cuota es cero
-                abono_capital = 0  # El abono a capital es cero
-                saldo_periodo += intereses  # El saldo aumenta por los intereses
-            else:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+            intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+
+            if ingresos_mensuales > 0:
                 abono_capital = max(ingresos_mensuales - intereses, 0)  # Abono a capital
-                cuota_mensual = ingresos_mensuales
-                saldo_periodo = saldo_periodo + intereses - abono_capital
+                saldo_periodo -= abono_capital  # Reducción del saldo por el abono a capital
+                cuota_mensual = ingresos_mensuales  # Cuota mensual es igual a los ingresos mensuales
+            else:
+                abono_capital = 0  # Sin abono a capital
+                cuota_mensual = 0  # Sin cuota mensual
+                saldo_periodo += intereses  # El saldo aumenta por los intereses
             
             # Ajustar el saldo
             saldo_periodo = max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
@@ -170,9 +170,12 @@ if submit_button:
             mime="application/pdf"
         )
 
-    # Mostrar las tablas
-    st.subheader("Detalles durante los estudios")
+    # Mostrar los resultados en Streamlit
+    st.subheader("Plan de Pagos durante los Estudios")
     st.dataframe(df_mientras_estudias)
 
-    st.subheader("Detalles después de finalizar estudios")
+    st.subheader("Plan de Pagos después de Estudios")
     st.dataframe(df_finalizado_estudios)
+    
+if clear_button:
+    st.experimental_rerun()
