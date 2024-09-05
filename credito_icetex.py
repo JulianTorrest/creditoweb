@@ -50,12 +50,15 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     tasa_interes_mensual = 0.0116  # Tasa mensual (1.16%)
 
     # Inicialización
-    saldo_periodo = valor_solicitado
+    saldo_periodo = 0  # Inicia en 0, ya que el saldo inicial se suma en el primer mes de cada semestre
 
     # Dataframe durante los estudios
     data_mientras_estudias = []
     for semestre in range(cantidad_periodos):
         for mes in range(6):  # 6 meses por semestre
+            if mes == 0:
+                saldo_periodo += valor_solicitado  # Sumar el valor solicitado en el primer mes de cada semestre
+
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
@@ -154,4 +157,3 @@ if submit_button:
 # Manejo del botón de limpiar
 if clear_button:
     st.experimental_rerun()
-
