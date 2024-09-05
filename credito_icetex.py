@@ -15,15 +15,9 @@ with st.form(key='credito_y_simulacion_form'):
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
-def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas):
+def calcular_viabilidad(ingresos, total_cuotas, total_meses):
     if ingresos == 0:
         return False, 0  # Previene división por cero
-    # Total meses durante los estudios
-    total_meses_estudios = cantidad_periodos * 6  # 6 meses por semestre
-    # Total meses después de estudios (depende de la cantidad de cuotas finales)
-    total_meses_post_estudios = len(df_finalizado_estudios)
-    # Total meses en el crédito
-    total_meses = total_meses_estudios + total_meses_post_estudios
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
@@ -136,10 +130,8 @@ if submit_button:
     # Verificar viabilidad del crédito
     viable, promedio_cuota_calculado = calcular_viabilidad(
         ingresos_mensuales,
-        valor_solicitado,
-        cantidad_periodos,
-        cuota_mensual_post_estudios,
-        total_cuotas
+        total_cuotas,
+        total_meses
     )
 
     # Generar el PDF
