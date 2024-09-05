@@ -42,10 +42,10 @@ with st.form(key='credito_y_simulacion_form'):
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, df_finalizado_estudios):
     if ingresos == 0:
-        return False, 0  # Previene división por cero
+        return False, 0, 0  # Previene división por cero
     saldo_final = df_finalizado_estudios['Saldo'].iloc[-1] if not df_finalizado_estudios.empty else 0
-    viable = saldo_final == 0
-    promedio_cuota = df_finalizado_estudios['Cuota Mensual'].sum() / len(df_finalizado_estudios) if not df_finalizado_estudios.empty else 0
+    viable = saldo_final <= 0
+    promedio_cuota = df_finalizado_estudios['Cuota Mensual'].mean() if not df_finalizado_estudios.empty else 0
     return viable, promedio_cuota, saldo_final
 
 # Función para generar el PDF
@@ -182,74 +182,53 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
             # Ajustar el saldo
             saldo_final = saldo_final + intereses
-
+        
         # Actualizar la tabla
         data_finalizado_estudios.append({
-            "Mes": mes + 1 + cantidad_periodos * 6,
+            "Mes": mes + 1,
             "Cuota Mensual": cuota_mensual,
             "Abono Capital": abono_capital,
             "Abono Intereses": abono_intereses,
             "Saldo": saldo_final
         })
-    
-    # Convertir los datos a DataFrame
+
+    # Crear dataframes
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
     df_finalizado_estudios = pd.DataFrame(data_finalizado_estudios)
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final
 
-# Main Logic
-if submit_button:
-    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        cuota_mensual_post_estudios
-    )
+# Función para manejar el envío del formulario
+def manejar_formulario(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios):
+    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios)
+    viable, promedio_cuota, saldo_final = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, df_finalizado_estudios)
     
-    # Mostrar tablas
-    st.subheader("Resumen de Pagos Durante los Estudios")
+    st.subheader("Detalles de la Simulación")
+    st.write("Datos mientras estudias")
     st.dataframe(df_mientras_estudias)
     
-    st.subheader("Resumen de Pagos Después de Finalizar los Estudios")
+    st.write("Datos después de finalizar los estudios")
     st.dataframe(df_finalizado_estudios)
     
-    # Verificar viabilidad
-    viable, promedio_cuota, saldo_final_final = calcular_viabilidad(
-        ingresos_mensuales,
-        valor_solicitado,
-        cantidad_periodos,
-        cuota_mensual_post_estudios,
-        df_finalizado_estudios
-    )
-    
-    # Generar PDF
-    generar_pdf(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        df_mientras_estudias,
-        df_finalizado_estudios,
-        viable,
-        saldo_final_final
-    )
-    
-    # Mensaje de viabilidad
     if viable:
         st.success("¡La solicitud es viable con los ingresos actuales!")
     else:
-        st.error("La solicitud no es viable con los ingresos actuales. Revisa los detalles y ajusta la solicitud si es necesario.")
+        st.warning("La solicitud no es viable con los ingresos actuales. Aquí está la simulación para tu referencia.")
     
-    # Enlace para descargar el PDF
-    with open("resumen_credito.pdf", "rb") as f:
+    # Generar PDF
+    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, df_mientras_estudias, df_finalizado_estudios, viable, saldo_final)
+    
+    # Descargar PDF
+    with open("resumen_credito.pdf", "rb") as pdf_file:
         st.download_button(
-            label="Descargar Resumen en PDF",
-            data=f,
+            label="Descargar PDF",
+            data=pdf_file,
             file_name="resumen_credito.pdf",
             mime="application/pdf"
         )
 
-if clear_button:
-    st.caching.clear_cache()
+# Manejando el formulario
+if submit_button:
+    manejar_formulario(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios)
+elif clear_button:
     st.experimental_rerun()
-
