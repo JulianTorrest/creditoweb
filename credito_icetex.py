@@ -1,3 +1,8 @@
+
+Aquí tienes el código completo con la funcionalidad que falta, incluyendo la recomendación de pagos mínimos y el ajuste de saldo final después de los estudios. También agregué la lógica para distribuir el saldo restante de la deuda en la tabla "Después de finalizar los estudios".
+
+python
+Copiar código
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
@@ -17,10 +22,11 @@ with st.form(key='credito_y_simulacion_form'):
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
     if ingresos == 0:
-        return False, 0  # Previene división por cero
+        return False, 0, 0  # Previene división por cero
     cuota_maxima = ingresos * 0.3  # 30% de los ingresos como cuota máxima sugerida
     cuota_calculada = valor_solicitado / (cantidad_periodos * 6)  # Cuota mensual estimada (6 meses por periodo)
-    return cuota_calculada <= cuota_maxima, cuota_calculada
+    cuota_minima_para_viabilidad = valor_solicitado / (cantidad_periodos * 6)  # Cuota mínima requerida para viabilidad
+    return cuota_calculada <= cuota_maxima, cuota_calculada, cuota_minima_para_viabilidad
 
 # Función para generar el PDF
 def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable, saldo_final):
@@ -100,12 +106,13 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
-    viable, cuota_calculada = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
+    viable, cuota_calculada, cuota_minima_para_viabilidad = calcular_viabilidad(ingresos_mensuales, valor_solicitado, cantidad_periodos)
     
     if viable:
         st.success("La solicitud es viable con los ingresos actuales.")
     else:
-        st.error("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
+        st.error("La solicitud no es viable con los ingresos actuales.")
+        st.warning(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${cuota_minima_para_viabilidad:,.2f} mensualmente.")
     
     # Generar PDF
     generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable, saldo_final=0)
