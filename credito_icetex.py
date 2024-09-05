@@ -245,3 +245,4 @@ if submit_button:
     manejar_formulario(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios)
 elif clear_button:
     st.experimental_rerun()
+
