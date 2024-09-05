@@ -10,7 +10,7 @@ with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    opcion_pago = st.selectbox("Opción de pago durante estudios:", ["0%", "20%"])
+    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000)
     submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
@@ -23,7 +23,7 @@ def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos):
     return cuota_calculada <= cuota_maxima, cuota_calculada
 
 # Función para generar el PDF
-def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable):
+def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable, saldo_final):
     pdf = FPDF()
     pdf.add_page()
     
@@ -40,22 +40,12 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_c
         pdf.cell(200, 10, txt="La solicitud es viable con los ingresos actuales.", ln=True)
     else:
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
-        minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
-        pdf.cell(200, 10, txt=f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.", ln=True)
+        pdf.cell(200, 10, txt=f"El saldo final después de los estudios es ${saldo_final:.2f}.", ln=True)
     
     pdf.output("resumen_credito.pdf")
 
-# Función para calcular el pago mínimo necesario
-def calcular_pago_minimo(valor_solicitado, cantidad_periodos):
-    cuota_maxima = ingresos_mensuales * 0.3
-    cuota_minima = valor_solicitado / (cantidad_periodos * 6)  # Cuota mensual mínima requerida
-    if cuota_minima > cuota_maxima:
-        return cuota_minima
-    else:
-        return cuota_maxima
-
 # Función para simular el plan de pagos
-def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, opcion_pago):
+def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios):
     meses_gracia = 6  # Ejemplo de meses de periodo de gracia
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
@@ -70,7 +60,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     for semestre in range(cantidad_periodos):
         for mes in range(6):  # 6 meses por semestre
             intereses = saldo_periodo * afim / 100 / 12  # Intereses mensuales
-            cuota_pago = ingresos_mensuales * (0.2 if opcion_pago == "20%" else 0)  # Abono de pago
+            cuota_pago = ingresos_mensuales  # Abono de pago durante estudios
             saldo_periodo = saldo_periodo - cuota_pago + intereses
             
             if mes == 5:  # En el último mes de cada semestre, añadir nuevo saldo
@@ -86,21 +76,22 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 "Saldo": saldo_periodo
             })
     
-    # Saldo final después de estudios para uso en la sección final
+    # Saldo final después de estudios
     saldo_final = saldo_periodo
-
-    # Dataframe después de finalizar estudios
-    valor_cuota_final = saldo_final / num_cuotas_finales
     data_finalizado_estudios = []
     for mes in range(num_cuotas_finales):
+        if saldo_final <= 0:
+            break
         intereses = saldo_final * afim / 100 / 12  # Intereses mensuales
-        cuota_pago_final = valor_cuota_final
-        saldo_final = saldo_final - cuota_pago_final + intereses
+        cuota_pago_final = min(cuota_mensual_post_estudios, saldo_final + intereses)
+        abono_capital = cuota_pago_final - intereses
+        saldo_final -= abono_capital
+        
         data_finalizado_estudios.append({
             "Mes": mes + 1,
             "Cuota Mensual": cuota_pago_final,
-            "Abono Capital": cuota_pago_final * 0.7,  # Suponiendo 70% para el capital
-            "Abono Intereses": cuota_pago_final * 0.3,  # Suponiendo 30% para intereses
+            "Abono Capital": abono_capital,
+            "Abono Intereses": intereses,
             "AFIM": afim,
             "Saldo": saldo_final
         })
@@ -115,11 +106,9 @@ if submit_button:
         st.success("La solicitud es viable con los ingresos actuales.")
     else:
         st.error("La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.")
-        minimo_necesario = calcular_pago_minimo(valor_solicitado, cantidad_periodos)
-        st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${minimo_necesario:,.2f} por mes.")
     
     # Generar PDF
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable)
+    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_calculada, viable, saldo_final=0)
     
     # Mostrar opción de descarga de PDF
     st.write("Haz clic en el siguiente enlace para descargar el PDF:")
@@ -137,7 +126,7 @@ if submit_button:
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
-        opcion_pago
+        cuota_mensual_post_estudios
     )
     
     st.write(f"El saldo final después de los estudios es ${saldo_final:.2f}.")
