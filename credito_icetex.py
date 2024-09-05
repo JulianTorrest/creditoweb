@@ -62,12 +62,17 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-            abono_capital = max(0, ingresos_mensuales - intereses)  # El abono a capital es la cuota mensual menos los intereses
-            cuota_mensual = intereses + abono_capital
+            if ingresos_mensuales > 0:
+                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                abono_capital = max(0, ingresos_mensuales - intereses)  # El abono a capital es la cuota mensual menos los intereses
+                cuota_mensual = intereses + abono_capital
+            else:
+                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                abono_capital = 0
+                cuota_mensual = 0  # Si no se paga nada, la cuota también es cero
 
             # Ajustar el saldo
-            saldo_periodo = saldo_periodo - abono_capital
+            saldo_periodo = saldo_periodo + intereses - abono_capital
             
             # Actualizar la tabla
             data_mientras_estudias.append({
