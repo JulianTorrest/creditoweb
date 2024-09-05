@@ -72,11 +72,13 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                     cuota_mensual = intereses  # Cuota solo cubre intereses
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses - abono_capital
+                abono_intereses = intereses
             else:
                 # Si la cuota mensual es cero
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = 0
                 cuota_mensual = 0  # Cuota mensual es cero
+                abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses
             
@@ -86,7 +88,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 "Mes": mes + 1 + semestre * 6,
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
-                "Abono Intereses": intereses,
+                "Abono Intereses": abono_intereses,
                 "Saldo": saldo_periodo
             })
 
@@ -165,6 +167,6 @@ if submit_button:
     st.subheader("Después de finalizar los estudios")
     st.dataframe(df_finalizado_estudios)
 
-# Opción para limpiar los datos del formulario
-if clear_button:
-    st.experimental_rerun()
+    # Opción para limpiar los datos
+    if clear_button:
+        st.experimental_rerun()
