@@ -68,17 +68,16 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            if ingresos_mensuales <= 0:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-                cuota_mensual = intereses  # La cuota solo cubre los intereses
-                abono_capital = 0
-            else:
+            if ingresos_mensuales > 0:
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = max(ingresos_mensuales - intereses, 0)  # Abono a capital
                 cuota_mensual = ingresos_mensuales
-                saldo_periodo = saldo_periodo + intereses - abono_capital
+            else:
+                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                abono_capital = 0
+                cuota_mensual = 0
             
-            # Ajustar el saldo
+            saldo_periodo = saldo_periodo + intereses - abono_capital  # Ajustar el saldo
             saldo_periodo = max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
             
             # Actualizar la tabla
@@ -163,15 +162,8 @@ if submit_button:
     # Mostrar el botón para descargar el PDF
     with open("resumen_credito.pdf", "rb") as pdf_file:
         st.download_button(
-            label="Descargar Resumen en PDF",
+            label="Descargar Resumen del Crédito",
             data=pdf_file,
             file_name="resumen_credito.pdf",
             mime="application/pdf"
         )
-
-    # Mostrar las tablas
-    st.subheader("Detalles durante los estudios")
-    st.dataframe(df_mientras_estudias)
-
-    st.subheader("Detalles después de finalizar estudios")
-    st.dataframe(df_finalizado_estudios)
