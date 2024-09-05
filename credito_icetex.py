@@ -2,25 +2,42 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 
-# Título de la página con imagen
-st.image("logo.png", width=200)  # Reemplaza con el nombre de tu imagen/logo
+# Título de la página
 st.title("Solicitud de Crédito Educativo - ICETEX")
-st.markdown("<hr>", unsafe_allow_html=True)
 
-# Formulario combinado con estilo
+# Estilo de encabezado
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #f0f2f6;
+    }
+    .stButton>button {
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    .stButton>button:hover {
+        background-color: #0056b3;
+    }
+    .stDataFrame {
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
-    st.subheader("Datos de la Solicitud")
-    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000, format="%d")
+    st.header("Formulario de Solicitud y Simulación")
+    valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
-    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000, format="%d")
-    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000, format="%d")
+    ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
+    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000)
     
-    # Botones de acción
-    col1, col2 = st.columns(2)
-    with col1:
-        submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación', help="Haz clic aquí para enviar la solicitud y ver la simulación.")
-    with col2:
-        clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario.")
+    submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
+    clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
 def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas):
@@ -109,10 +126,12 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     # Saldo final después de estudios
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
-    saldo_inicial_post_estudios = saldo_final
-    saldo_total_final = saldo_inicial_post_estudios
+    saldo_final_total = saldo_final  # Saldo final a ajustar
 
-    for mes in range(num_cuotas_finales):
+    # Calcular saldo inicial para después de estudios
+    saldo_inicial_post_estudios = saldo_final
+
+    for mes in range(tiempo_credito_maximo * 6):  # Total meses después de estudios
         if saldo_inicial_post_estudios <= 0:
             break
         intereses = saldo_inicial_post_estudios * tasa_interes_mensual  # Intereses mensuales
@@ -128,13 +147,21 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             "Saldo": saldo_inicial_post_estudios
         })
 
-    # Verificar que sólo el último saldo pueda ser cero
-    if len(data_finalizado_estudios) > 0:
-        last_entry = data_finalizado_estudios[-1]
-        if last_entry["Saldo"] != 0:
-            # Ajustar el saldo final para asegurar que el último saldo es cero
-            last_entry["Saldo"] = 0
-            last_entry["Cuota Mensual"] = last_entry["Abono Capital"] + last_entry["Abono Intereses"]
+    # Si queda saldo remanente, distribuirlo equitativamente en las cuotas
+    if saldo_final_total > 0 and len(data_finalizado_estudios) > 0:
+        cuota_extra = saldo_final_total / len(data_finalizado_estudios)
+        for entry in data_finalizado_estudios:
+            entry["Cuota Mensual"] += cuota_extra
+            # Recalcular los abonos
+            intereses = entry["Saldo"] * tasa_interes_mensual
+            entry["Abono Intereses"] = intereses
+            entry["Abono Capital"] = entry["Cuota Mensual"] - intereses
+            entry["Saldo"] -= entry["Abono Capital"]
+            # Asegurarse que el saldo no sea negativo
+            if entry["Saldo"] < 0:
+                entry["Saldo"] = 0
+                entry["Cuota Mensual"] = entry["Abono Capital"] + entry["Abono Intereses"]
+                break  # Salir del bucle si el saldo es 0
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
@@ -151,36 +178,43 @@ if submit_button:
         ingresos_mensuales,
         cuota_mensual_post_estudios
     )
-
-    # Calcular el promedio de cuota
-    total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
+    
+    # Mostrar tablas
+    st.subheader("Resumen de Pagos Durante los Estudios")
+    st.dataframe(df_mientras_estudias)
+    
+    st.subheader("Resumen de Pagos Después de Finalizar los Estudios")
+    st.dataframe(df_finalizado_estudios)
+    
+    # Verificar viabilidad
     viable, promedio_cuota = calcular_viabilidad(
         ingresos_mensuales,
         valor_solicitado,
         cantidad_periodos,
         cuota_mensual_post_estudios,
-        total_cuotas
+        df_finalizado_estudios['Cuota Mensual'].sum()  # Total cuotas finales
     )
     
-    # Mostrar DataFrames con estilos
-    st.markdown("### Resumen de pagos durante los estudios:")
-    st.dataframe(df_mientras_estudias.style.format({"Cuota Mensual": "${:,.2f}", "Abono Capital": "${:,.2f}", "Abono Intereses": "${:,.2f}", "Saldo": "${:,.2f}"}))
-    
-    st.markdown("### Resumen de pagos después de finalizar los estudios:")
-    st.dataframe(df_finalizado_estudios.style.format({"Cuota Mensual": "${:,.2f}", "Abono Capital": "${:,.2f}", "Abono Intereses": "${:,.2f}", "Saldo": "${:,.2f}"}))
-
     # Generar PDF
-    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
-
-    # Mostrar mensaje de viabilidad
-    if viable:
-        st.success(f"La solicitud es viable. El pago mensual promedio es ${promedio_cuota:,.2f}.")
-    else:
-        st.warning(f"La solicitud no es viable con los ingresos actuales. El pago mensual promedio es ${promedio_cuota:,.2f}.")
+    generar_pdf(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        promedio_cuota,
+        viable
+    )
     
-    st.markdown(f"El saldo final después de los estudios es ${saldo_final:,.2f}.")
+    st.success("¡Solicitud y simulación completadas con éxito!")
+    
+    # Enlace para descargar el PDF
+    with open("resumen_credito.pdf", "rb") as f:
+        st.download_button(
+            label="Descargar Resumen en PDF",
+            data=f,
+            file_name="resumen_credito.pdf",
+            mime="application/pdf"
+        )
 
-# Limpiar datos si se presiona el botón de limpiar
 if clear_button:
+    st.caching.clear_cache()
     st.experimental_rerun()
-
