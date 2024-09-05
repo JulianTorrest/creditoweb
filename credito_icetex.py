@@ -66,10 +66,6 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             # Ajustar el saldo
             saldo_periodo = saldo_periodo - abono_capital
             
-            # Solo en el último mes de cada semestre no se añade el nuevo saldo
-            if mes != 5:
-                saldo_periodo += valor_solicitado  # Añadir el valor solicitado al saldo
-
             # Actualizar la tabla
             data_mientras_estudias.append({
                 "Semestre": f"Semestre {semestre+1}",
@@ -83,6 +79,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     # Saldo final después de estudios
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
+    saldo_final_total = saldo_final  # Saldo final a ajustar
+
     for mes in range(num_cuotas_finales):
         if saldo_final <= 0:
             break
@@ -100,13 +98,13 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         })
 
     # Si queda saldo remanente, distribuirlo entre las últimas cuotas
-    if saldo_final > 0:
-        ajuste = saldo_final / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
+    if saldo_final_total > 0:
+        ajuste = saldo_final_total / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
         for entry in data_finalizado_estudios:
             entry["Cuota Mensual"] += ajuste
             entry["Saldo"] = max(0, entry["Saldo"] - ajuste)
 
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final_total
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
