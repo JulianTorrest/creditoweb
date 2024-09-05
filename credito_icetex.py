@@ -1,6 +1,6 @@
-import streamlit as st
 import pandas as pd
 from fpdf import FPDF
+import streamlit as st
 
 # Título de la página
 st.title("Solicitud de Crédito Educativo - ICETEX")
@@ -70,8 +70,9 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             
             if ingresos_mensuales <= 0:
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-                cuota_mensual = intereses  # La cuota solo cubre los intereses
-                abono_capital = 0
+                cuota_mensual = 0  # La cuota es cero
+                abono_capital = 0  # El abono a capital es cero
+                saldo_periodo += intereses  # El saldo aumenta por los intereses
             else:
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = max(ingresos_mensuales - intereses, 0)  # Abono a capital
