@@ -50,9 +50,6 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios):
-    meses_gracia = 6  # Ejemplo de meses de periodo de gracia
-    tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
-    num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
     tasa_interes_mensual = 0.0116  # Tasa mensual (1.16%)
 
     # Inicialización
@@ -72,13 +69,13 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
 
             if ingresos_mensuales > 0:
                 abono_capital = max(ingresos_mensuales - intereses, 0)  # Abono a capital
+                cuota_mensual = ingresos_mensuales  # La cuota mensual es igual a los ingresos mensuales
                 saldo_periodo -= abono_capital  # Reducción del saldo por el abono a capital
-                cuota_mensual = ingresos_mensuales  # Cuota mensual es igual a los ingresos mensuales
             else:
                 abono_capital = 0  # Sin abono a capital
                 cuota_mensual = 0  # Sin cuota mensual
                 saldo_periodo += intereses  # El saldo aumenta por los intereses
-            
+
             # Ajustar el saldo
             saldo_periodo = max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
             
@@ -88,7 +85,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 "Mes": mes + 1 + semestre * 6,
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
-                "Abono Intereses": intereses,
+                "Abono Intereses": intereses if ingresos_mensuales > 0 else 0,  # Solo mostrar abono a intereses cuando hay cuota
                 "Saldo": saldo_periodo
             })
 
@@ -96,6 +93,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
     saldo_inicial_post_estudios = saldo_final
+    num_cuotas_finales = (valor_solicitado // cuota_mensual_post_estudios) + 1
 
     # Calcular cuotas después de los estudios
     for mes in range(num_cuotas_finales):
@@ -159,19 +157,10 @@ if submit_button:
     else:
         st.warning("La solicitud no es viable con los ingresos actuales. Verifica la simulación para más detalles.")
     
-    st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota_calculado:,.2f} mensualmente.")
+    st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota_calculado:,.2f} por mes.")
     
-    # Mostrar el botón para descargar el PDF
-    with open("resumen_credito.pdf", "rb") as pdf_file:
-        st.download_button(
-            label="Descargar Resumen en PDF",
-            data=pdf_file,
-            file_name="resumen_credito.pdf",
-            mime="application/pdf"
-        )
-
-    # Mostrar los resultados en Streamlit
-    st.subheader("Plan de Pagos durante los Estudios")
+    # Mostrar DataFrames
+    st.subheader("Plan de Pagos durante el Periodo de Estudios")
     st.dataframe(df_mientras_estudias)
 
     st.subheader("Plan de Pagos después de Estudios")
