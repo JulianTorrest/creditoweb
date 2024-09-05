@@ -117,19 +117,26 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         })
 
     # Si queda saldo remanente, distribuirlo entre las últimas cuotas
-    saldo_remanente = max(0, saldo_inicial_post_estudios)
-    if saldo_remanente > 0 and len(data_finalizado_estudios) > 0:
-        ajuste = saldo_remanente / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
+    if saldo_inicial_post_estudios > 0:
+        ajuste = saldo_inicial_post_estudios / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
         for entry in data_finalizado_estudios:
             entry["Cuota Mensual"] += ajuste
             entry["Saldo"] = max(0, entry["Saldo"] - ajuste)
 
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final
+    # Nueva tabla con el saldo remanente distribuido
+    remanente_distribuido = []
+    if saldo_final_total > 0:
+        cuota_adicional = saldo_final_total / len(data_finalizado_estudios)
+        for entry in data_finalizado_estudios:
+            entry["Cuota Mensual"] += cuota_adicional
+            remanente_distribuido.append(entry)
+    
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), pd.DataFrame(remanente_distribuido), saldo_final
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
     # Simular el plan de pagos
-    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
+    df_mientras_estudias, df_finalizado_estudios, df_remanente_distribuido, saldo_final = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
@@ -153,21 +160,18 @@ if submit_button:
     st.write("Haz clic en el siguiente enlace para descargar el PDF:")
     with open("resumen_credito.pdf", "rb") as pdf_file:
         st.download_button(
-            label="Descargar PDF",
+            label="Descargar Resumen en PDF",
             data=pdf_file,
             file_name="resumen_credito.pdf",
             mime="application/pdf"
         )
 
     # Mostrar las tablas
-    st.header("Simulación de Plan de Pagos")
-
-    st.subheader("Durante los estudios")
+    st.subheader("Detalles durante los estudios")
     st.dataframe(df_mientras_estudias)
 
-    st.subheader("Después de finalizar los estudios")
+    st.subheader("Detalles después de finalizar los estudios")
     st.dataframe(df_finalizado_estudios)
 
-    # Opción para limpiar los datos
-    if clear_button:
-        st.experimental_rerun()
+    st.subheader("Detalles con saldo remanente distribuido")
+    st.dataframe(df_remanente_distribuido)
