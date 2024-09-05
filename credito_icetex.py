@@ -135,6 +135,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             # Asegurarse que el saldo no sea negativo
             if entry["Saldo"] < 0:
                 entry["Saldo"] = 0
+                entry["Cuota Mensual"] = entry["Abono Capital"] + entry["Abono Intereses"]
+                break  # Salir del bucle si el saldo es 0
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
@@ -155,53 +157,21 @@ if submit_button:
 
     # Calcular el promedio de cuota
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
-    promedio_cuota_calculado = total_cuotas / total_meses if total_meses > 0 else 0
-
-    # Verificar viabilidad del crédito
-    viable, promedio_cuota_calculado = calcular_viabilidad(
+    viable, promedio_cuota = calcular_viabilidad(
         ingresos_mensuales,
         valor_solicitado,
         cantidad_periodos,
         cuota_mensual_post_estudios,
         total_cuotas
     )
-
-    # Generar el PDF
-    generar_pdf(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        promedio_cuota_calculado,
-        viable
-    )
-
-    # Mostrar la viabilidad del crédito
-    if viable:
-        st.success("¡La solicitud es viable con los ingresos actuales!")
-    else:
-        st.warning("La solicitud no es viable con los ingresos actuales. Verifica la simulación para más detalles.")
     
-    st.write(f"Para que la solicitud sea viable, necesitas poder pagar al menos ${promedio_cuota_calculado:,.2f} mensualmente.")
-    
-    # Mostrar el botón para descargar el PDF
-    with open("resumen_credito.pdf", "rb") as pdf_file:
-        st.download_button(
-            label="Descargar Resumen en PDF",
-            data=pdf_file,
-            file_name="resumen_credito.pdf",
-            mime="application/pdf"
-        )
-
-    # Mostrar las tablas
-    st.subheader("Detalles durante los estudios")
+    # Mostrar DataFrames
+    st.write("Resumen de pagos durante los estudios:")
     st.dataframe(df_mientras_estudias)
-
-    st.subheader("Detalles después de finalizar los estudios")
+    
+    st.write("Resumen de pagos después de los estudios:")
     st.dataframe(df_finalizado_estudios)
-
-    # Checkbox para mostrar/ocultar la tabla de saldo remanente distribuido
-    show_remanente = st.checkbox("Mostrar detalles con saldo remanente distribuido", value=False)
-    if show_remanente:
-        st.subheader("Detalles con saldo remanente distribuido")
-        st.dataframe(df_remanente_distribuido)
+    
+    # Generar PDF
+    generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable)
+    st.success("PDF generado exitosamente. Revisa 'resumen_credito.pdf' en la carpeta de tu proyecto.")
