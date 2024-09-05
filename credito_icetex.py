@@ -81,30 +81,33 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     data_finalizado_estudios = []
     saldo_final_total = saldo_final  # Saldo final a ajustar
 
+    # Calcular saldo inicial para después de estudios
+    saldo_inicial_post_estudios = saldo_final
+
     for mes in range(num_cuotas_finales):
-        if saldo_final <= 0:
+        if saldo_inicial_post_estudios <= 0:
             break
-        intereses = saldo_final * tasa_interes_mensual  # Intereses mensuales
-        cuota_pago_final = min(cuota_mensual_post_estudios, saldo_final + intereses)
+        intereses = saldo_inicial_post_estudios * tasa_interes_mensual  # Intereses mensuales
+        cuota_pago_final = min(cuota_mensual_post_estudios, saldo_inicial_post_estudios + intereses)
         abono_capital = cuota_pago_final - intereses
-        saldo_final -= abono_capital
+        saldo_inicial_post_estudios -= abono_capital
 
         data_finalizado_estudios.append({
             "Mes": mes + 1,
             "Cuota Mensual": cuota_pago_final,
             "Abono Capital": abono_capital,
             "Abono Intereses": intereses,
-            "Saldo": saldo_final
+            "Saldo": saldo_inicial_post_estudios
         })
 
     # Si queda saldo remanente, distribuirlo entre las últimas cuotas
-    if saldo_final_total > 0:
-        ajuste = saldo_final_total / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
+    if saldo_inicial_post_estudios > 0:
+        ajuste = saldo_inicial_post_estudios / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
         for entry in data_finalizado_estudios:
             entry["Cuota Mensual"] += ajuste
             entry["Saldo"] = max(0, entry["Saldo"] - ajuste)
 
-    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final_total
+    return pd.DataFrame(data_mientras_estudias), pd.DataFrame(data_finalizado_estudios), saldo_final
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
@@ -151,3 +154,4 @@ if submit_button:
 # Manejo del botón de limpiar
 if clear_button:
     st.experimental_rerun()
+
