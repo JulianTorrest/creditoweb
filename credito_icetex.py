@@ -68,16 +68,18 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-            if ingresos_mensuales >= intereses:
-                abono_capital = ingresos_mensuales - intereses  # Abono a capital
-                cuota_mensual = ingresos_mensuales
-            else:
+            if ingresos_mensuales <= 0:
+                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                cuota_mensual = intereses  # La cuota solo cubre los intereses
                 abono_capital = 0
-                cuota_mensual = intereses  # Cuota solo cubre intereses
+            else:
+                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                abono_capital = max(ingresos_mensuales - intereses, 0)  # Abono a capital
+                cuota_mensual = ingresos_mensuales
+                saldo_periodo = saldo_periodo + intereses - abono_capital
+            
             # Ajustar el saldo
-            saldo_periodo = saldo_periodo + intereses - abono_capital
-            abono_intereses = intereses
+            saldo_periodo = max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
             
             # Actualizar la tabla
             data_mientras_estudias.append({
@@ -85,8 +87,8 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
                 "Mes": mes + 1 + semestre * 6,
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
-                "Abono Intereses": abono_intereses,
-                "Saldo": max(saldo_periodo, 0)  # Asegurar que el saldo no sea negativo
+                "Abono Intereses": intereses,
+                "Saldo": saldo_periodo
             })
 
     # Saldo final después de estudios
@@ -171,11 +173,5 @@ if submit_button:
     st.subheader("Detalles durante los estudios")
     st.dataframe(df_mientras_estudias)
 
-    st.subheader("Detalles después de finalizar los estudios")
+    st.subheader("Detalles después de finalizar estudios")
     st.dataframe(df_finalizado_estudios)
-
-    # Checkbox para mostrar/ocultar la tabla de saldo remanente distribuido
-    show_remanente = st.checkbox("Mostrar detalles con saldo remanente distribuido", value=False)
-    if show_remanente:
-        st.subheader("Detalles con saldo remanente distribuido")
-        st.dataframe(df_finalizado_estudios)  # Mostrar tabla final con saldo distribuido
