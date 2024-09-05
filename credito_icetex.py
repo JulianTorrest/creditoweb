@@ -117,8 +117,9 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
         })
 
     # Si queda saldo remanente, distribuirlo entre las últimas cuotas
-    if saldo_inicial_post_estudios > 0:
-        ajuste = saldo_inicial_post_estudios / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
+    saldo_remanente = max(0, saldo_inicial_post_estudios)
+    if saldo_remanente > 0 and len(data_finalizado_estudios) > 0:
+        ajuste = saldo_remanente / len(data_finalizado_estudios)  # Distribuir el saldo restante equitativamente
         for entry in data_finalizado_estudios:
             entry["Cuota Mensual"] += ajuste
             entry["Saldo"] = max(0, entry["Saldo"] - ajuste)
