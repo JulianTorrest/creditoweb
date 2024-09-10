@@ -63,7 +63,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
-            
+
             intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
             if ingresos_mensuales > intereses + cuota_afim_mensual:
                 abono_capital = ingresos_mensuales - intereses - cuota_afim_mensual  # Abono a capital
@@ -82,7 +82,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
                 "AFIM": cuota_afim_mensual,
-                "Saldo": saldo_periodo
+                "Saldo": max(saldo_periodo, 0)  # Evitar saldo negativo
             })
 
     # Saldo final después de estudios
@@ -106,7 +106,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 "Cuota Mensual": cuota_ideal,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
-                "Saldo": saldo_inicial_post_estudios
+                "Saldo": max(saldo_inicial_post_estudios, 0)  # Evitar saldo negativo
             })
     else:
         # Si el saldo final es cero o negativo, no hay pagos después de los estudios
@@ -160,4 +160,7 @@ if submit_button:
     
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
+    valor_solicitado = 0
+    cantidad_periodos = 1
+    ingresos_mensuales = 0
     st.experimental_rerun()
