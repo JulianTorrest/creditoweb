@@ -62,9 +62,6 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             if mes == 0:
                 saldo_periodo += valor_solicitado  # Sumar el valor solicitado en el primer mes de cada semestre
 
-            if saldo_periodo <= 0:
-                break
-
             intereses = saldo_periodo * tasa_interes_mensual
             abono_capital = cuota_fija - intereses - cuota_afim_mensual
             if abono_capital < 0:
@@ -72,6 +69,9 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 cuota_fija = intereses + cuota_afim_mensual
 
             saldo_periodo -= abono_capital
+
+            # Asegurarse de que el saldo no sea negativo
+            saldo_periodo = max(saldo_periodo, 0)
 
             # Actualizar la tabla
             data_mientras_estudias.append({
@@ -81,7 +81,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
                 "AFIM": cuota_afim_mensual,
-                "Saldo": max(saldo_periodo, 0)
+                "Saldo": saldo_periodo
             })
 
     saldo_final = saldo_periodo
@@ -99,12 +99,15 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             abono_capital = cuota_ideal - intereses
             saldo_inicial_post_estudios -= abono_capital
 
+            # Asegurarse de que el saldo no sea negativo
+            saldo_inicial_post_estudios = max(saldo_inicial_post_estudios, 0)
+
             data_finalizado_estudios.append({
                 "Mes": mes + 1,
                 "Cuota Mensual": cuota_ideal,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
-                "Saldo": max(saldo_inicial_post_estudios, 0)
+                "Saldo": saldo_inicial_post_estudios
             })
     else:
         cuota_ideal = 0
