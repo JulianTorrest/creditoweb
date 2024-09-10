@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from fpdf import FPDF
 from io import BytesIO
+import tempfile
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -44,7 +45,13 @@ def crear_graficos(df_mientras_estudias, df_finalizado_estudios):
     ax[1].xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     
     fig.tight_layout()
-    return fig
+    
+    # Guardar gráfico en archivo temporal
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.png')
+    plt.savefig(temp_file.name, format='png')
+    plt.close(fig)
+    
+    return temp_file.name
 
 # Función para generar el PDF
 def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable, df_mientras_estudias, df_finalizado_estudios, cuota_ideal):
@@ -121,19 +128,14 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     pdf.cell(200, 10, txt=f"Total Pagado (Capital + Intereses): ${df_finalizado_estudios['Abono Capital'].sum() + df_finalizado_estudios['Abono Intereses'].sum() + df_mientras_estudias['Abono Capital'].sum() + df_mientras_estudias['Abono Intereses'].sum():,.2f}", ln=True)
     pdf.cell(200, 10, txt=f"Duración Total del Crédito (Meses): {len(df_mientras_estudias) + len(df_finalizado_estudios)}", ln=True)
     pdf.cell(200, 10, txt=f"Proporción Capital/Intereses: {df_finalizado_estudios['Abono Capital'].sum() / (df_finalizado_estudios['Abono Intereses'].sum() if df_finalizado_estudios['Abono Intereses'].sum() > 0 else 1):.2f}:1", ln=True)
-    pdf.cell(200, 10, txt=f"Cuota Mensual Promedio Post Estudios: ${cuota_ideal:,.2f}", ln=True)
-    pdf.cell(200, 10, txt=f"Saldo Restante después de los Estudios: ${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Cuota Mensual Ideal: ${cuota_ideal:,.2f}", ln=True)
     
     # Agregar gráficos
-    pdf.ln(10)
-    pdf.cell(200, 10, txt="Gráficos de la Simulación", ln=True)
+    temp_img_path = crear_graficos(df_mientras_estudias, df_finalizado_estudios)
+    pdf.image(temp_img_path, x=10, y=None, w=190)
     
-    # Crear gráficos
-    fig = crear_graficos(df_mientras_estudias, df_finalizado_estudios)
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    pdf.image(buf, x=10, y=None, w=190)
+    # Eliminar archivo temporal
+    os.remove(temp_img_path)
     
     # Guardar PDF
     pdf_output = BytesIO()
@@ -288,3 +290,4 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
