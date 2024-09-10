@@ -10,20 +10,13 @@ with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    cuota_mensual_post_estudios = st.number_input("¿Cuánto puedes pagar mensualmente después de finalizar los estudios?", min_value=0, step=10000)
     submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
-def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, cuota_mensual_post_estudios, total_cuotas):
+def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, total_cuotas, total_meses):
     if ingresos == 0:
         return False, 0  # Previene división por cero
-    # Total meses durante los estudios
-    total_meses_estudios = cantidad_periodos * 6  # 6 meses por semestre
-    # Total meses después de estudios (depende de la cantidad de cuotas finales)
-    total_meses_post_estudios = len(df_finalizado_estudios)
-    # Total meses en el crédito
-    total_meses = total_meses_estudios + total_meses_post_estudios
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
@@ -49,7 +42,7 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     pdf.output("resumen_credito.pdf")
 
 # Función para simular el plan de pagos
-def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_mensual_post_estudios):
+def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     meses_gracia = 6  # Ejemplo de meses de periodo de gracia
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
@@ -104,11 +97,13 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
     saldo_inicial_post_estudios = saldo_final
     saldo_total_final = saldo_inicial_post_estudios
 
+    cuota_ideal = saldo_inicial_post_estudios / num_cuotas_finales  # Calcular la cuota mensual ideal
+
     for mes in range(num_cuotas_finales):
         if saldo_inicial_post_estudios <= 0:
             break
         intereses = saldo_inicial_post_estudios * tasa_interes_mensual  # Intereses mensuales
-        cuota_pago_final = min(cuota_mensual_post_estudios, saldo_inicial_post_estudios + intereses)
+        cuota_pago_final = min(cuota_ideal, saldo_inicial_post_estudios + intereses)
         abono_capital = cuota_pago_final - intereses
         saldo_inicial_post_estudios -= abono_capital
 
@@ -140,18 +135,18 @@ if submit_button:
     df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
-        ingresos_mensuales,
-        cuota_mensual_post_estudios
+        ingresos_mensuales
     )
 
     # Calcular el promedio de cuota
     total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
+    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
     viable, promedio_cuota = calcular_viabilidad(
         ingresos_mensuales,
         valor_solicitado,
         cantidad_periodos,
-        cuota_mensual_post_estudios,
-        total_cuotas
+        total_cuotas,
+        total_meses
     )
     
     # Mostrar DataFrames
@@ -178,6 +173,7 @@ if submit_button:
     
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
+    valor_solicitado = 0
+    cantidad_periodos = 1
+    ingresos_mensuales = 0
     st.experimental_rerun()
-
-
