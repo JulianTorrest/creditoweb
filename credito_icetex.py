@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
+import matplotlib.pyplot as plt
 
 # Título de la página
-st.title("Formulario")
+st.title("Formulario de Crédito Educativo")
 
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
@@ -118,6 +119,25 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final
 
+# Gráfico de evolución del saldo durante los estudios
+def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
+    saldo_mientras_estudias = df_mientras_estudias["Saldo"]
+    saldo_post_estudios = df_finalizado_estudios["Saldo"]
+    
+    # Concatenar los saldos
+    saldo_total = pd.concat([saldo_mientras_estudias, saldo_post_estudios])
+
+    # Crear el gráfico
+    fig, ax = plt.subplots()
+    ax.plot(saldo_total.index, saldo_total.values, label='Saldo Restante', marker='o')
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo Durante y Después de los Estudios")
+    ax.legend()
+    
+    # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)
+
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
     # Simular el plan de pagos
@@ -142,6 +162,9 @@ if submit_button:
     
     st.write("Resumen de pagos después de finalizar los estudios:")
     st.dataframe(df_finalizado_estudios)
+    
+    # Graficar evolución del saldo
+    graficar_saldo(df_mientras_estudias, df_finalizado_estudios)
     
     # Generar PDF
     generar_pdf(
