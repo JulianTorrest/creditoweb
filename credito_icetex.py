@@ -117,7 +117,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
     df_finalizado_estudios = pd.DataFrame(data_finalizado_estudios)
 
-    return df_mientras_estudias, df_finalizado_estudios, saldo_final
+    return df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal
 
 # Gráfico de evolución del saldo durante los estudios
 def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
@@ -141,7 +141,7 @@ def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
     # Simular el plan de pagos
-    df_mientras_estudias, df_finalizado_estudios, saldo_final = simular_plan_pagos(
+    df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales
@@ -179,7 +179,8 @@ if submit_button:
     if viable:
         st.success("La solicitud es viable con los ingresos actuales.")
     else:
-        st.warning("La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia.")
+        st.warning(f"La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia. "
+                   f"La cuota mensual simulada es de: ${cuota_ideal:,.2f}.")
     
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
@@ -187,3 +188,4 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
