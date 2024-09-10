@@ -171,9 +171,9 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    st.dataframe(df_comparacion)
+    
+    st.write(df_comparacion)
 
-# Funciones para graficar
 def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
     ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color=COLOR_ICETEX_PRIMARY, label="Saldo")
@@ -223,12 +223,12 @@ def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valo
     
     # KPIs
     st.subheader("KPIs Estratégicos y Tácticos")
-    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}", color=COLOR_ICETEX_SECONDARY)
+    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}")
     st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios))
     st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1")
-    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}", color=COLOR_ICETEX_TERTIARY)
-    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}", color=COLOR_ICETEX_TERTIARY)
+    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}")
+    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}")
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
