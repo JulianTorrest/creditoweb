@@ -7,6 +7,15 @@ from fpdf import FPDF
 # Título de la página
 st.title("Formulario de Crédito Educativo")
 
+# Tasas de interés para otras entidades financieras (en porcentaje mensual)
+tasas_competencia = {
+    "Bancolombia": 0.0171,
+    "BBVA": 0.0213,
+    "Davivienda": 0.0166,
+    "Banco de Bogota": 0.0174,
+    "Serfinanza": 0.0179
+}
+
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
@@ -44,11 +53,10 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     pdf.output("resumen_credito.pdf")
 
 # Función para simular el plan de pagos
-def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
+def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
     meses_gracia = 6  # Ejemplo de meses de periodo de gracia
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
-    tasa_interes_mensual = 0.0116  # Tasa mensual (1.16%)
 
     # Inicialización
     saldo_periodo = 0
@@ -120,6 +128,46 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal
 
+# Función para calcular el costo total del crédito
+def calcular_costo_total(valor_solicitado, tasa_interes_mensual, cantidad_periodos, meses_gracia):
+    # Simular el plan de pagos con la tasa dada
+    df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        tasa_interes_mensual
+    )
+
+    total_pagado_capital = df_finalizado_estudias["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
+    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
+    
+    return total_pagado_capital, total_pagado_intereses, total_pagado_capital + total_pagado_intereses
+
+# Función para mostrar comparación con otras entidades
+def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales):
+    tasa_interes_nuestra = 0.0116  # Tasa mensual de nuestra entidad
+
+    total_pagado_nuestra = calcular_costo_total(valor_solicitado, tasa_interes_nuestra, cantidad_periodos, 6)
+    
+    st.subheader("Comparación con Otras Entidades Financieras")
+    
+    resultados_comparacion = []
+    
+    for entidad, tasa_interes in tasas_competencia.items():
+        total_pagado_competencia = calcular_costo_total(valor_solicitado, tasa_interes, cantidad_periodos, 6)
+        ahorro_potencial = total_pagado_competencia[2] - total_pagado_nuestra[2]
+        
+        resultados_comparacion.append({
+            "Entidad": entidad,
+            "Valor Desembolsado": valor_solicitado * cantidad_periodos,
+            "Intereses Pagados": total_pagado_competencia[1],
+            "Total Crédito": total_pagado_competencia[2],
+            "Ahorro Potencial con Nuestra Entidad": ahorro_potencial
+        })
+    
+    df_comparacion = pd.DataFrame(resultados_comparacion)
+    st.write(df_comparacion)
+
 # Gráfico del saldo durante los estudios
 def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
@@ -182,11 +230,12 @@ def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valo
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
-    # Simular el plan de pagos
+    # Simular el plan de pagos con nuestra tasa
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
-        ingresos_mensuales
+        ingresos_mensuales,
+        0.0116  # Tasa mensual de nuestra entidad
     )
 
     # Calcular el promedio de cuota
@@ -220,7 +269,7 @@ if submit_button:
     else:
         st.warning(f"La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia. "
                    f"La cuota mensual simulada es de: ${cuota_ideal:,.2f}.")
-                   
+
     # Mostrar gráficos
     st.subheader("Evolución del Saldo")
     graficar_saldo_mientras_estudias(df_mientras_estudias)
@@ -232,9 +281,13 @@ if submit_button:
     # Mostrar KPIs
     mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas)
 
+    # Mostrar comparación con otras entidades
+    mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
+
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
     valor_solicitado = 0
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
