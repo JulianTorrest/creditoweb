@@ -5,6 +5,7 @@ import matplotlib.ticker as ticker
 from fpdf import FPDF
 import tempfile
 import io
+import os
 
 # Colores institucionales del ICETEX
 COLOR_ICETEX_PRIMARY = "#003D7C"
@@ -174,8 +175,8 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         resultados_comparacion.append({
             "Entidad": entidad,
             "Valor Desembolsado": valor_solicitado * cantidad_periodos,
-            "Intereses Pagados": total_pagado_competencia[1],
             "Total Crédito": total_pagado_competencia[2],
+            "Intereses Pagados": total_pagado_competencia[1],
             "Ahorro Potencial": ahorro_potencial
         })
     
@@ -201,19 +202,17 @@ def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valo
     
     total_pagado_capital, total_pagado_intereses, total_pagado = calcular_costo_total(valor_solicitado, 0.0116, total_cuotas, 6)
     
-    st.metric("Total Valor Solicitado", f"${valor_solicitado:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Cuota Ideal Post Estudios", f"${cuota_ideal:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Número Total de Cuotas", f"{total_cuotas}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Total Valor Solicitado", f"${valor_solicitado:,.2f}")
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado:,.2f}")
+    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
+    st.metric("Cuota Ideal Post Estudios", f"${cuota_ideal:,.2f}")
+    st.metric("Número Total de Cuotas", f"{total_cuotas}")
 
 # Ejecutar el código de la aplicación
 if submit_button:
-    # Calcula la tasa de interés mensual para nuestra entidad
-    tasa_interes_nuestra = 0.0116
     # Simula el plan de pagos
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
-        valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_nuestra
+        valor_solicitado, cantidad_periodos, ingresos_mensuales, 0.0116
     )
     
     # Muestra los KPIs
@@ -234,3 +233,4 @@ if submit_button:
 elif clear_button:
     st.caching.clear_cache()
     st.write("Formulario limpiado. Por favor, completa de nuevo los datos.")
+
