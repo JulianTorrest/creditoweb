@@ -91,6 +91,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": abono_intereses,
+                "AFIM": cuota_afim_mensual,
                 "Saldo": saldo_periodo
             })
 
@@ -169,4 +170,3 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
-
