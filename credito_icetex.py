@@ -14,7 +14,7 @@ with st.form(key='credito_y_simulacion_form'):
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
-def calcular_viabilidad(ingresos, valor_solicitado, cantidad_periodos, total_cuotas, total_meses):
+def calcular_viabilidad(ingresos, total_cuotas, total_meses):
     if ingresos == 0:
         return False, 0  # Previene división por cero
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
@@ -95,33 +95,24 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
     saldo_inicial_post_estudios = saldo_final
-    saldo_total_final = saldo_inicial_post_estudios
 
-    cuota_ideal = saldo_inicial_post_estudios / num_cuotas_finales  # Calcular la cuota mensual ideal
+    # Calcular la cuota ideal que asegure que el saldo se pague completamente en num_cuotas_finales
+    cuota_ideal = (saldo_inicial_post_estudios * tasa_interes_mensual) / (1 - (1 + tasa_interes_mensual)**(-num_cuotas_finales))
 
     for mes in range(num_cuotas_finales):
         if saldo_inicial_post_estudios <= 0:
             break
         intereses = saldo_inicial_post_estudios * tasa_interes_mensual  # Intereses mensuales
-        cuota_pago_final = min(cuota_ideal, saldo_inicial_post_estudios + intereses)
-        abono_capital = cuota_pago_final - intereses
+        abono_capital = cuota_ideal - intereses
         saldo_inicial_post_estudios -= abono_capital
 
         data_finalizado_estudios.append({
             "Mes": mes + 1,
-            "Cuota Mensual": cuota_pago_final,
+            "Cuota Mensual": cuota_ideal,
             "Abono Capital": abono_capital,
             "Abono Intereses": intereses,
             "Saldo": saldo_inicial_post_estudios
         })
-
-    # Verificar que sólo el último saldo pueda ser cero
-    if len(data_finalizado_estudios) > 0:
-        last_entry = data_finalizado_estudios[-1]
-        if last_entry["Saldo"] != 0:
-            # Ajustar el saldo final para asegurar que el último saldo es cero
-            last_entry["Saldo"] = 0
-            last_entry["Cuota Mensual"] = last_entry["Abono Capital"] + last_entry["Abono Intereses"]
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
@@ -143,8 +134,6 @@ if submit_button:
     total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
     viable, promedio_cuota = calcular_viabilidad(
         ingresos_mensuales,
-        valor_solicitado,
-        cantidad_periodos,
         total_cuotas,
         total_meses
     )
@@ -177,3 +166,4 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
