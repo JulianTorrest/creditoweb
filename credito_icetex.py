@@ -6,9 +6,8 @@ from fpdf import FPDF
 from io import BytesIO
 
 # Colores institucionales del ICETEX
-COLOR_ICETEX_PRIMARY = "#0033A0"  # Azul ICETEX
-COLOR_ICETEX_SECONDARY = "#0093D0"  # Azul Claro ICETEX
-COLOR_ICETEX_TERTIARY = "#6EB1F7"  # Azul Suave ICETEX
+COLOR_ICETEX_PRIMARY = "#0033A0"
+COLOR_ICETEX_SECONDARY = "#00A3E0"
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -37,7 +36,7 @@ def calcular_viabilidad(ingresos, total_cuotas, total_meses):
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
-# Función para generar el PDF en un buffer
+# Función para generar el PDF
 def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable):
     pdf = FPDF()
     pdf.add_page()
@@ -56,10 +55,11 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     else:
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
     
-    buffer = BytesIO()
-    pdf.output(buffer)
-    buffer.seek(0)
-    return buffer
+    # Guardar el PDF en un archivo temporal
+    with BytesIO() as buffer:
+        pdf.output(dest='F', name=buffer)
+        buffer.seek(0)
+        return buffer.getvalue()
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
@@ -175,78 +175,61 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    st.write(df_comparacion)
+    st.dataframe(df_comparacion)
     
-    # Crear gráfica de comparación
+    # Graficar comparación
     fig, ax = plt.subplots()
-    for i, row in df_comparacion.iterrows():
-        ax.bar(row['Entidad'], row['Total Crédito'], label=row['Entidad'], color=COLOR_ICETEX_PRIMARY if i == 0 else COLOR_ICETEX_SECONDARY)
-    
-    ax.set_xlabel("Entidad Financiera")
-    ax.set_ylabel("Total Crédito")
-    ax.set_title("Comparación de Costo Total del Crédito")
-    ax.legend()
-    
+    df_comparacion.set_index('Entidad').plot(kind='bar', ax=ax)
+    ax.set_title('Comparación de Créditos con Otras Entidades Financieras')
+    ax.set_ylabel('Valor en USD')
+    ax.yaxis.set_major_formatter('${x:,.0f}')
+    plt.xticks(rotation=45)
     st.pyplot(fig)
 
-# Función para graficar la distribución de pagos después de los estudios
-def graficar_distribucion_pagos(df_finalizado_estudios):
+# Función para graficar saldo durante y después de los estudios
+def graficar_saldo_mientras_estudias(df):
     fig, ax = plt.subplots()
-    
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color=COLOR_ICETEX_PRIMARY)
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color=COLOR_ICETEX_SECONDARY)
-
-    # Formato de los ejes en números enteros
-    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Valor de la Cuota")
-    ax.set_title("Distribución de Pagos después de los Estudios")
-    ax.legend()
-    
+    df.plot(x="Mes", y="Saldo", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
+    ax.set_title('Evolución del Saldo Durante los Estudios')
+    ax.set_xlabel('Mes')
+    ax.set_ylabel('Saldo')
+    ax.yaxis.set_major_formatter('${x:,.0f}')
     st.pyplot(fig)
 
-def graficar_saldo_mientras_estudias(df_mientras_estudias):
+def graficar_saldo_despues_estudios(df):
     fig, ax = plt.subplots()
-    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color=COLOR_ICETEX_PRIMARY, label="Saldo")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Saldo")
-    ax.set_title("Evolución del Saldo durante los Estudios")
-
-    # Formato de los ejes en números enteros
-    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-
+    df.plot(x="Mes", y="Saldo", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
+    ax.set_title('Evolución del Saldo Después de los Estudios')
+    ax.set_xlabel('Mes')
+    ax.set_ylabel('Saldo')
+    ax.yaxis.set_major_formatter('${x:,.0f}')
     st.pyplot(fig)
 
-def graficar_saldo_despues_estudios(df_finalizado_estudios):
+def graficar_distribucion_pagos(df):
     fig, ax = plt.subplots()
-    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color=COLOR_ICETEX_SECONDARY, label="Saldo")
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Saldo")
-    ax.set_title("Evolución del Saldo después de los Estudios")
-
-    # Formato de los ejes en números enteros
-    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-
+    df.plot(x="Mes", y="Cuota Mensual", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
+    ax.set_title('Distribución de Pagos Después de los Estudios')
+    ax.set_xlabel('Mes')
+    ax.set_ylabel('Cuota Mensual')
+    ax.yaxis.set_major_formatter('${x:,.0f}')
     st.pyplot(fig)
 
+# Función para mostrar KPIs
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
-    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
-    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
+    total_pagado_capital, total_pagado_intereses, total_pagado = calcular_costo_total(
+        valor_solicitado, 0.0116, cantidad_periodos, 6
+    )
     
-    # KPIs
-    st.subheader("KPIs Estratégicos y Tácticos")
-    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
-    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}")
-    st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios))
-    st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1")
-    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}")
-    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}")
+    st.subheader("KPIs")
 
-# Lógica para ejecutar y mostrar resultados
+    st.metric("Total Pagado en Capital", f"${total_pagado_capital:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Total del Crédito", f"${total_pagado:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Cuota Ideal (Si se aprueba el crédito)", f"${cuota_ideal:,.2f}", color=COLOR_ICETEX_PRIMARY)
+
+    st.metric("Total Cuotas", f"${total_cuotas:,.2f}", color=COLOR_ICETEX_PRIMARY)
+
+# Si se envía el formulario
 if submit_button:
     # Simular el plan de pagos con nuestra tasa
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
@@ -273,7 +256,7 @@ if submit_button:
     st.dataframe(df_finalizado_estudios)
 
     # Generar PDF
-    pdf_buffer = generar_pdf(
+    pdf_bytes = generar_pdf(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
@@ -284,7 +267,7 @@ if submit_button:
     # Botón para descargar el PDF
     st.download_button(
         label="Descargar PDF",
-        data=pdf_buffer,
+        data=pdf_bytes,
         file_name="resumen_solicitud.pdf",
         mime="application/pdf"
     )
@@ -309,10 +292,3 @@ if submit_button:
 
     # Mostrar comparación con otras entidades
     mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
-
-# Limpiar datos si se presiona el botón de limpiar
-if clear_button:
-    valor_solicitado = 0
-    cantidad_periodos = 1
-    ingresos_mensuales = 0
-    st.experimental_rerun()
