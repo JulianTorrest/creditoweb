@@ -92,7 +92,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     # Calcular la cuota ideal que asegure que el saldo se pague completamente en num_cuotas_finales
     if saldo_inicial_post_estudios > 0:
-        cuota_ideal = (saldo_inicial_post_estudios * tasa_interes_mensual) / (1 - (1 + tasa_interes_mensual)**(-num_cuotas_finales))
+        cuota_ideal = saldo_inicial_post_estudios * tasa_interes_mensual / (1 - (1 + tasa_interes_mensual)**-num_cuotas_finales)
 
         for mes in range(num_cuotas_finales):
             if saldo_inicial_post_estudios <= 0:
@@ -160,8 +160,4 @@ if submit_button:
     
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
-    valor_solicitado = 0
-    cantidad_periodos = 1
-    ingresos_mensuales = 0
     st.experimental_rerun()
-
