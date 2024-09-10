@@ -3,7 +3,7 @@ import pandas as pd
 from fpdf import FPDF
 
 # Título de la página
-st.title("Solicitud de Crédito Educativo - ICETEX")
+st.title("Formulario")
 
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
