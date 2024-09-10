@@ -3,11 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from fpdf import FPDF
-from io import BytesIO
+import tempfile
+import io
 
 # Colores institucionales del ICETEX
-COLOR_ICETEX_PRIMARY = "#0033A0"
-COLOR_ICETEX_SECONDARY = "#00A3E0"
+COLOR_ICETEX_PRIMARY = "#003D7C"
+COLOR_ICETEX_SECONDARY = "#E9E9E9"
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -56,10 +57,14 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
     
     # Guardar el PDF en un archivo temporal
-    with BytesIO() as buffer:
-        pdf.output(dest='F', name=buffer)
-        buffer.seek(0)
-        return buffer.getvalue()
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+        pdf.output(temp_file.name)
+        temp_file.seek(0)
+        pdf_bytes = temp_file.read()
+        temp_file.close()
+        os.remove(temp_file.name)
+    
+    return pdf_bytes
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
@@ -175,120 +180,57 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    st.dataframe(df_comparacion)
     
-    # Graficar comparación
-    fig, ax = plt.subplots()
-    df_comparacion.set_index('Entidad').plot(kind='bar', ax=ax)
-    ax.set_title('Comparación de Créditos con Otras Entidades Financieras')
-    ax.set_ylabel('Valor en USD')
-    ax.yaxis.set_major_formatter('${x:,.0f}')
-    plt.xticks(rotation=45)
+    # Gráfica de comparación
+    st.subheader("Gráfica de Comparación con Otras Entidades Financieras")
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    df_comparacion.set_index("Entidad")["Total Crédito"].plot(kind='bar', ax=ax, color=COLOR_ICETEX_PRIMARY)
+    
+    ax.set_title('Comparación del Total Crédito Pagado con Otras Entidades Financieras')
+    ax.set_ylabel('Total Crédito Pagado')
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    
     st.pyplot(fig)
+    
+    return df_comparacion
 
-# Función para graficar saldo durante y después de los estudios
-def graficar_saldo_mientras_estudias(df):
-    fig, ax = plt.subplots()
-    df.plot(x="Mes", y="Saldo", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
-    ax.set_title('Evolución del Saldo Durante los Estudios')
-    ax.set_xlabel('Mes')
-    ax.set_ylabel('Saldo')
-    ax.yaxis.set_major_formatter('${x:,.0f}')
-    st.pyplot(fig)
-
-def graficar_saldo_despues_estudios(df):
-    fig, ax = plt.subplots()
-    df.plot(x="Mes", y="Saldo", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
-    ax.set_title('Evolución del Saldo Después de los Estudios')
-    ax.set_xlabel('Mes')
-    ax.set_ylabel('Saldo')
-    ax.yaxis.set_major_formatter('${x:,.0f}')
-    st.pyplot(fig)
-
-def graficar_distribucion_pagos(df):
-    fig, ax = plt.subplots()
-    df.plot(x="Mes", y="Cuota Mensual", ax=ax, color=COLOR_ICETEX_PRIMARY, marker='o')
-    ax.set_title('Distribución de Pagos Después de los Estudios')
-    ax.set_xlabel('Mes')
-    ax.set_ylabel('Cuota Mensual')
-    ax.yaxis.set_major_formatter('${x:,.0f}')
-    st.pyplot(fig)
-
-# Función para mostrar KPIs
+# Mostrar KPIs
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
-    total_pagado_capital, total_pagado_intereses, total_pagado = calcular_costo_total(
-        valor_solicitado, 0.0116, cantidad_periodos, 6
-    )
+    st.subheader("KPIs de la Simulación de Crédito")
     
-    st.subheader("KPIs")
-
-    st.metric("Total Pagado en Capital", f"${total_pagado_capital:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    total_pagado_capital, total_pagado_intereses, total_pagado = calcular_costo_total(valor_solicitado, 0.0116, total_cuotas, 6)
+    
+    st.metric("Total Valor Solicitado", f"${valor_solicitado:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado:,.2f}", color=COLOR_ICETEX_PRIMARY)
     st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Total del Crédito", f"${total_pagado:,.2f}", color=COLOR_ICETEX_PRIMARY)
-    st.metric("Cuota Ideal (Si se aprueba el crédito)", f"${cuota_ideal:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Cuota Ideal Post Estudios", f"${cuota_ideal:,.2f}", color=COLOR_ICETEX_PRIMARY)
+    st.metric("Número Total de Cuotas", f"{total_cuotas}", color=COLOR_ICETEX_PRIMARY)
 
-    st.metric("Total Cuotas", f"${total_cuotas:,.2f}", color=COLOR_ICETEX_PRIMARY)
-
-# Si se envía el formulario
+# Ejecutar el código de la aplicación
 if submit_button:
-    # Simular el plan de pagos con nuestra tasa
+    # Calcula la tasa de interés mensual para nuestra entidad
+    tasa_interes_nuestra = 0.0116
+    # Simula el plan de pagos
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        0.0116  # Tasa mensual de nuestra entidad
-    )
-
-    # Calcular el promedio de cuota
-    total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
-    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
-    viable, promedio_cuota = calcular_viabilidad(
-        ingresos_mensuales,
-        total_cuotas,
-        total_meses
+        valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_nuestra
     )
     
-    # Mostrar DataFrames
-    st.write("Resumen de pagos durante los estudios:")
-    st.dataframe(df_mientras_estudias)
+    # Muestra los KPIs
+    mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, cantidad_periodos)
     
-    st.write("Resumen de pagos después de finalizar los estudios:")
-    st.dataframe(df_finalizado_estudios)
-
-    # Generar PDF
-    pdf_bytes = generar_pdf(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        promedio_cuota,
-        viable
-    )
-
-    # Botón para descargar el PDF
+    # Muestra la comparación con otras entidades
+    df_comparacion = mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
+    
+    # Genera y muestra el PDF
+    pdf_bytes = generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_ideal, saldo_final >= 0)
+    
     st.download_button(
         label="Descargar PDF",
         data=pdf_bytes,
-        file_name="resumen_solicitud.pdf",
+        file_name="resumen_solicitud_credito.pdf",
         mime="application/pdf"
     )
-
-    # Mensaje de viabilidad
-    if viable:
-        st.success("La solicitud es viable con los ingresos actuales.")
-    else:
-        st.warning(f"La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia. "
-                   f"La cuota mensual simulada es de: ${cuota_ideal:,.2f}.")
-
-    # Mostrar gráficos
-    st.subheader("Evolución del Saldo")
-    graficar_saldo_mientras_estudias(df_mientras_estudias)
-    graficar_saldo_despues_estudios(df_finalizado_estudios)
-
-    st.subheader("Distribución de Pagos Después de los Estudios")
-    graficar_distribucion_pagos(df_finalizado_estudios)
-    
-    # Mostrar KPIs
-    mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas)
-
-    # Mostrar comparación con otras entidades
-    mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
+elif clear_button:
+    st.caching.clear_cache()
+    st.write("Formulario limpiado. Por favor, completa de nuevo los datos.")
