@@ -138,7 +138,7 @@ def calcular_costo_total(valor_solicitado, tasa_interes_mensual, cantidad_period
         tasa_interes_mensual
     )
 
-    total_pagado_capital = df_finalizado_estudias["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
+    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
     total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
     
     return total_pagado_capital, total_pagado_intereses, total_pagado_capital + total_pagado_intereses
@@ -162,13 +162,13 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
             "Valor Desembolsado": valor_solicitado * cantidad_periodos,
             "Intereses Pagados": total_pagado_competencia[1],
             "Total Crédito": total_pagado_competencia[2],
-            "Ahorro Potencial con Nuestra Entidad": ahorro_potencial
+            "Ahorro Potencial": ahorro_potencial
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    st.write(df_comparacion)
+    st.dataframe(df_comparacion)
 
-# Gráfico del saldo durante los estudios
+# Funciones para graficar
 def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
     ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color='blue', label="Saldo")
@@ -182,7 +182,6 @@ def graficar_saldo_mientras_estudias(df_mientras_estudias):
 
     st.pyplot(fig)
 
-# Gráfico del saldo después de los estudios
 def graficar_saldo_despues_estudios(df_finalizado_estudios):
     fig, ax = plt.subplots()
     ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color='red', label="Saldo")
@@ -196,7 +195,6 @@ def graficar_saldo_despues_estudios(df_finalizado_estudios):
 
     st.pyplot(fig)
 
-# Gráfico de distribución de pagos de intereses y capital
 def graficar_distribucion_pagos(df_finalizado_estudios):
     fig, ax = plt.subplots()
     
@@ -214,7 +212,6 @@ def graficar_distribucion_pagos(df_finalizado_estudios):
     
     st.pyplot(fig)
 
-# Mostrar KPIs adicionales
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
     total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
     total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
@@ -290,4 +287,5 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
 
