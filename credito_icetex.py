@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from fpdf import FPDF
+from io import BytesIO
 
 # Colores institucionales del ICETEX
 COLOR_ICETEX_PRIMARY = "#0033A0"  # Azul ICETEX
@@ -36,7 +37,7 @@ def calcular_viabilidad(ingresos, total_cuotas, total_meses):
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
-# Función para generar el PDF
+# Función para generar el PDF en un buffer
 def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable):
     pdf = FPDF()
     pdf.add_page()
@@ -55,7 +56,10 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     else:
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
     
-    pdf.output("resumen_credito.pdf")
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+    return buffer
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
@@ -171,8 +175,37 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    
     st.write(df_comparacion)
+    
+    # Crear gráfica de comparación
+    fig, ax = plt.subplots()
+    for i, row in df_comparacion.iterrows():
+        ax.bar(row['Entidad'], row['Total Crédito'], label=row['Entidad'], color=COLOR_ICETEX_PRIMARY if i == 0 else COLOR_ICETEX_SECONDARY)
+    
+    ax.set_xlabel("Entidad Financiera")
+    ax.set_ylabel("Total Crédito")
+    ax.set_title("Comparación de Costo Total del Crédito")
+    ax.legend()
+    
+    st.pyplot(fig)
+
+# Función para graficar la distribución de pagos después de los estudios
+def graficar_distribucion_pagos(df_finalizado_estudios):
+    fig, ax = plt.subplots()
+    
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color=COLOR_ICETEX_PRIMARY)
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color=COLOR_ICETEX_SECONDARY)
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Valor de la Cuota")
+    ax.set_title("Distribución de Pagos después de los Estudios")
+    ax.legend()
+    
+    st.pyplot(fig)
 
 def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
@@ -198,23 +231,6 @@ def graficar_saldo_despues_estudios(df_finalizado_estudios):
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
-    st.pyplot(fig)
-
-def graficar_distribucion_pagos(df_finalizado_estudios):
-    fig, ax = plt.subplots()
-    
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color=COLOR_ICETEX_PRIMARY)
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color=COLOR_ICETEX_SECONDARY)
-
-    # Formato de los ejes en números enteros
-    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
-    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
-
-    ax.set_xlabel("Mes")
-    ax.set_ylabel("Valor de la Cuota")
-    ax.set_title("Distribución de Pagos después de los Estudios")
-    ax.legend()
-    
     st.pyplot(fig)
 
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
@@ -257,12 +273,20 @@ if submit_button:
     st.dataframe(df_finalizado_estudios)
 
     # Generar PDF
-    generar_pdf(
+    pdf_buffer = generar_pdf(
         valor_solicitado,
         cantidad_periodos,
         ingresos_mensuales,
         promedio_cuota,
         viable
+    )
+
+    # Botón para descargar el PDF
+    st.download_button(
+        label="Descargar PDF",
+        data=pdf_buffer,
+        file_name="resumen_solicitud.pdf",
+        mime="application/pdf"
     )
 
     # Mensaje de viabilidad
@@ -292,4 +316,3 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
-
