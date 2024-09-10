@@ -49,68 +49,69 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     tasa_interes_mensual = 0.0116  # Tasa mensual (1.16%)
 
     # Inicialización
-    saldo_periodo = 0
-    cuota_fija = ingresos_mensuales
-    afim_total = valor_solicitado * 0.02  # 2% del valor solicitado
-    cuota_afim_mensual = afim_total / (cantidad_periodos * meses_gracia)  # Distribuir AFIM en todos los meses
+    saldo_periodo = 0  # Inicia en 0, ya que el saldo inicial se suma en el primer mes de cada semestre
 
     # Dataframe durante los estudios
     data_mientras_estudias = []
-
     for semestre in range(cantidad_periodos):
-        for mes in range(meses_gracia):
+        for mes in range(6):  # 6 meses por semestre
             if mes == 0:
                 saldo_periodo += valor_solicitado  # Sumar el valor solicitado en el primer mes de cada semestre
 
+            if saldo_periodo <= 0:
+                break  # No hacer cálculos si el saldo es cero o negativo
+            
+            # Calcular intereses
             intereses = saldo_periodo * tasa_interes_mensual
-            abono_capital = cuota_fija - intereses - cuota_afim_mensual
-            if abono_capital < 0:
+            
+            if ingresos_mensuales > 0:
+                if ingresos_mensuales >= intereses:
+                    abono_capital = ingresos_mensuales - intereses
+                    cuota_mensual = ingresos_mensuales
+                else:
+                    abono_capital = 0
+                    cuota_mensual = intereses  # Cuota solo cubre intereses
+                saldo_periodo = saldo_periodo + intereses - abono_capital
+            else:
+                cuota_mensual = 0
                 abono_capital = 0
-                cuota_fija = intereses + cuota_afim_mensual
-
-            saldo_periodo -= abono_capital
-
-            # Asegurarse de que el saldo no sea negativo
-            saldo_periodo = max(saldo_periodo, 0)
+                saldo_periodo = saldo_periodo + intereses
 
             # Actualizar la tabla
             data_mientras_estudias.append({
                 "Semestre": f"Semestre {semestre+1}",
-                "Mes": mes + 1 + semestre * meses_gracia,
-                "Cuota Mensual": cuota_fija,
+                "Mes": mes + 1 + semestre * 6,
+                "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
-                "AFIM": cuota_afim_mensual,
                 "Saldo": saldo_periodo
             })
 
+    # Saldo final después de estudios
     saldo_final = saldo_periodo
     data_finalizado_estudios = []
     saldo_inicial_post_estudios = saldo_final
 
     # Calcular la cuota ideal que asegure que el saldo se pague completamente en num_cuotas_finales
     if saldo_inicial_post_estudios > 0:
-        cuota_ideal = saldo_inicial_post_estudios * tasa_interes_mensual / (1 - (1 + tasa_interes_mensual)**-num_cuotas_finales)
-
-        for mes in range(num_cuotas_finales):
-            if saldo_inicial_post_estudios <= 0:
-                break
-            intereses = saldo_inicial_post_estudios * tasa_interes_mensual
-            abono_capital = cuota_ideal - intereses
-            saldo_inicial_post_estudios -= abono_capital
-
-            # Asegurarse de que el saldo no sea negativo
-            saldo_inicial_post_estudios = max(saldo_inicial_post_estudios, 0)
-
-            data_finalizado_estudios.append({
-                "Mes": mes + 1,
-                "Cuota Mensual": cuota_ideal,
-                "Abono Capital": abono_capital,
-                "Abono Intereses": intereses,
-                "Saldo": saldo_inicial_post_estudios
-            })
+        cuota_ideal = (saldo_inicial_post_estudios * tasa_interes_mensual) / (1 - (1 + tasa_interes_mensual)**(-num_cuotas_finales))
     else:
         cuota_ideal = 0
+
+    for mes in range(num_cuotas_finales):
+        if saldo_inicial_post_estudios <= 0:
+            break
+        intereses = saldo_inicial_post_estudios * tasa_interes_mensual  # Intereses mensuales
+        abono_capital = cuota_ideal - intereses
+        saldo_inicial_post_estudios -= abono_capital
+
+        data_finalizado_estudios.append({
+            "Mes": mes + 1,
+            "Cuota Mensual": cuota_ideal,
+            "Abono Capital": abono_capital,
+            "Abono Intereses": intereses,
+            "Saldo": saldo_inicial_post_estudios
+        })
 
     # Convertir las listas en DataFrames
     df_mientras_estudias = pd.DataFrame(data_mientras_estudias)
@@ -164,3 +165,4 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
