@@ -3,13 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from fpdf import FPDF
-import tempfile
-import io
-import os
-
-# Colores institucionales del ICETEX
-COLOR_ICETEX_PRIMARY = "#003D7C"
-COLOR_ICETEX_SECONDARY = "#E9E9E9"
+from io import BytesIO
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -38,8 +32,16 @@ def calcular_viabilidad(ingresos, total_cuotas, total_meses):
     promedio_cuota = total_cuotas / total_meses  # Promedio de las cuotas mensuales
     return promedio_cuota <= ingresos, promedio_cuota
 
+# Función para generar gráficos y agregar al PDF
+def graficar_y_guardar(fig, archivo):
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    buf.seek(0)
+    archivo.image(buf, x=10, y=None, w=190)  # Ajusta el ancho según sea necesario
+    buf.close()
+
 # Función para generar el PDF
-def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable):
+def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedio_cuota, viable, df_mientras_estudias, df_finalizado_estudios, cuota_ideal):
     pdf = FPDF()
     pdf.add_page()
     
@@ -57,15 +59,69 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     else:
         pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
     
-    # Guardar el PDF en un archivo temporal
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
-        pdf.output(temp_file.name)
-        temp_file.seek(0)
-        pdf_bytes = temp_file.read()
-        temp_file.close()
-        os.remove(temp_file.name)
+    # Incluir tablas en el PDF
+    pdf.ln(10)
+    pdf.set_font("Arial", size=10)
     
-    return pdf_bytes
+    pdf.cell(200, 10, txt="Resumen de pagos durante los estudios:", ln=True)
+    for index, row in df_mientras_estudias.iterrows():
+        pdf.cell(200, 10, txt=f"Semestre {row['Semestre']} - Mes {row['Mes']}: Cuota: ${row['Cuota Mensual']}, Abono Capital: ${row['Abono Capital']}, Abono Intereses: ${row['Abono Intereses']}, AFIM: ${row['AFIM']}, Saldo: ${row['Saldo']}", ln=True)
+    
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Resumen de pagos después de finalizar los estudios:", ln=True)
+    for index, row in df_finalizado_estudios.iterrows():
+        pdf.cell(200, 10, txt=f"Mes {row['Mes']}: Cuota: ${row['Cuota Mensual']}, Abono Capital: ${row['Abono Capital']}, Abono Intereses: ${row['Abono Intereses']}, Saldo: ${row['Saldo']}", ln=True)
+
+    # Graficar y agregar gráficos al PDF
+    pdf.ln(10)
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Evolución del Saldo durante los Estudios", ln=True)
+    fig, ax = plt.subplots()
+    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color='blue', label="Saldo")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo durante los Estudios")
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    graficar_y_guardar(fig, pdf)
+    plt.close(fig)
+
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Evolución del Saldo después de los Estudios", ln=True)
+    fig, ax = plt.subplots()
+    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color='red', label="Saldo")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo después de los Estudios")
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    graficar_y_guardar(fig, pdf)
+    plt.close(fig)
+
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Distribución de Pagos Después de los Estudios", ln=True)
+    fig, ax = plt.subplots()
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color="blue")
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color="orange")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Valor de la Cuota")
+    ax.set_title("Distribución de Pagos después de los Estudios")
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    ax.legend()
+    graficar_y_guardar(fig, pdf)
+    plt.close(fig)
+
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="KPIs Estratégicos y Tácticos", ln=True)
+    pdf.cell(200, 10, txt=f"Total Intereses Pagados: ${df_finalizado_estudios['Abono Intereses'].sum() + df_mientras_estudias['Abono Intereses'].sum():,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Total Pagado (Capital + Intereses): ${df_finalizado_estudios['Abono Capital'].sum() + df_mientras_estudias['Abono Capital'].sum() + df_finalizado_estudios['Abono Intereses'].sum() + df_mientras_estudias['Abono Intereses'].sum():,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Duración Total del Crédito (Meses): {len(df_mientras_estudias) + len(df_finalizado_estudios)}", ln=True)
+    pdf.cell(200, 10, txt=f"Proporción Capital/Intereses: {df_finalizado_estudios['Abono Capital'].sum() / df_finalizado_estudios['Abono Intereses'].sum():.2f}:1", ln=True)
+    pdf.cell(200, 10, txt=f"Cuota Mensual Promedio Post Estudios: ${cuota_ideal:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Saldo Restante después de los Estudios: ${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}", ln=True)
+
+    pdf.output("resumen_credito.pdf")
 
 # Función para simular el plan de pagos
 def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
@@ -175,62 +231,222 @@ def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
         resultados_comparacion.append({
             "Entidad": entidad,
             "Valor Desembolsado": valor_solicitado * cantidad_periodos,
-            "Total Crédito": total_pagado_competencia[2],
             "Intereses Pagados": total_pagado_competencia[1],
+            "Total Crédito": total_pagado_competencia[2],
             "Ahorro Potencial": ahorro_potencial
         })
     
     df_comparacion = pd.DataFrame(resultados_comparacion)
-    
-    # Gráfica de comparación
-    st.subheader("Gráfica de Comparación con Otras Entidades Financieras")
-    
-    fig, ax = plt.subplots(figsize=(10, 6))
-    df_comparacion.set_index("Entidad")["Total Crédito"].plot(kind='bar', ax=ax, color=COLOR_ICETEX_PRIMARY)
-    
-    ax.set_title('Comparación del Total Crédito Pagado con Otras Entidades Financieras')
-    ax.set_ylabel('Total Crédito Pagado')
+    st.dataframe(df_comparacion)
+
+# Funciones para graficar
+def graficar_saldo_mientras_estudias(df_mientras_estudias):
+    fig, ax = plt.subplots()
+    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color='blue', label="Saldo")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo durante los Estudios")
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
+    st.pyplot(fig)
+
+def graficar_saldo_despues_estudios(df_finalizado_estudios):
+    fig, ax = plt.subplots()
+    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color='red', label="Saldo")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo después de los Estudios")
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
+    st.pyplot(fig)
+
+def graficar_distribucion_pagos(df_finalizado_estudios):
+    fig, ax = plt.subplots()
+    
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color="blue")
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color="orange")
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Valor de la Cuota")
+    ax.set_title("Distribución de Pagos después de los Estudios")
+    ax.legend()
     
     st.pyplot(fig)
-    
-    return df_comparacion
 
-# Mostrar KPIs
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
-    st.subheader("KPIs de la Simulación de Crédito")
+    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
+    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
     
-    total_pagado_capital, total_pagado_intereses, total_pagado = calcular_costo_total(valor_solicitado, 0.0116, total_cuotas, 6)
-    
-    st.metric("Total Valor Solicitado", f"${valor_solicitado:,.2f}")
-    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado:,.2f}")
+    # KPIs
+    st.subheader("KPIs Estratégicos y Tácticos")
     st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
-    st.metric("Cuota Ideal Post Estudios", f"${cuota_ideal:,.2f}")
-    st.metric("Número Total de Cuotas", f"{total_cuotas}")
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}")
+    st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios))
+    st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1")
+    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}")
+    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}")
 
-# Ejecutar el código de la aplicación
+# Lógica para ejecutar y mostrar resultados
 if submit_button:
-    # Simula el plan de pagos
+    # Simular el plan de pagos con nuestra tasa
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
-        valor_solicitado, cantidad_periodos, ingresos_mensuales, 0.0116
+        valor_solicitado,
+        cantidad_periodos,
+        ingresos_mensuales,
+        0.0116  # Tasa mensual de nuestra entidad
+    )
+
+    # Calcular el promedio de cuota
+    total_cuotas = df_mientras_estudias["Cuota Mensual"].sum() + df_finalizado_estudios["Cuota Mensual"].sum()
+    total_meses = len(df_mientras_estudias) + len(df_finalizado_estudios)
+    viable, promedio_cuota = calcular_viabilidad(
+        ingresos_mensuales,
+        total_cuotas,
+        total_meses
     )
     
-    # Muestra los KPIs
-    mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, cantidad_periodos)
+    # Mostrar DataFrames
+    st.write("Resumen de pagos durante los estudios:")
+    st.dataframe(df_mientras_estudias)
     
-    # Muestra la comparación con otras entidades
-    df_comparacion = mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
+    st.write("Resumen de pagos después de finalizar los estudios:")
+    st.dataframe(df_finalizado_estudios)
+
+    # Mostrar gráficos
+    st.subheader("Evolución del Saldo")
+    graficar_saldo_mientras_estudias(df_mientras_estudias)
+    graficar_saldo_despues_estudios(df_finalizado_estudios)
+
+    st.subheader("Distribución de Pagos Después de los Estudios")
+    graficar_distribucion_pagos(df_finalizado_estudios)
     
-    # Genera y muestra el PDF
-    pdf_bytes = generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, cuota_ideal, saldo_final >= 0)
+    # Mostrar KPIs
+    mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas)
+
+    # Mostrar comparación con otras entidades
+    mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales)
+
+    # Generar PDF
+    pdf = FPDF()
+    pdf.add_page()
     
-    st.download_button(
-        label="Descargar PDF",
-        data=pdf_bytes,
-        file_name="resumen_solicitud_credito.pdf",
-        mime="application/pdf"
-    )
-elif clear_button:
-    st.caching.clear_cache()
-    st.write("Formulario limpiado. Por favor, completa de nuevo los datos.")
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="Resumen de Solicitud de Crédito Educativo - ICETEX", ln=True, align='C')
+    pdf.ln(10)
+    
+    pdf.cell(200, 10, txt=f"Valor solicitado por periodo académico: ${valor_solicitado:,}", ln=True)
+    pdf.cell(200, 10, txt=f"Cantidad de periodos a financiar: {cantidad_periodos}", ln=True)
+    pdf.cell(200, 10, txt=f"Pago mensual promedio: ${promedio_cuota:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Pago mensual mientras estudias: ${ingresos_mensuales:,}", ln=True)
+    
+    if viable:
+        pdf.cell(200, 10, txt="La solicitud es viable con los ingresos actuales.", ln=True)
+    else:
+        pdf.cell(200, 10, txt="La solicitud no es viable con los ingresos actuales. La simulación aún se muestra para tu referencia.", ln=True)
+
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Resumen de pagos durante los estudios:", ln=True)
+    pdf.ln(5)
+    
+    # Agregar tabla de datos durante los estudios al PDF
+    pdf.set_font("Arial", size=10)
+    pdf.cell(40, 10, txt="Semestre", border=1)
+    pdf.cell(30, 10, txt="Mes", border=1)
+    pdf.cell(40, 10, txt="Cuota Mensual", border=1)
+    pdf.cell(40, 10, txt="Abono Capital", border=1)
+    pdf.cell(40, 10, txt="Abono Intereses", border=1)
+    pdf.cell(30, 10, txt="AFIM", border=1)
+    pdf.cell(40, 10, txt="Saldo", border=1)
+    pdf.ln()
+    
+    for _, row in df_mientras_estudias.iterrows():
+        pdf.cell(40, 10, txt=row["Semestre"], border=1)
+        pdf.cell(30, 10, txt=str(row["Mes"]), border=1)
+        pdf.cell(40, 10, txt=f"${row['Cuota Mensual']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Abono Capital']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Abono Intereses']:,}", border=1)
+        pdf.cell(30, 10, txt=f"${row['AFIM']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Saldo']:,}", border=1)
+        pdf.ln()
+    
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Resumen de pagos después de finalizar los estudios:", ln=True)
+    pdf.ln(5)
+    
+    # Agregar tabla de datos después de los estudios al PDF
+    pdf.cell(30, 10, txt="Mes", border=1)
+    pdf.cell(40, 10, txt="Cuota Mensual", border=1)
+    pdf.cell(40, 10, txt="Abono Capital", border=1)
+    pdf.cell(40, 10, txt="Abono Intereses", border=1)
+    pdf.cell(40, 10, txt="Saldo", border=1)
+    pdf.ln()
+    
+    for _, row in df_finalizado_estudios.iterrows():
+        pdf.cell(30, 10, txt=str(row["Mes"]), border=1)
+        pdf.cell(40, 10, txt=f"${row['Cuota Mensual']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Abono Capital']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Abono Intereses']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Saldo']:,}", border=1)
+        pdf.ln()
+    
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="KPIs Estratégicos y Tácticos:", ln=True)
+    pdf.ln(5)
+    
+    # Agregar KPIs al PDF
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt=f"Total Intereses Pagados: ${total_pagado_intereses:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Total Pagado (Capital + Intereses): ${total_pagado_capital + total_pagado_intereses:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Duración Total del Crédito (Meses): {len(df_mientras_estudias) + len(df_finalizado_estudios)}", ln=True)
+    pdf.cell(200, 10, txt=f"Proporción Capital/Intereses: {total_pagado_capital / total_pagado_intereses:.2f}:1", ln=True)
+    pdf.cell(200, 10, txt=f"Cuota Mensual Promedio Post Estudios: ${cuota_ideal:,.2f}", ln=True)
+    pdf.cell(200, 10, txt=f"Saldo Restante después de los Estudios: ${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}", ln=True)
+    
+    pdf.ln(10)
+    pdf.cell(200, 10, txt="Comparación con Otras Entidades Financieras:", ln=True)
+    pdf.ln(5)
+    
+    # Agregar tabla de comparación al PDF
+    pdf.cell(50, 10, txt="Entidad", border=1)
+    pdf.cell(40, 10, txt="Valor Desembolsado", border=1)
+    pdf.cell(40, 10, txt="Intereses Pagados", border=1)
+    pdf.cell(40, 10, txt="Total Crédito", border=1)
+    pdf.cell(40, 10, txt="Ahorro Potencial", border=1)
+    pdf.ln()
+    
+    df_comparacion = pd.DataFrame([{
+        "Entidad": entidad,
+        "Valor Desembolsado": valor_solicitado * cantidad_periodos,
+        "Intereses Pagados": total_pagado_competencia[1],
+        "Total Crédito": total_pagado_competencia[2],
+        "Ahorro Potencial": ahorro_potencial
+    } for entidad, tasa_interes in tasas_competencia.items()])
+
+    for _, row in df_comparacion.iterrows():
+        pdf.cell(50, 10, txt=row["Entidad"], border=1)
+        pdf.cell(40, 10, txt=f"${row['Valor Desembolsado']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Intereses Pagados']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Total Crédito']:,}", border=1)
+        pdf.cell(40, 10, txt=f"${row['Ahorro Potencial']:,}", border=1)
+        pdf.ln()
+    
+    # Guardar el PDF
+    pdf.output("resumen_credito.pdf")
+
+# Limpiar datos si se presiona el botón de limpiar
+if clear_button:
+    valor_solicitado = 0
+    cantidad_periodos = 1
+    ingresos_mensuales = 0
+    st.experimental_rerun()
 
