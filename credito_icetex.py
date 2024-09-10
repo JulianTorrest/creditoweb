@@ -53,8 +53,11 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     # Dataframe durante los estudios
     data_mientras_estudias = []
+    afim_total = valor_solicitado * 0.02  # 2% del valor solicitado
+    cuota_afim_mensual = afim_total / (cantidad_periodos * meses_gracia)  # Distribuir AFIM en todos los meses
+
     for semestre in range(cantidad_periodos):
-        for mes in range(6):  # 6 meses por semestre
+        for mes in range(meses_gracia):  # 6 meses por semestre
             if mes == 0:
                 saldo_periodo += valor_solicitado  # Sumar el valor solicitado en el primer mes de cada semestre
 
@@ -63,12 +66,12 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             
             if ingresos_mensuales > 0:
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-                if ingresos_mensuales >= intereses:
-                    abono_capital = ingresos_mensuales - intereses  # Abono a capital
+                if ingresos_mensuales >= (intereses + cuota_afim_mensual):
+                    abono_capital = ingresos_mensuales - intereses - cuota_afim_mensual  # Abono a capital
                     cuota_mensual = ingresos_mensuales
                 else:
                     abono_capital = 0
-                    cuota_mensual = intereses  # Cuota solo cubre intereses
+                    cuota_mensual = intereses + cuota_afim_mensual  # Cuota solo cubre intereses y AFIM
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses - abono_capital
                 abono_intereses = intereses
@@ -76,7 +79,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 # Si la cuota mensual es cero
                 intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 abono_capital = 0
-                cuota_mensual = 0  # Cuota mensual es cero
+                cuota_mensual = cuota_afim_mensual  # Solo AFIM si la cuota es cero
                 abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
                 # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses
@@ -162,4 +165,8 @@ if submit_button:
     
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
+    valor_solicitado = 0
+    cantidad_periodos = 1
+    ingresos_mensuales = 0
     st.experimental_rerun()
+
