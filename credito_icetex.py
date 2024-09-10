@@ -61,33 +61,29 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
+            # Calcular intereses
+            intereses = saldo_periodo * tasa_interes_mensual
+            
             if ingresos_mensuales > 0:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
                 if ingresos_mensuales >= intereses:
-                    abono_capital = ingresos_mensuales - intereses  # Abono a capital
+                    abono_capital = ingresos_mensuales - intereses
                     cuota_mensual = ingresos_mensuales
                 else:
                     abono_capital = 0
                     cuota_mensual = intereses  # Cuota solo cubre intereses
-                # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses - abono_capital
-                abono_intereses = intereses
             else:
-                # Si la cuota mensual es cero
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                cuota_mensual = 0
                 abono_capital = 0
-                cuota_mensual = 0  # Cuota mensual es cero
-                abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
-                # Ajustar el saldo
                 saldo_periodo = saldo_periodo + intereses
-            
+
             # Actualizar la tabla
             data_mientras_estudias.append({
                 "Semestre": f"Semestre {semestre+1}",
                 "Mes": mes + 1 + semestre * 6,
                 "Cuota Mensual": cuota_mensual,
                 "Abono Capital": abono_capital,
-                "Abono Intereses": abono_intereses,
+                "Abono Intereses": intereses,
                 "Saldo": saldo_periodo
             })
 
@@ -97,7 +93,10 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     saldo_inicial_post_estudios = saldo_final
 
     # Calcular la cuota ideal que asegure que el saldo se pague completamente en num_cuotas_finales
-    cuota_ideal = (saldo_inicial_post_estudios * tasa_interes_mensual) / (1 - (1 + tasa_interes_mensual)**(-num_cuotas_finales))
+    if saldo_inicial_post_estudios > 0:
+        cuota_ideal = (saldo_inicial_post_estudios * tasa_interes_mensual) / (1 - (1 + tasa_interes_mensual)**(-num_cuotas_finales))
+    else:
+        cuota_ideal = 0
 
     for mes in range(num_cuotas_finales):
         if saldo_inicial_post_estudios <= 0:
