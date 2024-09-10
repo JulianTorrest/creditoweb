@@ -48,7 +48,6 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     afim_total = valor_solicitado * 0.02  # 2% del valor solicitado
     cuota_afim_mensual = afim_total / (cantidad_periodos * meses_gracia)  # Distribuir AFIM en todos los meses
     
-    # Inicialización
     saldo_periodo = 0  # Inicia en 0, ya que el saldo inicial se suma en el primer mes de cada semestre
 
     # Dataframe durante los estudios
@@ -62,23 +61,16 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             if saldo_periodo <= 0:
                 break  # No hacer cálculos si el saldo es cero o negativo
             
-            if ingresos_mensuales > 0:
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+            intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+            if ingresos_mensuales > intereses + cuota_afim_mensual:
+                abono_capital = ingresos_mensuales - intereses - cuota_afim_mensual
                 cuota_mensual = ingresos_mensuales
-                abono_capital = cuota_mensual - intereses - cuota_afim_mensual  # Abono a capital
-                if abono_capital < 0:
-                    abono_capital = 0  # No permitir abonos negativos
-                    cuota_mensual = intereses + cuota_afim_mensual  # Cuota solo cubre intereses y AFIM
-                else:
-                    saldo_periodo = saldo_periodo - abono_capital
-                abono_intereses = intereses
             else:
-                # Si la cuota mensual es cero
-                intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
+                cuota_mensual = intereses + cuota_afim_mensual
                 abono_capital = 0
-                cuota_mensual = intereses + cuota_afim_mensual  # Solo AFIM si la cuota es cero
-                abono_intereses = 0  # No hay abono a intereses cuando la cuota es cero
-                saldo_periodo = saldo_periodo + intereses
+
+            saldo_periodo -= abono_capital
+            abono_intereses = intereses
             
             # Actualizar la tabla
             data_mientras_estudias.append({
@@ -174,4 +166,3 @@ if submit_button:
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
     st.experimental_rerun()
-
