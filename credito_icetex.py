@@ -4,24 +4,21 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from fpdf import FPDF
 
+# Colores institucionales del ICETEX
+AZUL_ICETEX = '#003B5C'
+VERDE_ICETEX = '#009B77'
+GRIS_ICETEX = '#C4C4C4'
+
 # Título de la página
 st.title("Formulario de Crédito Educativo")
-
-# Tasas de interés para otras entidades financieras (en porcentaje mensual)
-tasas_competencia = {
-    "Bancolombia": 0.0171,
-    "BBVA": 0.0213,
-    "Davivienda": 0.0166,
-    "Banco de Bogota": 0.0174,
-    "Serfinanza": 0.0179
-}
+st.markdown(f"<h1 style='color: {AZUL_ICETEX};'>Formulario de Crédito Educativo</h1>", unsafe_allow_html=True)
 
 # Formulario combinado
 with st.form(key='credito_y_simulacion_form'):
     valor_solicitado = st.number_input("¿Cuál es el valor solicitado por periodo académico?", min_value=0, step=100000)
     cantidad_periodos = st.number_input("Cantidad de periodos a financiar:", min_value=1, max_value=10, step=1)
     ingresos_mensuales = st.number_input("¿Cuánto puedes pagar mensualmente mientras estudias?", min_value=0, step=10000)
-    submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación')
+    submit_button = st.form_submit_button(label='Enviar Solicitud y Simulación', help="Haz clic aquí para enviar la solicitud y ver la simulación")
     clear_button = st.form_submit_button(label='Limpiar Datos', help="Haz clic aquí para limpiar todos los datos del formulario")
 
 # Función para calcular la viabilidad del crédito
@@ -53,10 +50,11 @@ def generar_pdf(valor_solicitado, cantidad_periodos, ingresos_mensuales, promedi
     pdf.output("resumen_credito.pdf")
 
 # Función para simular el plan de pagos
-def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, tasa_interes_mensual):
+def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
     meses_gracia = 6  # Ejemplo de meses de periodo de gracia
     tiempo_credito_maximo = cantidad_periodos * 2  # Tiempo máximo del crédito es el doble del periodo de estudio
     num_cuotas_finales = tiempo_credito_maximo * 6  # Máximo doble de semestres de estudio
+    tasa_interes_mensual = 0.0116  # Tasa mensual (1.16%)
 
     # Inicialización
     saldo_periodo = 0
@@ -128,80 +126,39 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales, 
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal
 
-# Función para calcular el costo total del crédito
-def calcular_costo_total(valor_solicitado, tasa_interes_mensual, cantidad_periodos, meses_gracia):
-    # Simular el plan de pagos con la tasa dada
-    df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
-        valor_solicitado,
-        cantidad_periodos,
-        ingresos_mensuales,
-        tasa_interes_mensual
-    )
-
-    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
-    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
-    
-    return total_pagado_capital, total_pagado_intereses, total_pagado_capital + total_pagado_intereses
-
-# Función para mostrar comparación con otras entidades
-def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales):
-    tasa_interes_nuestra = 0.0116  # Tasa mensual de nuestra entidad
-
-    total_pagado_nuestra = calcular_costo_total(valor_solicitado, tasa_interes_nuestra, cantidad_periodos, 6)
-    
-    st.subheader("Comparación con Otras Entidades Financieras")
-    
-    resultados_comparacion = []
-    
-    for entidad, tasa_interes in tasas_competencia.items():
-        total_pagado_competencia = calcular_costo_total(valor_solicitado, tasa_interes, cantidad_periodos, 6)
-        ahorro_potencial = total_pagado_competencia[2] - total_pagado_nuestra[2]
-        
-        resultados_comparacion.append({
-            "Entidad": entidad,
-            "Valor Desembolsado": valor_solicitado * cantidad_periodos,
-            "Intereses Pagados": total_pagado_competencia[1],
-            "Total Crédito": total_pagado_competencia[2],
-            "Ahorro Potencial": ahorro_potencial
-        })
-    
-    df_comparacion = pd.DataFrame(resultados_comparacion)
-    st.dataframe(df_comparacion)
-
-# Funciones para graficar
+# Gráfico del saldo durante los estudios
 def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
-    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color='blue', label="Saldo")
+    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color=AZUL_ICETEX, label="Saldo")
     ax.set_xlabel("Mes")
     ax.set_ylabel("Saldo")
     ax.set_title("Evolución del Saldo durante los Estudios")
-
-    # Formato de los ejes en números enteros
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    ax.legend()
 
     st.pyplot(fig)
 
+# Gráfico del saldo después de los estudios
 def graficar_saldo_despues_estudios(df_finalizado_estudios):
     fig, ax = plt.subplots()
-    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color='red', label="Saldo")
+    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color=VERDE_ICETEX, label="Saldo")
     ax.set_xlabel("Mes")
     ax.set_ylabel("Saldo")
     ax.set_title("Evolución del Saldo después de los Estudios")
-
-    # Formato de los ejes en números enteros
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    ax.legend()
 
     st.pyplot(fig)
 
+# Gráfico de distribución de pagos de intereses y capital
 def graficar_distribucion_pagos(df_finalizado_estudios):
     fig, ax = plt.subplots()
     
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color="blue")
-    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color="orange")
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color=AZUL_ICETEX)
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color=VERDE_ICETEX)
 
-    # Formato de los ejes en números enteros
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
@@ -212,27 +169,75 @@ def graficar_distribucion_pagos(df_finalizado_estudios):
     
     st.pyplot(fig)
 
+# Función para calcular el costo total
+def calcular_costo_total(valor_solicitado, tasa_interes, cantidad_periodos, meses_gracia):
+    df_mientras_estudias, df_finalizado_estudios, saldo_final, _ = simular_plan_pagos(
+        valor_solicitado, cantidad_periodos, ingresos_mensuales
+    )
+    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
+    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
+    return total_pagado_capital + total_pagado_intereses, total_pagado_capital, total_pagado_intereses
+
+# Función para mostrar la comparación con otras entidades financieras
+def mostrar_comparacion(valor_solicitado, cantidad_periodos, ingresos_mensuales):
+    tasa_interes_nuestra = 0.0116  # Tasa mensual del ICETEX
+    tasas_interes_competencia = {
+        'Bancolombia': 0.0171,
+        'BBVA': 0.0213,
+        'Davivienda': 0.0166,
+        'Banco de Bogotá': 0.0174,
+        'Serfinanza': 0.0179
+    }
+
+    # Calcular costos para nuestra tasa
+    total_pagado_nuestra, total_pagado_capital_nuestra, total_pagado_intereses_nuestra = calcular_costo_total(
+        valor_solicitado, tasa_interes_nuestra, cantidad_periodos, 6
+    )
+
+    st.subheader("Comparación con Otras Entidades Financieras")
+
+    # Mostrar datos para ICETEX
+    st.write("**ICETEX**")
+    st.write(f"Valor desembolsado: ${valor_solicitado * cantidad_periodos:,.2f}")
+    st.write(f"Total de intereses pagados: ${total_pagado_intereses_nuestra:,.2f}")
+    st.write(f"Total crédito (capital + intereses): ${total_pagado_capital_nuestra + total_pagado_intereses_nuestra:,.2f}")
+
+    # Comparar con otras entidades
+    for entidad, tasa_interes in tasas_interes_competencia.items():
+        total_pagado_competencia, total_pagado_capital_competencia, total_pagado_intereses_competencia = calcular_costo_total(
+            valor_solicitado, tasa_interes, cantidad_periodos, 6
+        )
+
+        ahorro_potencial = total_pagado_competencia - total_pagado_nuestra
+
+        st.write(f"**{entidad}**")
+        st.write(f"Valor desembolsado: ${valor_solicitado * cantidad_periodos:,.2f}")
+        st.write(f"Total de intereses pagados: ${total_pagado_intereses_competencia:,.2f}")
+        st.write(f"Total crédito (capital + intereses): ${total_pagado_capital_competencia + total_pagado_intereses_competencia:,.2f}")
+        st.write(f"Ahorro potencial si eliges ICETEX: ${ahorro_potencial:,.2f}")
+        st.write("---")
+
+# Mostrar KPIs adicionales
 def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
     total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
     total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
     
     # KPIs
     st.subheader("KPIs Estratégicos y Tácticos")
-    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
-    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}")
-    st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios))
-    st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1")
-    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}")
-    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}")
+    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}", help="Total de intereses pagados a lo largo del crédito")
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}", help="Suma total de capital e intereses pagados")
+    st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios), help="Duración total en meses del crédito")
+    st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1", help="Proporción entre capital e intereses pagados")
+    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}", help="Promedio de cuota mensual después de finalizar los estudios")
+    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}", help="Saldo restante después de finalizar los estudios")
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
-    # Simular el plan de pagos con nuestra tasa
+    # Simular el plan de pagos
     df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal = simular_plan_pagos(
         valor_solicitado,
         cantidad_periodos,
-        ingresos_mensuales,
-        0.0116  # Tasa mensual de nuestra entidad
+        ingresos_mensuales
     )
 
     # Calcular el promedio de cuota
@@ -287,5 +292,3 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
-
-
