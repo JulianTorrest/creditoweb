@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
-from fpdf import FPDF
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from fpdf import FPDF
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -120,28 +120,32 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal
 
-# Gráfico de evolución del saldo durante los estudios y después
-def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
-    saldo_mientras_estudias = df_mientras_estudias["Saldo"]
-    saldo_post_estudios = df_finalizado_estudios["Saldo"]
-    
-    # Concatenar los saldos
-    saldo_total = pd.concat([saldo_mientras_estudias, saldo_post_estudios])
-
-    # Crear el gráfico
+# Gráfico del saldo durante los estudios
+def graficar_saldo_mientras_estudias(df_mientras_estudias):
     fig, ax = plt.subplots()
-    ax.plot(saldo_total.index, saldo_total.values, label='Saldo Restante', marker='o')
+    ax.plot(df_mientras_estudias["Mes"], df_mientras_estudias["Saldo"], marker='o', color='blue', label="Saldo")
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Saldo")
+    ax.set_title("Evolución del Saldo durante los Estudios")
 
     # Formato de los ejes en números enteros
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
+    st.pyplot(fig)
+
+# Gráfico del saldo después de los estudios
+def graficar_saldo_despues_estudios(df_finalizado_estudios):
+    fig, ax = plt.subplots()
+    ax.plot(df_finalizado_estudios["Mes"], df_finalizado_estudios["Saldo"], marker='o', color='red', label="Saldo")
     ax.set_xlabel("Mes")
     ax.set_ylabel("Saldo")
-    ax.set_title("Evolución del Saldo Durante y Después de los Estudios")
-    ax.legend()
-    
-    # Mostrar el gráfico en Streamlit
+    ax.set_title("Evolución del Saldo después de los Estudios")
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
     st.pyplot(fig)
 
 # Gráfico de distribución de pagos de intereses y capital
@@ -151,15 +155,30 @@ def graficar_distribucion_pagos(df_finalizado_estudios):
     ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color="blue")
     ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color="orange")
 
+    # Formato de los ejes en números enteros
     ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
     ax.set_xlabel("Mes")
-    ax.set_ylabel("Valor ($)")
-    ax.set_title("Distribución de Pagos: Capital vs Intereses")
+    ax.set_ylabel("Valor de la Cuota")
+    ax.set_title("Distribución de Pagos después de los Estudios")
     ax.legend()
-
+    
     st.pyplot(fig)
+
+# Mostrar KPIs adicionales
+def mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas):
+    total_pagado_capital = df_finalizado_estudios["Abono Capital"].sum() + df_mientras_estudias["Abono Capital"].sum()
+    total_pagado_intereses = df_finalizado_estudios["Abono Intereses"].sum() + df_mientras_estudias["Abono Intereses"].sum()
+    
+    # KPIs
+    st.subheader("KPIs Estratégicos y Tácticos")
+    st.metric("Total Intereses Pagados", f"${total_pagado_intereses:,.2f}")
+    st.metric("Total Pagado (Capital + Intereses)", f"${total_pagado_capital + total_pagado_intereses:,.2f}")
+    st.metric("Duración Total del Crédito (Meses)", len(df_mientras_estudias) + len(df_finalizado_estudios))
+    st.metric("Proporción Capital/Intereses", f"{total_pagado_capital / total_pagado_intereses:.2f}:1")
+    st.metric("Cuota Mensual Promedio Post Estudios", f"${cuota_ideal:,.2f}")
+    st.metric("Saldo Restante después de los Estudios", f"${df_finalizado_estudios['Saldo'].iloc[-1]:,.2f}")
 
 # Lógica para ejecutar y mostrar resultados
 if submit_button:
@@ -203,8 +222,15 @@ if submit_button:
                    f"La cuota mensual simulada es de: ${cuota_ideal:,.2f}.")
 
     # Mostrar gráficos
-    graficar_saldo(df_mientras_estudias, df_finalizado_estudios)
+    st.subheader("Evolución del Saldo")
+    graficar_saldo_mientras_estudias(df_mientras_estudias)
+    graficar_saldo_despues_estudios(df_finalizado_estudios)
+
+    st.subheader("Distribución de Pagos Después de los Estudios")
     graficar_distribucion_pagos(df_finalizado_estudios)
+    
+    # Mostrar KPIs
+    mostrar_kpis(df_mientras_estudias, df_finalizado_estudios, cuota_ideal, valor_solicitado, total_cuotas)
 
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
@@ -212,5 +238,6 @@ if clear_button:
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
 
 
