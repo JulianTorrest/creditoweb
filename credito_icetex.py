@@ -50,11 +50,12 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     # Inicialización
     saldo_periodo = 0  # Inicia en 0, ya que el saldo inicial se suma en el primer mes de cada semestre
+    cuota_fija = ingresos_mensuales  # Cuota mensual fija durante el periodo de estudios
+    afim_total = valor_solicitado * 0.02  # 2% del valor solicitado
+    cuota_afim_mensual = afim_total / (cantidad_periodos * meses_gracia)  # Distribuir AFIM en todos los meses
 
     # Dataframe durante los estudios
     data_mientras_estudias = []
-    afim_total = valor_solicitado * 0.02  # 2% del valor solicitado
-    cuota_afim_mensual = afim_total / (cantidad_periodos * meses_gracia)  # Distribuir AFIM en todos los meses
 
     for semestre in range(cantidad_periodos):
         for mes in range(meses_gracia):  # 6 meses por semestre
@@ -65,12 +66,10 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
                 break  # No hacer cálculos si el saldo es cero o negativo
 
             intereses = saldo_periodo * tasa_interes_mensual  # Intereses mensuales
-            if ingresos_mensuales > intereses + cuota_afim_mensual:
-                abono_capital = ingresos_mensuales - intereses - cuota_afim_mensual  # Abono a capital
-                cuota_mensual = ingresos_mensuales
-            else:
-                cuota_mensual = intereses + cuota_afim_mensual  # Solo cubre intereses y AFIM
-                abono_capital = 0  # No hay abono a capital si la cuota es insuficiente
+            abono_capital = cuota_fija - intereses - cuota_afim_mensual  # Calcular abono a capital
+            if abono_capital < 0:
+                abono_capital = 0  # No se puede tener abono a capital negativo
+                cuota_fija = intereses + cuota_afim_mensual  # Ajustar la cuota a los intereses y AFIM
 
             saldo_periodo -= abono_capital  # Actualizar el saldo
 
@@ -78,7 +77,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
             data_mientras_estudias.append({
                 "Semestre": f"Semestre {semestre+1}",
                 "Mes": mes + 1 + semestre * meses_gracia,
-                "Cuota Mensual": cuota_mensual,
+                "Cuota Mensual": cuota_fija,
                 "Abono Capital": abono_capital,
                 "Abono Intereses": intereses,
                 "AFIM": cuota_afim_mensual,
