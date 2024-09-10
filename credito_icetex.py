@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 # Título de la página
 st.title("Formulario de Crédito Educativo")
@@ -119,7 +120,7 @@ def simular_plan_pagos(valor_solicitado, cantidad_periodos, ingresos_mensuales):
 
     return df_mientras_estudias, df_finalizado_estudios, saldo_final, cuota_ideal
 
-# Gráfico de evolución del saldo durante los estudios
+# Gráfico de evolución del saldo durante los estudios y después
 def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
     saldo_mientras_estudias = df_mientras_estudias["Saldo"]
     saldo_post_estudios = df_finalizado_estudios["Saldo"]
@@ -130,12 +131,34 @@ def graficar_saldo(df_mientras_estudias, df_finalizado_estudios):
     # Crear el gráfico
     fig, ax = plt.subplots()
     ax.plot(saldo_total.index, saldo_total.values, label='Saldo Restante', marker='o')
+
+    # Formato de los ejes en números enteros
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
     ax.set_xlabel("Mes")
     ax.set_ylabel("Saldo")
     ax.set_title("Evolución del Saldo Durante y Después de los Estudios")
     ax.legend()
     
     # Mostrar el gráfico en Streamlit
+    st.pyplot(fig)
+
+# Gráfico de distribución de pagos de intereses y capital
+def graficar_distribucion_pagos(df_finalizado_estudios):
+    fig, ax = plt.subplots()
+    
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Capital"], label="Capital", color="blue")
+    ax.bar(df_finalizado_estudios.index, df_finalizado_estudios["Abono Intereses"], bottom=df_finalizado_estudios["Abono Capital"], label="Intereses", color="orange")
+
+    ax.get_yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+
+    ax.set_xlabel("Mes")
+    ax.set_ylabel("Valor ($)")
+    ax.set_title("Distribución de Pagos: Capital vs Intereses")
+    ax.legend()
+
     st.pyplot(fig)
 
 # Lógica para ejecutar y mostrar resultados
@@ -162,10 +185,7 @@ if submit_button:
     
     st.write("Resumen de pagos después de finalizar los estudios:")
     st.dataframe(df_finalizado_estudios)
-    
-    # Graficar evolución del saldo
-    graficar_saldo(df_mientras_estudias, df_finalizado_estudios)
-    
+
     # Generar PDF
     generar_pdf(
         valor_solicitado,
@@ -181,11 +201,16 @@ if submit_button:
     else:
         st.warning(f"La solicitud no es viable con los ingresos actuales. La simulación se muestra para tu referencia. "
                    f"La cuota mensual simulada es de: ${cuota_ideal:,.2f}.")
-    
+
+    # Mostrar gráficos
+    graficar_saldo(df_mientras_estudias, df_finalizado_estudios)
+    graficar_distribucion_pagos(df_finalizado_estudios)
+
 # Limpiar datos si se presiona el botón de limpiar
 if clear_button:
     valor_solicitado = 0
     cantidad_periodos = 1
     ingresos_mensuales = 0
     st.experimental_rerun()
+
 
