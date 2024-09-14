@@ -4,13 +4,11 @@ import random
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
 import streamlit as st
 
@@ -58,27 +56,27 @@ def generar_datos_credito(n=1000):
 datos_credito = generar_datos_credito()
 
 # Descripción básica
-st.subheader('Descripción Básica de Datos')
+st.write("Descripción Básica de Datos")
 st.write(datos_credito.describe())
 st.write(datos_credito.info())
 
 # Histograma de montos solicitados
-st.subheader('Distribución de Monto Solicitado')
-fig_histograma = plt.figure(figsize=(10, 6))
+st.write("Distribución de Monto Solicitado")
+fig = plt.figure(figsize=(10, 6))
 sns.histplot(datos_credito['Monto_Solicitado'], bins=30, kde=True)
 plt.title('Distribución de Monto Solicitado')
 plt.xlabel('Monto Solicitado')
 plt.ylabel('Frecuencia')
-st.pyplot(fig_histograma)
+st.pyplot(fig)
 
 # Gráfico de dispersión de Monto Solicitado vs Monto Desembolsado
-st.subheader('Monto Solicitado vs Monto Desembolsado')
-fig_dispersion = plt.figure(figsize=(10, 6))
+st.write("Monto Solicitado vs Monto Desembolsado")
+fig = plt.figure(figsize=(10, 6))
 sns.scatterplot(x='Monto_Solicitado', y='Monto_Desembolsado', data=datos_credito)
 plt.title('Monto Solicitado vs Monto Desembolsado')
 plt.xlabel('Monto Solicitado')
 plt.ylabel('Monto Desembolsado')
-st.pyplot(fig_dispersion)
+st.pyplot(fig)
 
 # Codificación de variables categóricas
 label_encoders = {}
@@ -106,79 +104,41 @@ X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, 
 modelos = {
     'Regresión Logística': LogisticRegression(max_iter=1000),
     'Bosque Aleatorio': RandomForestClassifier(n_estimators=100, random_state=42),
-    'SVM': SVC(probability=True, random_state=42),
-    'KNN': KNeighborsClassifier()
+    'SVM': SVC(probability=True, random_state=42)
 }
 
 # Entrenamiento y evaluación
-st.subheader('Evaluación de Modelos')
 for nombre, modelo in modelos.items():
     modelo.fit(X_train, y_train)
     y_pred = modelo.predict(X_test)
+    y_prob = modelo.predict_proba(X_test)[:, 1] if nombre in ['Regresión Logística', 'SVM'] else modelo.predict_proba(X_test)[:, 1]
+    
     st.write(f"Modelo: {nombre}")
     st.write("Matriz de Confusión:\n", confusion_matrix(y_test, y_pred))
     st.write("Reporte de Clasificación:\n", classification_report(y_test, y_pred))
+    
+    # Curva ROC y AUC
+    fpr, tpr, _ = roc_curve(y_test, y_prob, pos_label='Alto')  # Ajusta pos_label si es necesario
+    roc_auc = auc(fpr, tpr)
+    
+    fig = plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'Receiver Operating Characteristic ({nombre})')
+    plt.legend(loc='lower right')
+    st.pyplot(fig)
 
-    # Curva ROC
-    if nombre == 'Regresión Logística' or nombre == 'SVM':
-        y_prob = modelo.predict_proba(X_test)[:,1] if nombre == 'Regresión Logística' else modelo.decision_function(X_test)
-        fpr, tpr, _ = roc_curve(y_test, y_prob, pos_label='Alto')
-        roc_auc = auc(fpr, tpr)
+# Gráfico interactivo del riesgo de crédito
+st.write("Monto Solicitado por Riesgo de Crédito")
+fig = px.histogram(datos_credito, x='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Riesgo de Crédito')
+st.plotly_chart(fig)
 
-        fig_roc = plt.figure(figsize=(10, 6))
-        plt.plot(fpr, tpr, color='darkorange', lw=2, label='Curva ROC (area = %0.2f)' % roc_auc)
-        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('Tasa de Falsos Positivos')
-        plt.ylabel('Tasa de Verdaderos Positivos')
-        plt.title('Curva ROC')
-        plt.legend(loc="lower right")
-        st.pyplot(fig_roc)
-
-# Optimización de hiperparámetros para RandomForestClassifier
-param_grid = {
-    'n_estimators': [50, 100, 150],
-    'max_depth': [None, 10, 20],
-    'min_samples_split': [2, 5, 10]
-}
-grid_search = GridSearchCV(RandomForestClassifier(random_state=42), param_grid, cv=5, scoring='accuracy')
-grid_search.fit(X_train, y_train)
-st.write("Mejores parámetros para RandomForestClassifier:", grid_search.best_params_)
-
-# Clusterización
-st.subheader('Clusterización con K-Means')
-n_clusters = 3
-kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-datos_credito['Cluster'] = kmeans.fit_predict(X_scaled)
-
-# Gráfico interactivo de la clusterización
-fig_clusterizacion = px.scatter(datos_credito, x='Monto_Solicitado', y='Monto_Desembolsado', color='Cluster', title='Clusterización de Datos de Crédito')
-st.plotly_chart(fig_clusterizacion)
-
-# Análisis de importancia de características para RandomForestClassifier
-importancias = modelos['Bosque Aleatorio'].feature_importances_
-caracteristicas = X.columns
-importancias_df = pd.DataFrame({'Característica': caracteristicas, 'Importancia': importancias})
-importancias_df = importancias_df.sort_values(by='Importancia', ascending=False)
-
-fig_importancia = plt.figure(figsize=(12, 8))
-sns.barplot(x='Importancia', y='Característica', data=importancias_df)
-plt.title('Importancia de Características')
-st.pyplot(fig_importancia)
-
-# Evaluación de modelos con validación cruzada
-scores = cross_val_score(LogisticRegression(max_iter=1000), X_scaled, y, cv=5)
-st.write("Puntuaciones de validación cruzada para Regresión Logística:", scores)
-st.write("Media de puntuaciones:", scores.mean())
-
-# Análisis de datos perturbados
-datos_credito_perturbado = shuffle(datos_credito)
-X_perturbado = datos_credito_perturbado.drop('Riesgo_Credito', axis=1)
-y_perturbado = datos_credito_perturbado['Riesgo_Credito']
-
-X_perturbado_scaled = scaler.transform(X_perturbado)
-y_pred_perturbado = modelos['Regresión Logística'].predict(X_perturbado_scaled)
-st.write("Reporte de Clasificación con Datos Perturbados:")
-st.write(classification_report(y_perturbado, y_pred_perturbado))
+# Gráfico interactivo de la distribución del riesgo de crédito por estrato socioeconómico
+st.write("Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito")
+fig = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
+st.plotly_chart(fig)
 
