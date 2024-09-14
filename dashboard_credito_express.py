@@ -17,12 +17,14 @@ def generar_datos_dummy(num_solicitudes=300):
         'Monto Desembolsado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
         'Estrato Socioeconómico': np.random.choice([1, 2, 3, 4, 5], num_solicitudes),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], num_solicitudes),
-        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado'], num_solicitudes),
+        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado', 'Independiente'], num_solicitudes),
         'Ingreso Mensual (COP)': np.random.randint(1000000, 6000000, num_solicitudes),
         'Rango de Edad': np.random.choice(['18-25', '26-35', '36-45', '46-60'], num_solicitudes),
         'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado'], num_solicitudes),
         'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Salud', 'Humanidades'], num_solicitudes),
-        'Patrimonio (Rango)': np.random.choice(['Bajo', 'Medio', 'Alto'], num_solicitudes)
+        'Patrimonio (Rango)': np.random.choice(['Bajo', 'Medio', 'Alto'], num_solicitudes),
+        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 10, num_solicitudes),
+        'Periodo Académico': np.random.choice(['1er Semestre', '2do Semestre'], num_solicitudes)
     })
     return data
 
@@ -102,6 +104,11 @@ def grafico_funnel_monto(data):
 def pagina_principal():
     st.title("Dashboard - Créditos Educativos ICETEX")
     
+    # Información de la convocatoria
+    st.header("Información de la Convocatoria")
+    st.write("Link a la página web de la convocatoria: [Página de Convocatoria](http://www.example.com)")
+    st.write("Cronograma de la convocatoria: Apertura: 01/01/2024 - Cierre: 31/12/2024")
+
     # Generar datos dummy
     num_solicitudes = 300
     data = generar_datos_dummy(num_solicitudes)
@@ -121,7 +128,7 @@ def pagina_principal():
     st.subheader("Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado")
     fig_funnel_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_funnel_monto)
-    
+
     st.header("Información del Postulante")
     
     # Mostrar DataFrame
@@ -131,7 +138,7 @@ def pagina_principal():
     # Mostrar métricas principales
     st.metric(label="Número Total de Solicitudes", value=num_solicitudes)
     
-    # Mostrar histogramas y gráficas
+    # Distribuciones por categoría
     st.subheader("Distribución por Estrato Socioeconómico")
     st.bar_chart(data['Estrato Socioeconómico'].value_counts())
 
@@ -143,11 +150,26 @@ def pagina_principal():
 
     st.subheader("Distribución de Ingreso Mensual")
     st.bar_chart(data['Ingreso Mensual (COP)'].value_counts(bins=10))
+
+    st.subheader("Distribución por Rango de Edad")
+    st.bar_chart(data['Rango de Edad'].value_counts())
+
+    st.subheader("Distribución por Área del Conocimiento del Título de Pregrado")
+    st.bar_chart(data['Área del Conocimiento (Pregrado)'].value_counts())
+
+    st.subheader("Distribución por Estado Civil")
+    st.bar_chart(data['Estado Civil'].value_counts())
+
+    st.subheader("Distribución por Patrimonio (Rango)")
+    st.bar_chart(data['Patrimonio (Rango)'].value_counts())
+
+    st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
+    cantidad_desembolsos_periodos = data.groupby('Periodo Académico')['Cantidad de Desembolsos Requeridos'].sum().reset_index()
+    st.bar_chart(cantidad_desembolsos_periodos.set_index('Periodo Académico'))
+
+    st.header("Información de las Instituciones de Educación Superior (IES)")
     
-    # Gráficos del bloque IES
-    st.header("Bloque IES")
-    
-    st.subheader("Modalidad de Estudio")
+    st.subheader("Modalidad de la IES")
     st.bar_chart(data_ies['Modalidad'].value_counts())
 
     st.subheader("Nivel de Estudios Ofrecido")
@@ -156,25 +178,26 @@ def pagina_principal():
     st.subheader("Tipo de Institución")
     st.bar_chart(data_ies['Tipo de Institución'].value_counts())
 
-    st.subheader("Renovaciones Realizadas vs Requeridas")
+    st.subheader("Renovaciones Realizadas vs Renovaciones Requeridas")
     renovaciones_data = pd.DataFrame({
-        'Institución': data_ies['Nombre de Institución'],
+        'Nombre de Institución': data_ies['Nombre de Institución'],
         'Renovaciones Requeridas': data_ies['Renovaciones Requeridas'],
         'Renovaciones Realizadas': data_ies['Renovaciones Realizadas']
     })
-    st.bar_chart(renovaciones_data.set_index('Institución'))
+    st.bar_chart(renovaciones_data.set_index('Nombre de Institución'))
 
-    st.subheader("Estudiantes con el Total de Renovaciones Desembolsadas")
-    st.bar_chart(data_ies['Estudiantes con Renovaciones Desembolsadas'])
-    
+    st.subheader("Estudiantes con Total de Renovaciones Desembolsadas")
+    st.bar_chart(data_ies.set_index('Nombre de Institución')['Estudiantes con Renovaciones Desembolsadas'])
+
     st.subheader("Deserciones y Suspensiones")
     deserciones_suspensiones_data = pd.DataFrame({
-        'Institución': data_ies['Nombre de Institución'],
+        'Nombre de Institución': data_ies['Nombre de Institución'],
         'Deserciones': data_ies['Deserciones'],
         'Suspensiones': data_ies['Suspensiones']
     })
-    st.bar_chart(deserciones_suspensiones_data.set_index('Institución'))
+    st.bar_chart(deserciones_suspensiones_data.set_index('Nombre de Institución'))
 
 # Ejecutar la aplicación de Streamlit
 pagina_principal()
+
 
