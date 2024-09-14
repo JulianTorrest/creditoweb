@@ -29,7 +29,7 @@ def generar_datos_ies():
     np.random.seed(0)
     n = 10000
     data = pd.DataFrame({
-        'Nombre de Institución': np.random.choice(['Universidad A', 'Universidad B', 'Universidad C'], n),
+        'Nombre de Institución': np.random.choice(['Universidad de los Andes', 'Universidad Nacional', 'Universidad Javeriana','Universidad del Rosario','Universidad Externado'], n),
         'Modalidad': np.random.choice(['Presencial', 'Virtual', 'Distancia'], n),
         'Nivel de Estudios': np.random.choice(['Pregrado', 'Maestría', 'Doctorado'], n),
         'Institución Pública o Privada': np.random.choice(['Pública', 'Privada'], n),
