@@ -3,3 +3,4 @@ pandas
 fpdf
 matplotlib
 plotly
+scikit-learn
