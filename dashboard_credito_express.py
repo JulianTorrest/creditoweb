@@ -40,7 +40,8 @@ def generar_datos_ies():
         'Renovaciones Realizadas': np.random.randint(1, 100, size=n),
         'Renovaciones Requeridas': np.random.randint(1, 100, size=n),
         'Total Renovaciones Desembolsadas': np.random.randint(1, 100, size=n),
-        'Deserciones': np.random.randint(1, 50, size=n)
+        'Deserciones': np.random.randint(1, 50, size=n),
+        'Suspensiones': np.random.randint(1, 50, size=n)
     })
     return data_ies
 
