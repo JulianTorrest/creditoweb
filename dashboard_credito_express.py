@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import random
+import plotly.graph_objects as go
 
 # Función para generar datos dummy
 def generar_datos_dummy(num_solicitudes=300):
@@ -19,6 +20,15 @@ def generar_datos_dummy(num_solicitudes=300):
     patrimonio = np.random.choice(['< 10 millones', '10-50 millones', '50-100 millones', '100+ millones'], num_solicitudes)
     desembolsos = np.random.randint(1, 13, num_solicitudes)
 
+    aprobado = np.random.choice([True, False], num_solicitudes, p=[0.7, 0.3])
+    legalizado = np.random.choice([True, False], num_solicitudes, p=[0.8, 0.2])
+    desembolso = np.random.choice([True, False], num_solicitudes, p=[0.9, 0.1])
+    
+    monto_solicitado = np.random.randint(5000000, 80000000, num_solicitudes)
+    monto_aprobado = monto_solicitado * np.random.uniform(0.7, 1, num_solicitudes)
+    monto_legalizado = monto_aprobado * np.random.uniform(0.8, 1, num_solicitudes)
+    monto_desembolsado = monto_legalizado * np.random.uniform(0.9, 1, num_solicitudes)
+
     # Crear DataFrame con los datos dummy
     data = pd.DataFrame({
         'Estrato Socioeconómico': estrato,
@@ -33,10 +43,57 @@ def generar_datos_dummy(num_solicitudes=300):
         'Ingreso Mensual (COP)': ingreso_mensual,
         'Estado Civil': estado_civil,
         'Patrimonio (Rango)': patrimonio,
-        'Cantidad de Desembolsos': desembolsos
+        'Cantidad de Desembolsos': desembolsos,
+        'Aprobado': aprobado,
+        'Legalizado': legalizado,
+        'Desembolso': desembolso,
+        'Monto Solicitado': monto_solicitado,
+        'Monto Aprobado': monto_aprobado,
+        'Monto Legalizado': monto_legalizado,
+        'Monto Desembolsado': monto_desembolsado
     })
 
     return data
+
+# Función para crear gráfico embudo para la cantidad de postulantes
+def grafico_funnel_cantidad(data):
+    total_solicitudes = len(data)
+    total_aprobados = len(data[data['Aprobado']])
+    total_legalizados = len(data[data['Legalizado']])
+    total_desembolsos = len(data[data['Desembolso']])
+
+    etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Desembolsos']
+    valores = [total_solicitudes, total_aprobados, total_legalizados, total_desembolsos]
+
+    fig = go.Figure(go.Funnel(
+        y=etapas,
+        x=valores,
+        textinfo="value+percent initial"
+    ))
+
+    fig.update_layout(title='Cantidad de Postulantes → Aprobados → Legalizados → Desembolsos')
+
+    return fig
+
+# Función para crear gráfico embudo para el monto de desembolso
+def grafico_funnel_monto(data):
+    monto_solicitado = data['Monto Solicitado'].sum()
+    monto_aprobado = data['Monto Aprobado'].sum()
+    monto_legalizado = data['Monto Legalizado'].sum()
+    monto_desembolsado = data['Monto Desembolsado'].sum()
+
+    etapas = ['Monto Solicitado', 'Monto Aprobado', 'Monto Legalizado', 'Monto Desembolsado']
+    valores = [monto_solicitado, monto_aprobado, monto_legalizado, monto_desembolsado]
+
+    fig = go.Figure(go.Funnel(
+        y=etapas,
+        x=valores,
+        textinfo="value+percent initial"
+    ))
+
+    fig.update_layout(title='Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado')
+
+    return fig
 
 # Función para la página principal del dashboard
 def pagina_principal():
@@ -46,7 +103,19 @@ def pagina_principal():
     num_solicitudes = 300
     data = generar_datos_dummy(num_solicitudes)
     
-    st.header("Resumen de Información del Postulante")
+    st.header("Bloque General")
+    
+    # Gráfico embudo para cantidad de postulantes, aprobados, legalizados y desembolsos
+    st.subheader("Cantidad de Postulantes → Aprobados → Legalizados → Desembolsos")
+    fig_funnel_cantidad = grafico_funnel_cantidad(data)
+    st.plotly_chart(fig_funnel_cantidad)
+
+    # Gráfico embudo para monto solicitado, aprobado, legalizado y desembolsado
+    st.subheader("Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado")
+    fig_funnel_monto = grafico_funnel_monto(data)
+    st.plotly_chart(fig_funnel_monto)
+    
+    st.header("Información del Postulante")
     
     # Mostrar DataFrame
     st.subheader(f"Mostrando los primeros {num_solicitudes} registros:")
@@ -97,12 +166,12 @@ def segunda_pagina():
     if st.button("Regresar al dashboard principal"):
         st.session_state['page'] = 'pagina_principal'
 
-# Inicializar la sesión de navegación
+# Navegación entre páginas
 if 'page' not in st.session_state:
     st.session_state['page'] = 'pagina_principal'
 
-# Control de navegación entre páginas
 if st.session_state['page'] == 'pagina_principal':
     pagina_principal()
 elif st.session_state['page'] == 'segunda_pagina':
     segunda_pagina()
+
