@@ -39,6 +39,7 @@ def generar_datos_ies():
         'Institución Pública o Privada': np.random.choice(['Pública', 'Privada'], n),
         'Renovaciones Realizadas': np.random.randint(1, 100, size=n),
         'Renovaciones Requeridas': np.random.randint(1, 100, size=n)
+        'Total Renovaciones Desembolsadas': np.random.randint(1, 100, size=n)
     })
     return data_ies
 
