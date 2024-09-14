@@ -498,7 +498,7 @@ def main():
     st.header('Gráficos de Instituciones Educativas')
 
     st.subheader('16. Renovaciones Realizadas vs Requeridas')
-    fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(data_ies)
+    fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(datos_ies)
     st.plotly_chart(fig_renovaciones_vs_requeridas)
 
     st.subheader('17. Distribución por Modalidad')
