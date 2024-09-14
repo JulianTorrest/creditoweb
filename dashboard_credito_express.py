@@ -6,12 +6,12 @@ import numpy as np
 # Generación de datos dummy para propósitos demostrativos
 def generar_datos_dummy():
     np.random.seed(0)
-    n = 100
+    n = 1000
     data = pd.DataFrame({
         'Periodo Académico': np.random.choice(['2023-I', '2023-II', '2024-I'], n),
-        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 100, n),
-        'Ingreso Mensual': np.random.randint(500, 5000, n),
-        'Estrato Socioeconómico': np.random.choice(['1', '2', '3', '4', '5'], n),
+        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 1000, n),
+        'Ingreso Mensual': np.random.randint(1300000, 20000000, n),
+        'Estrato Socioeconómico': np.random.choice(['1', '2', '3', '4', '5','6'], n),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], n),
         'Rango de Edad': np.random.choice(['18-24', '25-34', '35-44', '45-54', '55+'], n),
         'Ubicación de Residencia': np.random.choice(['Urbano', 'Rural'], n),
@@ -21,7 +21,7 @@ def generar_datos_dummy():
         'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado'], n),
         'Antigüedad del Último Empleo': np.random.randint(0, 10, n),
         'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado'], n),
-        'Patrimonio': np.random.randint(10000, 500000, n)
+        'Patrimonio': np.random.randint(1300000, 500000000, n)
     })
     return data
 
