@@ -27,14 +27,14 @@ def generar_datos_dummy():
 
 def generar_datos_ies():
     np.random.seed(0)
-    n = 20
+    n = 10000
     data = pd.DataFrame({
         'Nombre de Institución': np.random.choice(['Universidad A', 'Universidad B', 'Universidad C'], n),
         'Modalidad': np.random.choice(['Presencial', 'Virtual', 'Distancia'], n),
         'Nivel de Estudios': np.random.choice(['Pregrado', 'Maestría', 'Doctorado'], n),
         'Institución Pública o Privada': np.random.choice(['Pública', 'Privada'], n),
-        'Deserciones': np.random.randint(1, 20, n),
-        'Suspensiones': np.random.randint(1, 20, n)
+        'Deserciones': np.random.randint(1, 10000, n),
+        'Suspensiones': np.random.randint(1, 10000, n)
     })
     return data
 
