@@ -2,6 +2,12 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve
+import plotly.express as px
 
 # Función para generar datos dummy para postulantes
 def generar_datos_dummy():
@@ -213,53 +219,57 @@ def grafico_anio_finalizacion_pregrado(data):
 
     return fig
 
-# Función para el gráfico de distribución por área del conocimiento (pregrado)
+# Función para el gráfico de distribución por área del conocimiento del pregrado
 def grafico_area_conocimiento_pregrado(data):
     fig = go.Figure()
 
     area_counts = data['Área del Conocimiento (Pregrado)'].value_counts()
-    fig.add_trace(go.Pie(
-        labels=area_counts.index,
-        values=area_counts.values,
+    fig.add_trace(go.Bar(
+        x=area_counts.index,
+        y=area_counts.values,
         name='Área del Conocimiento (Pregrado)'
     ))
 
-    fig.update_layout(title='Distribución por Área del Conocimiento (Pregrado)')
+    fig.update_layout(title='Distribución por Área del Conocimiento (Pregrado)',
+                      xaxis_title='Área del Conocimiento (Pregrado)',
+                      yaxis_title='Cantidad')
 
     return fig
 
-# Función para el gráfico de distribución por área del conocimiento (aplicación)
+# Función para el gráfico de distribución por área del conocimiento de la aplicación
 def grafico_area_conocimiento_aplicacion(data):
     fig = go.Figure()
 
     area_counts = data['Área del Conocimiento (Aplicación)'].value_counts()
-    fig.add_trace(go.Pie(
-        labels=area_counts.index,
-        values=area_counts.values,
+    fig.add_trace(go.Bar(
+        x=area_counts.index,
+        y=area_counts.values,
         name='Área del Conocimiento (Aplicación)'
     ))
 
-    fig.update_layout(title='Distribución por Área del Conocimiento (Aplicación)')
+    fig.update_layout(title='Distribución por Área del Conocimiento (Aplicación)',
+                      xaxis_title='Área del Conocimiento (Aplicación)',
+                      yaxis_title='Cantidad')
 
     return fig
 
-# Función para el gráfico de distribución por empleado, desempleado o independiente
-def grafico_empleado_desempleado_independiente(data):
+# Función para el gráfico de distribución por empleo, desempleo o independencia
+def grafico_empleo_estado(data):
     fig = go.Figure()
 
-    estado_counts = data['Empleado, Desempleado o Independiente'].value_counts()
+    empleo_counts = data['Empleado, Desempleado o Independiente'].value_counts()
     fig.add_trace(go.Pie(
-        labels=estado_counts.index,
-        values=estado_counts.values,
+        labels=empleo_counts.index,
+        values=empleo_counts.values,
         name='Empleado, Desempleado o Independiente'
     ))
 
-    fig.update_layout(title='Distribución por Estado Laboral')
+    fig.update_layout(title='Distribución por Estado de Empleo')
 
     return fig
 
-# Función para el gráfico de distribución por antigüedad en el último empleo
-def grafico_antiguedad_ultimo_empleo(data):
+# Función para el gráfico de antigüedad del último empleo
+def grafico_antiguedad_empleo(data):
     fig = go.Figure()
 
     antiguedad_counts = data['Antigüedad Último Empleo'].value_counts()
@@ -269,7 +279,7 @@ def grafico_antiguedad_ultimo_empleo(data):
         name='Antigüedad Último Empleo'
     ))
 
-    fig.update_layout(title='Distribución por Antigüedad en el Último Empleo',
+    fig.update_layout(title='Distribución por Antigüedad del Último Empleo',
                       xaxis_title='Antigüedad Último Empleo',
                       yaxis_title='Cantidad')
 
@@ -279,10 +289,10 @@ def grafico_antiguedad_ultimo_empleo(data):
 def grafico_estado_civil(data):
     fig = go.Figure()
 
-    estado_civil_counts = data['Estado Civil'].value_counts()
+    estado_counts = data['Estado Civil'].value_counts()
     fig.add_trace(go.Pie(
-        labels=estado_civil_counts.index,
-        values=estado_civil_counts.values,
+        labels=estado_counts.index,
+        values=estado_counts.values,
         name='Estado Civil'
     ))
 
@@ -298,108 +308,131 @@ def grafico_patrimonio(data):
     fig.add_trace(go.Pie(
         labels=patrimonio_counts.index,
         values=patrimonio_counts.values,
-        name='Patrimonio'
+        name='Patrimonio (Rango)'
     ))
 
     fig.update_layout(title='Distribución por Patrimonio')
 
     return fig
 
-# Función para el gráfico de cantidad de desembolsos requeridos por periodo académico
-def grafico_desembolsos_periodo_academico(data):
-    fig = go.Figure()
+# Función para los modelos de riesgo y machine learning
+def analizar_modelos(data):
+    # Generar datos de muestra para clasificación
+    X, y = make_classification(n_samples=1000, n_features=20, n_informative=15, n_redundant=5, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-    desembolsos_counts = data.groupby('Periodo Académico')['Cantidad de Desembolsos Requeridos'].sum().reset_index()
-    fig.add_trace(go.Bar(
-        x=desembolsos_counts['Periodo Académico'],
-        y=desembolsos_counts['Cantidad de Desembolsos Requeridos'],
-        name='Cantidad de Desembolsos Requeridos'
-    ))
+    # Modelos
+    models = {
+        'Logistic Regression': LogisticRegression(),
+        'Random Forest': RandomForestClassifier()
+    }
+    
+    results = []
 
-    fig.update_layout(title='Cantidad de Desembolsos Requeridos por Periodo Académico',
-                      xaxis_title='Periodo Académico',
-                      yaxis_title='Cantidad de Desembolsos Requeridos')
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        auc = roc_auc_score(y_test, model.predict_proba(X_test)[:, 1])
+        fpr, tpr, _ = roc_curve(y_test, model.predict_proba(X_test)[:, 1])
+        
+        results.append({
+            'Model': name,
+            'Accuracy': accuracy,
+            'AUC': auc
+        })
+        
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=name))
+        fig.update_layout(title=f'ROC Curve for {name}', xaxis_title='False Positive Rate', yaxis_title='True Positive Rate')
+        
+        st.plotly_chart(fig)
 
-    return fig
+    results_df = pd.DataFrame(results)
+    st.write("Model Performance")
+    st.write(results_df)
 
-# Función principal de Streamlit
-def main():
-    st.title('Dashboard de Datos de Postulantes')
+# Página 1: Visualización de datos postulantes
+def pagina_1():
+    st.title("Visualización de Datos de Postulantes")
 
+    st.header("Embudo de Cantidad")
     data = generar_datos_dummy()
-    data_ies = generar_datos_ies()
-
-    # Gráficos para los postulantes
-    st.header('Gráficos de Postulantes')
-
-    st.subheader('1. Embudo de Cantidad')
     fig_cantidad = grafico_funnel_cantidad(data)
     st.plotly_chart(fig_cantidad)
 
-    st.subheader('2. Embudo de Monto')
+    st.header("Embudo de Monto")
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
-    st.subheader('3. Distribución del Ingreso Mensual')
-    fig_ingreso_mensual = grafico_ingreso_mensual(data)
-    st.plotly_chart(fig_ingreso_mensual)
+    st.header("Distribución del Ingreso Mensual")
+    fig_ingreso = grafico_ingreso_mensual(data)
+    st.plotly_chart(fig_ingreso)
 
-    st.subheader('4. Distribución por Estrato Socioeconómico')
-    fig_estrato_socioeconomico = grafico_estrato_socioeconomico(data)
-    st.plotly_chart(fig_estrato_socioeconomico)
+    st.header("Distribución por Estrato Socioeconómico")
+    fig_estrato = grafico_estrato_socioeconomico(data)
+    st.plotly_chart(fig_estrato)
 
-    st.subheader('5. Distribución por Sexo Biológico')
-    fig_sexo_biologico = grafico_sexo_biologico(data)
-    st.plotly_chart(fig_sexo_biologico)
+    st.header("Distribución por Sexo Biológico")
+    fig_sexo = grafico_sexo_biologico(data)
+    st.plotly_chart(fig_sexo)
 
-    st.subheader('6. Distribución por Rango de Edad')
+    st.header("Distribución por Rango de Edad")
     fig_rango_edad = grafico_rango_edad(data)
     st.plotly_chart(fig_rango_edad)
 
-    st.subheader('7. Distribución por Ubicación de Residencia')
+    st.header("Distribución por Ubicación de Residencia")
     fig_ubicacion_residencia = grafico_ubicacion_residencia(data)
     st.plotly_chart(fig_ubicacion_residencia)
 
-    st.subheader('8. Distribución por Año de Finalización del Pregrado')
-    fig_anio_finalizacion_pregrado = grafico_anio_finalizacion_pregrado(data)
-    st.plotly_chart(fig_anio_finalizacion_pregrado)
+    st.header("Distribución por Año de Finalización del Pregrado")
+    fig_anio_pregrado = grafico_anio_finalizacion_pregrado(data)
+    st.plotly_chart(fig_anio_pregrado)
 
-    st.subheader('9. Distribución por Área del Conocimiento (Pregrado)')
-    fig_area_conocimiento_pregrado = grafico_area_conocimiento_pregrado(data)
-    st.plotly_chart(fig_area_conocimiento_pregrado)
+    st.header("Distribución por Área del Conocimiento (Pregrado)")
+    fig_area_pregrado = grafico_area_conocimiento_pregrado(data)
+    st.plotly_chart(fig_area_pregrado)
 
-    st.subheader('10. Distribución por Área del Conocimiento (Aplicación)')
-    fig_area_conocimiento_aplicacion = grafico_area_conocimiento_aplicacion(data)
-    st.plotly_chart(fig_area_conocimiento_aplicacion)
+    st.header("Distribución por Área del Conocimiento (Aplicación)")
+    fig_area_aplicacion = grafico_area_conocimiento_aplicacion(data)
+    st.plotly_chart(fig_area_aplicacion)
 
-    st.subheader('11. Distribución por Empleado, Desempleado o Independiente')
-    fig_empleado_desempleado_independiente = grafico_empleado_desempleado_independiente(data)
-    st.plotly_chart(fig_empleado_desempleado_independiente)
+    st.header("Distribución por Estado de Empleo")
+    fig_empleo_estado = grafico_empleo_estado(data)
+    st.plotly_chart(fig_empleo_estado)
 
-    st.subheader('12. Distribución por Antigüedad en el Último Empleo')
-    fig_antiguedad_ultimo_empleo = grafico_antiguedad_ultimo_empleo(data)
-    st.plotly_chart(fig_antiguedad_ultimo_empleo)
+    st.header("Distribución por Antigüedad del Último Empleo")
+    fig_antiguedad_empleo = grafico_antiguedad_empleo(data)
+    st.plotly_chart(fig_antiguedad_empleo)
 
-    st.subheader('13. Distribución por Estado Civil')
+    st.header("Distribución por Estado Civil")
     fig_estado_civil = grafico_estado_civil(data)
     st.plotly_chart(fig_estado_civil)
 
-    st.subheader('14. Distribución por Patrimonio')
+    st.header("Distribución por Patrimonio")
     fig_patrimonio = grafico_patrimonio(data)
     st.plotly_chart(fig_patrimonio)
 
-    st.subheader('15. Cantidad de Desembolsos Requeridos por Periodo Académico')
-    fig_desembolsos_periodo_academico = grafico_desembolsos_periodo_academico(data)
-    st.plotly_chart(fig_desembolsos_periodo_academico)
+# Página 2: Modelos de Riesgo y Machine Learning
+def pagina_2():
+    st.title("Modelos de Riesgo y Machine Learning")
 
-    # Gráficos para las instituciones educativas
-    st.header('Gráficos de Instituciones Educativas')
+    st.header("Análisis de Modelos de Machine Learning")
+    data = generar_datos_dummy()
+    analizar_modelos(data)
 
-    st.subheader('16. Renovaciones Realizadas vs Requeridas')
-    fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(data_ies)
-    st.plotly_chart(fig_renovaciones_vs_requeridas)
+# Menú de navegación
+def main():
+    st.sidebar.title("Navegación")
+    opcion = st.sidebar.radio("Selecciona una página", ["Página 1: Datos de Postulantes", "Página 2: Modelos de Riesgo y Machine Learning"])
+
+    if opcion == "Página 1: Datos de Postulantes":
+        pagina_1()
+    elif opcion == "Página 2: Modelos de Riesgo y Machine Learning":
+        pagina_2()
 
 if __name__ == "__main__":
     main()
+
 
 
