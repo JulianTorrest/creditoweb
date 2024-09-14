@@ -4,3 +4,4 @@ fpdf
 matplotlib
 plotly
 scikit-learn
+seaborn
