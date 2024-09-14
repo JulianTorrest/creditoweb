@@ -96,12 +96,11 @@ def grafico_funnel_monto(data):
 
     return fig
 
-
 # Función para el gráfico de distribución de ingreso mensual
 def grafico_ingreso_mensual(data):
     bins = [0, 1000000, 3000000, 6000000, 9000000, 12000000, 15000000, 18000000, 21000000, 24000000, 27000000, 30000000, 120000000]
     labels = ['≤1M', '1M-3M', '3M-6M', '6M-9M', '9M-12M', '12M-15M', '15M-18M', '18M-21M', '21M-24M', '24M-27M', '27M-30M', '30M+']
-    data['Ingreso Mensual (COP)'] = pd.cut(data['Ingreso Mensual (COP)'], bins=bins, labels=labels)
+    data['Ingreso Mensual (COP)'] = pd.cut(data['Ingreso Mensual'], bins=bins, labels=labels)
     ingreso_mensual_dist = data['Ingreso Mensual (COP)'].value_counts().sort_index()
 
     fig = go.Figure(go.Bar(
@@ -114,7 +113,6 @@ def grafico_ingreso_mensual(data):
     fig.update_layout(title='Distribución de Ingreso Mensual', xaxis_title='Rango de Ingreso Mensual', yaxis_title='Número de Postulantes')
 
     return fig
-
 
 # Función para el gráfico de monto solicitado, aprobado, legalizado y desembolsado
 def grafico_monto_solicitado(data):
@@ -148,234 +146,165 @@ def grafico_informacion_postulante(data, columna, title):
         hole=0.3
     ))
 
-    fig.update_layout(
-        title=title,
-        template='plotly_dark'
-    )
+    fig.update_layout(title=title)
 
     return fig
 
-# Función para el gráfico de cantidad de desembolsos requeridos vs periodos definidos
-def grafico_desembolsos_periodos(data):
-    periodos_definidos = [f'Semestre {i+1}' for i in range(10)]
-    desembolsos_periodos = data[data['Periodo Académico'].isin(periodos_definidos)]
-    cantidad_desembolsos_periodos = desembolsos_periodos.groupby('Periodo Académico')['Cantidad de Desembolsos Requeridos'].sum().reindex(periodos_definidos).fillna(0)
-
-    fig = go.Figure(go.Line(
-        x=cantidad_desembolsos_periodos.index,
-        y=cantidad_desembolsos_periodos.values,
-        mode='lines+markers',
-        line=dict(color='deepskyblue', width=2),
-        marker=dict(color='darkblue', size=8)
-    ))
-
-    fig.update_layout(
-        title='Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico',
-        xaxis_title='Periodo Académico',
-        yaxis_title='Cantidad de Desembolsos Requeridos',
-        template='plotly_dark'
-    )
-
-    return fig
-
-# Función para el gráfico de modalidades de IES
-def grafico_modalidad_ies(data_ies):
-    modalidad_dist = data_ies['Modalidad'].value_counts()
+# Función para gráficos de IES
+def grafico_modalidad_ies(data):
+    dist = data['Modalidad'].value_counts()
 
     fig = go.Figure(go.Pie(
-        labels=modalidad_dist.index,
-        values=modalidad_dist.values,
+        labels=dist.index,
+        values=dist.values,
         hole=0.3
     ))
 
-    fig.update_layout(
-        title='Modalidades de Instituciones de Educación Superior (IES)',
-        template='plotly_dark'
-    )
+    fig.update_layout(title='Modalidades de IES')
 
     return fig
 
-# Función para el gráfico de nivel de estudios ofrecidos por IES
-def grafico_nivel_estudios_ies(data_ies):
-    nivel_estudios_dist = data_ies['Nivel de Estudios'].value_counts()
+def grafico_nivel_estudios_ies(data):
+    dist = data['Nivel de Estudios'].value_counts()
 
     fig = go.Figure(go.Pie(
-        labels=nivel_estudios_dist.index,
-        values=nivel_estudios_dist.values,
+        labels=dist.index,
+        values=dist.values,
         hole=0.3
     ))
 
-    fig.update_layout(
-        title='Niveles de Estudios Ofrecidos por IES',
-        template='plotly_dark'
-    )
+    fig.update_layout(title='Niveles de Estudios Ofrecidos por IES')
 
     return fig
 
-# Función para el gráfico de renovaciones realizadas vs requeridas
-def grafico_renovaciones(data_ies):
-    universidades_principales = [
-        'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
-        'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
-        'Universidad de la Sabana', 'Universidad de Cartagena', 'Universidad del Norte',
-        'Universidad de San Buenaventura'
-    ]
-    data_ies_filtrado = data_ies[data_ies['Nombre de Institución'].isin(universidades_principales)]
-
+def grafico_renovaciones(data):
     fig = go.Figure()
+
     fig.add_trace(go.Bar(
-        x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Renovaciones Realizadas'],
+        x=data['Nombre de Institución'],
+        y=data['Renovaciones Realizadas'],
         name='Renovaciones Realizadas',
-        marker_color='mediumseagreen'
+        marker_color='blue'
     ))
+
     fig.add_trace(go.Bar(
-        x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Renovaciones Requeridas'],
+        x=data['Nombre de Institución'],
+        y=data['Renovaciones Requeridas'],
         name='Renovaciones Requeridas',
+        marker_color='red'
+    ))
+
+    fig.update_layout(
+        title='Renovaciones Realizadas vs Requeridas',
+        barmode='group',
+        xaxis_title='Nombre de Institución',
+        yaxis_title='Número de Renovaciones'
+    )
+
+    return fig
+
+def grafico_deserciones_suspensiones(data):
+    fig = go.Figure()
+
+    fig.add_trace(go.Bar(
+        x=data['Nombre de Institución'],
+        y=data['Deserciones'],
+        name='Deserciones',
         marker_color='orange'
     ))
 
-    fig.update_layout(
-        title='Renovaciones Realizadas vs Renovaciones Requeridas',
-        xaxis_title='Nombre de Institución',
-        yaxis_title='Número de Renovaciones',
-        barmode='group',
-        template='plotly_dark'
-    )
-
-    return fig
-
-# Función para el gráfico de deserciones y suspensiones
-def grafico_deserciones_suspensiones(data_ies):
-    universidades_principales = [
-        'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
-        'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
-        'Universidad de la Sabana', 'Universidad de Cartagena', 'Universidad del Norte',
-        'Universidad de San Buenaventura'
-    ]
-    data_ies_filtrado = data_ies[data_ies['Nombre de Institución'].isin(universidades_principales)]
-
-    fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Deserciones'],
-        name='Deserciones',
-        marker_color='orangered'
-    ))
-    fig.add_trace(go.Bar(
-        x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Suspensiones'],
+        x=data['Nombre de Institución'],
+        y=data['Suspensiones'],
         name='Suspensiones',
-        marker_color='gold'
+        marker_color='purple'
     ))
 
     fig.update_layout(
         title='Deserciones y Suspensiones',
-        xaxis_title='Nombre de Institución',
-        yaxis_title='Número de Casos',
         barmode='group',
-        template='plotly_dark'
+        xaxis_title='Nombre de Institución',
+        yaxis_title='Número de Casos'
     )
 
     return fig
 
-# Página principal de Streamlit
-st.title("Dashboard de Convocatorias y Estudiantes")
+# Configuración de Streamlit
+st.set_page_config(page_title="Dashboard de Análisis de Postulantes e IES", layout="wide")
 
-# Cargar datos
+st.title("Dashboard de Análisis de Postulantes e IES")
+
+# Generar datos dummy
 data = generar_datos_dummy()
 data_ies = generar_datos_ies()
 
-st.header("Información General")
+# Gráficos de postulantes
+st.header("Análisis de Postulantes")
 
-# Cantidad de postulantes vs cantidad aprobados vs legalizados vs estudiantes con desembolso
-st.subheader("Cantidad de Postulantes, Aprobados, Legalizados y Con Desembolso")
-fig_cantidad_postulantes = grafico_cantidad_postulantes(data)
-st.plotly_chart(fig_cantidad_postulantes)
+st.subheader("Embudo de Cantidad")
+fig_funnel_cantidad = grafico_funnel_cantidad(data)
+st.plotly_chart(fig_funnel_cantidad)
 
-# Monto solicitado vs monto aprobado vs monto legalizado vs monto desembolsado
+st.subheader("Embudo de Monto")
+fig_funnel_monto = grafico_funnel_monto(data)
+st.plotly_chart(fig_funnel_monto)
+
+st.subheader("Distribución de Ingreso Mensual")
+fig_ingreso_mensual = grafico_ingreso_mensual(data)
+st.plotly_chart(fig_ingreso_mensual)
+
 st.subheader("Monto Solicitado, Aprobado, Legalizado y Desembolsado")
 fig_monto_solicitado = grafico_monto_solicitado(data)
 st.plotly_chart(fig_monto_solicitado)
 
-st.header("Información del Postulante")
-
-# Gráficos de información del postulante
-st.subheader("Estrato Socioeconómico")
+st.subheader("Distribución por Estrato Socioeconómico")
 fig_estrato_socioeconomico = grafico_informacion_postulante(data, 'Estrato Socioeconómico', 'Distribución por Estrato Socioeconómico')
 st.plotly_chart(fig_estrato_socioeconomico)
 
-st.subheader("Sexo Biológico")
+st.subheader("Distribución por Sexo Biológico")
 fig_sexo_biologico = grafico_informacion_postulante(data, 'Sexo Biológico', 'Distribución por Sexo Biológico')
 st.plotly_chart(fig_sexo_biologico)
 
-st.subheader("Rango de Edad")
+st.subheader("Distribución por Rango de Edad")
 fig_rango_edad = grafico_informacion_postulante(data, 'Rango de Edad', 'Distribución por Rango de Edad')
 st.plotly_chart(fig_rango_edad)
 
-st.subheader("Ubicación de Residencia")
+st.subheader("Distribución por Ubicación de Residencia")
 fig_ubicacion_residencia = grafico_informacion_postulante(data, 'Ubicación de Residencia', 'Distribución por Ubicación de Residencia')
 st.plotly_chart(fig_ubicacion_residencia)
 
-st.subheader("Año de Finalización del Pregrado")
-fig_ano_finalizacion = go.Figure(go.Histogram(
-    x=data['Año de Finalización del Pregrado'],
-    marker_color='lightcoral'
-))
-fig_ano_finalizacion.update_layout(
-    title='Año de Finalización del Pregrado',
-    xaxis_title='Año',
-    yaxis_title='Cantidad',
-    template='plotly_dark'
-)
-st.plotly_chart(fig_ano_finalizacion)
-
-st.subheader("Área del Conocimiento del Título de Pregrado")
-fig_area_conocimiento_pregrado = grafico_informacion_postulante(data, 'Área del Conocimiento (Pregrado)', 'Distribución por Área del Conocimiento del Título de Pregrado')
+st.subheader("Distribución por Área del Conocimiento (Pregrado)")
+fig_area_conocimiento_pregrado = grafico_informacion_postulante(data, 'Área del Conocimiento (Pregrado)', 'Distribución por Área del Conocimiento (Pregrado)')
 st.plotly_chart(fig_area_conocimiento_pregrado)
 
-st.subheader("Áreas de Conocimiento de los Programas a los Cuales Desean Aplicar")
-fig_area_conocimiento_aplicacion = grafico_informacion_postulante(data, 'Área del Conocimiento (Aplicación)', 'Distribución por Área de Conocimiento de Programas')
+st.subheader("Distribución por Área del Conocimiento (Aplicación)")
+fig_area_conocimiento_aplicacion = grafico_informacion_postulante(data, 'Área del Conocimiento (Aplicación)', 'Distribución por Área del Conocimiento (Aplicación)')
 st.plotly_chart(fig_area_conocimiento_aplicacion)
 
-st.subheader("Empleado, Desempleado o Independiente")
-fig_empleo_estado = grafico_informacion_postulante(data, 'Empleado, Desempleado o Independiente', 'Distribución por Estado de Empleo')
-st.plotly_chart(fig_empleo_estado)
+st.subheader("Distribución por Empleado, Desempleado o Independiente")
+fig_estado_laboral = grafico_informacion_postulante(data, 'Empleado, Desempleado o Independiente', 'Distribución por Empleado, Desempleado o Independiente')
+st.plotly_chart(fig_estado_laboral)
 
-st.subheader("Antigüedad de su Último Empleo")
-fig_antiguedad_empleo = grafico_informacion_postulante(data, 'Antigüedad Último Empleo', 'Distribución por Antigüedad de Último Empleo')
+st.subheader("Distribución por Antigüedad Último Empleo")
+fig_antiguedad_empleo = grafico_informacion_postulante(data, 'Antigüedad Último Empleo', 'Distribución por Antigüedad Último Empleo')
 st.plotly_chart(fig_antiguedad_empleo)
 
-st.subheader("Ingreso Mensual del Postulante")
-fig_ingreso_mensual = go.Figure(go.Histogram(
-    x=data['Ingreso Mensual'],
-    marker_color='lightseagreen'
-))
-fig_ingreso_mensual.update_layout(
-    title='Ingreso Mensual del Postulante',
-    xaxis_title='Ingreso Mensual',
-    yaxis_title='Cantidad',
-    template='plotly_dark'
-)
-st.plotly_chart(fig_ingreso_mensual)
-
-st.subheader("Estado Civil")
+st.subheader("Distribución por Estado Civil")
 fig_estado_civil = grafico_informacion_postulante(data, 'Estado Civil', 'Distribución por Estado Civil')
 st.plotly_chart(fig_estado_civil)
 
-st.subheader("Patrimonio (Rango)")
-fig_patrimonio_rango = grafico_informacion_postulante(data, 'Patrimonio (Rango)', 'Distribución por Patrimonio (Rango)')
-st.plotly_chart(fig_patrimonio_rango)
+st.subheader("Distribución por Patrimonio (Rango)")
+fig_patrimonio = grafico_informacion_postulante(data, 'Patrimonio (Rango)', 'Distribución por Patrimonio (Rango)')
+st.plotly_chart(fig_patrimonio)
 
-st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
-fig_desembolsos_periodos = grafico_desembolsos_periodos(data)
-st.plotly_chart(fig_desembolsos_periodos)
-
-st.header("Información de Instituciones de Educación Superior (IES)")
+st.subheader("Distribución por Periodo Académico")
+fig_periodo_academico = grafico_informacion_postulante(data, 'Periodo Académico', 'Distribución por Periodo Académico')
+st.plotly_chart(fig_periodo_academico)
 
 # Gráficos de IES
-st.subheader("Modalidades de Instituciones de Educación Superior (IES)")
+st.header("Información de Instituciones de Educación Superior (IES)")
+
+st.subheader("Modalidades de IES")
 fig_modalidad_ies = grafico_modalidad_ies(data_ies)
 st.plotly_chart(fig_modalidad_ies)
 
@@ -383,10 +312,7 @@ st.subheader("Niveles de Estudios Ofrecidos por IES")
 fig_nivel_estudios_ies = grafico_nivel_estudios_ies(data_ies)
 st.plotly_chart(fig_nivel_estudios_ies)
 
-st.header("Renovaciones y Deserciones")
-
-# Gráficos de renovaciones y deserciones
-st.subheader("Renovaciones Realizadas vs Renovaciones Requeridas")
+st.subheader("Renovaciones Realizadas vs Requeridas")
 fig_renovaciones = grafico_renovaciones(data_ies)
 st.plotly_chart(fig_renovaciones)
 
