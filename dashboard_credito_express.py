@@ -361,43 +361,6 @@ def pagina1():
     fig_deserciones_suspensiones = grafico_deserciones_suspensiones(data_ies)
     st.plotly_chart(fig_deserciones_suspensiones)
 
-# Página 2
-def pagina2():
-    st.title("Análisis de Datos - Página 2")
-
-    st.header("Análisis por Tipo de Institución")
-    st.subheader("Distribución por Modalidad")
-    data_ies = generar_datos_ies()
-    fig_modalidad_ies = grafico_modalidad_ies(data_ies)
-    st.plotly_chart(fig_modalidad_ies)
-
-    st.subheader("Distribución por Nivel de Estudios")
-    fig_nivel_estudios_ies = grafico_nivel_estudios_ies(data_ies)
-    st.plotly_chart(fig_nivel_estudios_ies)
-
-    st.subheader("Distribución por Institución Pública o Privada")
-    fig_publica_privada_ies = grafico_publica_privada_ies(data_ies)
-    st.plotly_chart(fig_publica_privada_ies)
-
-    st.header("Renovaciones y Suspensiones por Institución")
-    st.subheader("Total de Renovaciones (Deserciones + Suspensiones)")
-    fig_total_renovaciones = grafico_total_renovaciones(data_ies)
-    st.plotly_chart(fig_total_renovaciones)
-
-    st.subheader("Deserciones y Suspensiones por Institución")
-    fig_deserciones_suspensiones = grafico_deserciones_suspensiones(data_ies)
-    st.plotly_chart(fig_deserciones_suspensiones)
-
-# Menú de selección de página
-def main():
-    st.sidebar.title("Navegación")
-    opciones = st.sidebar.radio("Selecciona una página", ["Página 1", "Página 2"])
-
-    if opciones == "Página 1":
-        pagina1()
-    elif opciones == "Página 2":
-        pagina2()
-
 # Ejecutar la aplicación
 if __name__ == "__main__":
     main()
