@@ -8,6 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.cluster import KMeans
 from sklearn.metrics import classification_report, confusion_matrix
 import streamlit as st
 
@@ -105,7 +108,9 @@ X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, 
 # Modelos
 modelos = {
     'Regresión Logística': LogisticRegression(max_iter=1000),
-    'Bosque Aleatorio': RandomForestClassifier(n_estimators=100, random_state=42)
+    'Bosque Aleatorio': RandomForestClassifier(n_estimators=100, random_state=42),
+    'SVM': SVC(),
+    'KNN': KNeighborsClassifier()
 }
 
 # Entrenamiento y evaluación
@@ -119,12 +124,32 @@ for nombre, modelo in modelos.items():
     st.write("Reporte de Clasificación:")
     st.write(classification_report(y_test, y_pred))
 
+# Pronóstico con Regresión Logística
+st.subheader('Pronóstico de Riesgo de Crédito')
+modelo_regresion_logistica = LogisticRegression(max_iter=1000)
+modelo_regresion_logistica.fit(X_train, y_train)
+y_pred_logistica = modelo_regresion_logistica.predict(X_test)
+st.write("Pronósticos del Modelo de Regresión Logística:")
+st.write(pd.DataFrame({'Actual': y_test, 'Predicción': y_pred_logistica}))
+
+# Clusterización con K-Means
+st.subheader('Clusterización con K-Means')
+n_clusters = st.slider('Selecciona el número de clusters:', 2, 10, 3)
+kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+datos_credito_clusterizado = datos_credito.copy()
+datos_credito_clusterizado['Cluster'] = kmeans.fit_predict(X_scaled)
+
+# Gráfico interactivo de clusters
+fig_clusters = px.scatter(datos_credito_clusterizado, x='Monto_Solicitado', y='Monto_Desembolsado', color='Cluster', title='Clusters de Riesgo de Crédito')
+st.plotly_chart(fig_clusters)
+
 # Gráfico interactivo del riesgo de crédito
 st.subheader('Monto Solicitado por Riesgo de Crédito')
 fig_histograma_interactivo = px.histogram(datos_credito, x='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Riesgo de Crédito')
 st.plotly_chart(fig_histograma_interactivo)
 
 # Gráfico interactivo de la distribución del riesgo de crédito por estrato socioeconómico
-st.subheader('Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
-fig_box_interactivo = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
-st.plotly_chart(fig_box_interactivo)
+st.subheader('Monto Solicitado por Estrato Socioeconómico')
+fig_estrato_socioeconomico = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico')
+st.plotly_chart(fig_estrato_socioeconomico)
+
