@@ -8,7 +8,7 @@ def generar_datos_dummy():
     np.random.seed(0)
     n = 1000
     data = pd.DataFrame({
-        'Estrato Socioeconómico': np.random.choice(['Alto', 'Medio', 'Bajo'], n),
+        'Estrato Socioeconómico': np.random.choice(['1', '2', '3','4','5','6'], n),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], n),
         'Rango de Edad': np.random.choice(['18-24', '25-34', '35-44', '45-54', '55-64', '65+'], n),
         'Ubicación de Residencia': np.random.choice(['Urbana', 'Rural'], n),
