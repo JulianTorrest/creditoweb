@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import random
 import plotly.graph_objects as go
 
 # Función para generar datos dummy
@@ -161,17 +160,29 @@ def segunda_pagina():
 
     st.subheader("Distribución por Ubicación de Residencia")
     st.bar_chart(data['Ubicación de Residencia'].value_counts())
-
-    # Botón para regresar a la página principal
-    if st.button("Regresar al dashboard principal"):
+    
+    # Ejemplo de gráfico de dispersión (ingreso vs. monto solicitado)
+    st.subheader("Gráfico de Dispersión: Ingreso Mensual vs Monto Solicitado")
+    fig_scatter = go.Figure()
+    fig_scatter.add_trace(go.Scatter(
+        x=data['Ingreso Mensual (COP)'],
+        y=data['Monto Solicitado'],
+        mode='markers',
+        marker=dict(size=10, color='rgba(156, 165, 196, 0.95)', line=dict(width=2, color='rgba(156, 165, 196, 0.95)'))
+    ))
+    fig_scatter.update_layout(title='Ingreso Mensual vs Monto Solicitado', xaxis_title='Ingreso Mensual (COP)', yaxis_title='Monto Solicitado')
+    st.plotly_chart(fig_scatter)
+    
+    # Botón para volver a la página principal
+    if st.button("Volver a la página principal"):
         st.session_state['page'] = 'pagina_principal'
 
-# Navegación entre páginas
-if 'page' not in st.session_state:
-    st.session_state['page'] = 'pagina_principal'
+# Función principal
+def main():
+    if 'page' not in st.session_state:
+        st.session_state['page'] = 'pagina_principal'
 
-if st.session_state['page'] == 'pagina_principal':
-    pagina_principal()
-elif st.session_state['page'] == 'segunda_pagina':
-    segunda_pagina()
-
+    if st.session_state['page'] == 'pagina_principal':
+        pagina_principal()
+    elif st.session_state['page'] == 'segunda_pagina':
+        segunda_pagina()
