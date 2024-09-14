@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 
 # Función para generar datos dummy
 def generar_datos_dummy(num_solicitudes=300):
+    np.random.seed(0)  # Para reproducibilidad
     estrato = np.random.choice([1, 2, 3, 4, 5, 6], num_solicitudes)
     sexo = np.random.choice(['Masculino', 'Femenino'], num_solicitudes)
     rango_edad = np.random.choice(['18-25', '26-30', '31-35', '36-40', '40+'], num_solicitudes)
@@ -28,7 +29,6 @@ def generar_datos_dummy(num_solicitudes=300):
     monto_legalizado = monto_aprobado * np.random.uniform(0.8, 1, num_solicitudes)
     monto_desembolsado = monto_legalizado * np.random.uniform(0.9, 1, num_solicitudes)
 
-    # Crear DataFrame con los datos dummy
     data = pd.DataFrame({
         'Estrato Socioeconómico': estrato,
         'Sexo Biológico': sexo,
@@ -158,31 +158,18 @@ def segunda_pagina():
     st.subheader("Distribución por Área del Conocimiento (Pregrado)")
     st.bar_chart(data['Área del Conocimiento (Pregrado)'].value_counts())
 
-    st.subheader("Distribución por Ubicación de Residencia")
-    st.bar_chart(data['Ubicación de Residencia'].value_counts())
-    
-    # Ejemplo de gráfico de dispersión (ingreso vs. monto solicitado)
-    st.subheader("Gráfico de Dispersión: Ingreso Mensual vs Monto Solicitado")
-    fig_scatter = go.Figure()
-    fig_scatter.add_trace(go.Scatter(
-        x=data['Ingreso Mensual (COP)'],
-        y=data['Monto Solicitado'],
-        mode='markers',
-        marker=dict(size=10, color='rgba(156, 165, 196, 0.95)', line=dict(width=2, color='rgba(156, 165, 196, 0.95)'))
-    ))
-    fig_scatter.update_layout(title='Ingreso Mensual vs Monto Solicitado', xaxis_title='Ingreso Mensual (COP)', yaxis_title='Monto Solicitado')
-    st.plotly_chart(fig_scatter)
+    st.subheader("Distribución por Patrimonio")
+    st.bar_chart(data['Patrimonio (Rango)'].value_counts())
     
     # Botón para volver a la página principal
     if st.button("Volver a la página principal"):
-        st.session_state['page'] = 'pagina_principal'
+        st.session_state['page'] = 'principal'
 
-# Función principal
-def main():
-    if 'page' not in st.session_state:
-        st.session_state['page'] = 'pagina_principal'
+# Control de navegación entre páginas
+if 'page' not in st.session_state:
+    st.session_state['page'] = 'principal'
 
-    if st.session_state['page'] == 'pagina_principal':
-        pagina_principal()
-    elif st.session_state['page'] == 'segunda_pagina':
-        segunda_pagina()
+if st.session_state['page'] == 'principal':
+    pagina_principal()
+elif st.session_state['page'] == 'segunda_pagina':
+    segunda_pagina()
