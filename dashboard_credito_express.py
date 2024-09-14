@@ -263,3 +263,4 @@ fig_deserciones_suspensiones = grafico_deserciones_suspensiones(data_ies)
 st.plotly_chart(fig_deserciones_suspensiones)
 
 
+
