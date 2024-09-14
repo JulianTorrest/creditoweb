@@ -429,7 +429,7 @@ def main():
     st.title('Dashboard de Datos de Postulantes')
 
     data = generar_datos_dummy()
-    data_ies = generar_datos_ies()
+    datos_ies = generar_datos_ies()
 
     # Gráficos para los postulantes
     st.header('Gráficos de Postulantes')
