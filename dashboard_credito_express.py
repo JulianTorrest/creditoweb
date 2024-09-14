@@ -18,7 +18,7 @@ def generar_datos_dummy():
         'Año de Finalización del Pregrado': np.random.randint(2010, 2022, n),
         'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Ciencias Naturales'], n),
         'Área del Conocimiento (Aplicación)': np.random.choice(['Economía', 'Tecnología', 'Salud'], n),
-        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado'], n),
+        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado', 'Independiente'], n),
         'Antigüedad del Último Empleo': np.random.randint(0, 10, n),
         'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado'], n),
         'Patrimonio': np.random.randint(1300000, 500000000, n)
