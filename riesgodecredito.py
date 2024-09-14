@@ -4,12 +4,13 @@ import random
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, learning_curve
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.svm import SVC
-from sklearn.metrics import classification_report, confusion_matrix, roc_curve, auc
+from sklearn.metrics import classification_report, confusion_matrix, roc_curve, roc_auc_score, precision_recall_fscore_support, ConfusionMatrixDisplay
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
 import streamlit as st
 
 # Configurar la semilla para reproducibilidad
@@ -104,41 +105,111 @@ X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.3, 
 modelos = {
     'Regresión Logística': LogisticRegression(max_iter=1000),
     'Bosque Aleatorio': RandomForestClassifier(n_estimators=100, random_state=42),
-    'SVM': SVC(probability=True, random_state=42)
+    'SVM': SVC(probability=True, random_state=42)  # Agregado SVM
 }
 
 # Entrenamiento y evaluación
 for nombre, modelo in modelos.items():
     modelo.fit(X_train, y_train)
     y_pred = modelo.predict(X_test)
-    y_prob = modelo.predict_proba(X_test)[:, 1] if nombre in ['Regresión Logística', 'SVM'] else modelo.predict_proba(X_test)[:, 1]
+    y_prob = modelo.predict_proba(X_test)[:, 1] if nombre == 'Regresión Logística' else None
     
     st.write(f"Modelo: {nombre}")
     st.write("Matriz de Confusión:\n", confusion_matrix(y_test, y_pred))
     st.write("Reporte de Clasificación:\n", classification_report(y_test, y_pred))
     
-    # Curva ROC y AUC
-    fpr, tpr, _ = roc_curve(y_test, y_prob, pos_label='Alto')  # Ajusta pos_label si es necesario
-    roc_auc = auc(fpr, tpr)
-    
-    fig = plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'ROC curve (area = {roc_auc:.2f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title(f'Receiver Operating Characteristic ({nombre})')
-    plt.legend(loc='lower right')
-    st.pyplot(fig)
+    if nombre == 'Regresión Logística':
+        # Curva ROC
+        fpr, tpr, _ = roc_curve(y_test, y_prob, pos_label='Alto')
+        auc = roc_auc_score(y_test, y_prob)
+        fig = plt.figure(figsize=(10, 6))
+        plt.plot(fpr, tpr, marker='.')
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title(f'Curva ROC (AUC = {auc:.2f})')
+        st.pyplot(fig)
 
-# Gráfico interactivo del riesgo de crédito
-st.write("Monto Solicitado por Riesgo de Crédito")
-fig = px.histogram(datos_credito, x='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Riesgo de Crédito')
-st.plotly_chart(fig)
+# Importancia de características para Random Forest
+st.write("Importancia de Características del Modelo de Bosque Aleatorio")
+rf_model = modelos['Bosque Aleatorio']
+importancia = rf_model.feature_importances_
+caracteristicas = X.columns
+importancia_df = pd.DataFrame({'Característica': caracteristicas, 'Importancia': importancia})
+importancia_df = importancia_df.sort_values(by='Importancia', ascending=False)
 
-# Gráfico interactivo de la distribución del riesgo de crédito por estrato socioeconómico
-st.write("Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito")
-fig = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
-st.plotly_chart(fig)
+fig = plt.figure(figsize=(10, 6))
+sns.barplot(x='Importancia', y='Característica', data=importancia_df)
+plt.title('Importancia de Características en el Modelo de Bosque Aleatorio')
+st.pyplot(fig)
 
+# Optimización de Hiperparámetros con GridSearchCV
+st.write("Optimización de Hiperparámetros con GridSearchCV")
+param_grid = {
+    'n_estimators': [50, 100, 150],
+    'max_depth': [None, 10, 20, 30]
+}
+grid_search = GridSearchCV(estimator=RandomForestClassifier(random_state=42), param_grid=param_grid, cv=5, n_jobs=-1, verbose=2)
+grid_search.fit(X_train, y_train)
+st.write("Mejores parámetros para Random Forest:", grid_search.best_params_)
+
+# Validación Cruzada
+st.write("Validación Cruzada")
+cv_scores = cross_val_score(LogisticRegression(max_iter=1000), X_scaled, y, cv=5)
+st.write(f"Cross-Validation Scores (Regresión Logística): {cv_scores}")
+st.write(f"Mean CV Score: {cv_scores.mean()}")
+
+# Curva de Aprendizaje
+st.write("Curva de Aprendizaje")
+train_sizes, train_scores, test_scores = learning_curve(LogisticRegression(max_iter=1000), X_scaled, y, cv=5, n_jobs=-1, train_sizes=np.linspace(0.1, 1.0, 10))
+
+fig, ax = plt.subplots()
+ax.plot(train_sizes, np.mean(train_scores, axis=1), 'o-', color='r', label='Train Score')
+ax.plot(train_sizes, np.mean(test_scores, axis=1), 'o-', color='g', label='Test Score')
+ax.set_xlabel('Training Size')
+ax.set_ylabel('Score')
+ax.set_title('Curva de Aprendizaje')
+ax.legend(loc='best')
+st.pyplot(fig)
+
+# Matriz de Confusión Normalizada
+st.write("Matriz de Confusión Normalizada (Regresión Logística)")
+cm = confusion_matrix(y_test, y_pred, normalize='true')
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=modelos['Regresión Logística'].classes_)
+fig, ax = plt.subplots(figsize=(10, 6))
+disp.plot(ax=ax, cmap=plt.cm.Blues)
+plt.title('Matriz de Confusión Normalizada (Regresión Logística)')
+st.pyplot(fig)
+
+# Evaluación Adicional con Métricas de Clasificación
+st.write("Evaluación Adicional (Regresión Logística)")
+precision, recall, f1, _ = precision_recall_fscore_support(y_test, y_pred, average='weighted')
+st.write(f"Precisión Promedio: {precision}")
+st.write(f"Recall Promedio: {recall}")
+st.write(f"Puntuación F1 Promedio: {f1}")
+
+# Análisis de Residuos (Solo si se usa regresión)
+# residuos = y_test - y_pred
+# fig = plt.figure(figsize=(10, 6))
+# sns.histplot(residuos, bins=30, kde=True)
+# plt.title('Distribución de Residuos')
+# st.pyplot(fig)
+
+# PCA
+st.write("Análisis de Componentes Principales (PCA)")
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+
+fig = plt.figure(figsize=(10, 6))
+sns.scatterplot(x=X_pca[:, 0], y=X_pca[:, 1], hue=y, palette='viridis')
+plt.title('Análisis de Componentes Principales (PCA)')
+st.pyplot(fig)
+
+# Segmentación de Datos y Análisis de Clústeres
+st.write("Segmentación de Datos con K-Means")
+kmeans = KMeans(n_clusters=3, random_state=42)
+clusters = kmeans.fit_predict(X_scaled)
+
+fig = plt.figure(figsize=(10, 6))
+sns.scatterplot(x=X_scaled[:, 0], y=X_scaled[:, 1], hue=clusters, palette='viridis')
+plt.title('Segmentación de Datos con K-Means')
+st.pyplot(fig)
