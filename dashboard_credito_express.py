@@ -398,3 +398,6 @@ def main():
     st.subheader('16. Renovaciones Realizadas vs Requeridas')
     fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(data_ies)
     st.plotly_chart(fig_renovaciones_vs_requeridas)
+    
+if __name__ == "__main__":
+    main()
