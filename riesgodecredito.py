@@ -9,8 +9,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix
-
-
+import streamlit as st
 
 # Configurar la semilla para reproducibilidad
 np.random.seed(42)
@@ -55,26 +54,31 @@ def generar_datos_credito(n=1000):
 
 datos_credito = generar_datos_credito()
 
-# Descripción básica
-print(datos_credito.describe())
-print(datos_credito.info())
+# Configuración de Streamlit
+st.title('Análisis de Riesgo de Crédito Educativo')
+
+# Mostrar información básica
+st.subheader('Descripción de los Datos')
+st.write(datos_credito.describe())
+st.write(datos_credito.info())
 
 # Histograma de montos solicitados
-plt.figure(figsize=(10, 6))
+st.subheader('Distribución de Monto Solicitado')
+fig_histograma = plt.figure(figsize=(10, 6))
 sns.histplot(datos_credito['Monto_Solicitado'], bins=30, kde=True)
 plt.title('Distribución de Monto Solicitado')
 plt.xlabel('Monto Solicitado')
 plt.ylabel('Frecuencia')
-plt.show()
+st.pyplot(fig_histograma)
 
 # Gráfico de dispersión de Monto Solicitado vs Monto Desembolsado
-plt.figure(figsize=(10, 6))
+st.subheader('Monto Solicitado vs Monto Desembolsado')
+fig_dispersion = plt.figure(figsize=(10, 6))
 sns.scatterplot(x='Monto_Solicitado', y='Monto_Desembolsado', data=datos_credito)
 plt.title('Monto Solicitado vs Monto Desembolsado')
 plt.xlabel('Monto Solicitado')
 plt.ylabel('Monto Desembolsado')
-plt.show()
-
+st.pyplot(fig_dispersion)
 
 # Codificación de variables categóricas
 label_encoders = {}
@@ -105,18 +109,22 @@ modelos = {
 }
 
 # Entrenamiento y evaluación
+st.subheader('Evaluación de Modelos')
 for nombre, modelo in modelos.items():
     modelo.fit(X_train, y_train)
     y_pred = modelo.predict(X_test)
-    print(f"Modelo: {nombre}")
-    print("Matriz de Confusión:\n", confusion_matrix(y_test, y_pred))
-    print("Reporte de Clasificación:\n", classification_report(y_test, y_pred))
+    st.write(f"Modelo: {nombre}")
+    st.write("Matriz de Confusión:")
+    st.write(confusion_matrix(y_test, y_pred))
+    st.write("Reporte de Clasificación:")
+    st.write(classification_report(y_test, y_pred))
 
 # Gráfico interactivo del riesgo de crédito
-fig = px.histogram(datos_credito, x='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Riesgo de Crédito')
-fig.show()
+st.subheader('Monto Solicitado por Riesgo de Crédito')
+fig_histograma_interactivo = px.histogram(datos_credito, x='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Riesgo de Crédito')
+st.plotly_chart(fig_histograma_interactivo)
 
 # Gráfico interactivo de la distribución del riesgo de crédito por estrato socioeconómico
-fig = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
-fig.show()
-
+st.subheader('Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
+fig_box_interactivo = px.box(datos_credito, x='Estrato_Socioeconomico', y='Monto_Solicitado', color='Riesgo_Credito', title='Monto Solicitado por Estrato Socioeconómico y Riesgo de Crédito')
+st.plotly_chart(fig_box_interactivo)
