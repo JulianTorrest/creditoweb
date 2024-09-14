@@ -3,58 +3,57 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-# Función para generar datos dummy
+# Función para generar datos dummy para el bloque general
 def generar_datos_dummy(num_solicitudes=300):
-    np.random.seed(0)  # Para reproducibilidad
-    estrato = np.random.choice([1, 2, 3, 4, 5, 6], num_solicitudes)
-    sexo = np.random.choice(['Masculino', 'Femenino'], num_solicitudes)
-    rango_edad = np.random.choice(['18-25', '26-30', '31-35', '36-40', '40+'], num_solicitudes)
-    ubicacion = np.random.choice(['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Cartagena', 'Pereira', 'Manizales', 'Bucaramanga'], num_solicitudes)
-    año_pregrado = np.random.choice([f'{a}' for a in range(2000, 2024)], num_solicitudes)
-    area_pregrado = np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Ciencias de la Salud', 'Artes', 'Ciencias Naturales'], num_solicitudes)
-    area_aplicacion = np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Ciencias de la Salud', 'Artes', 'Ciencias Naturales'], num_solicitudes)
-    empleo_status = np.random.choice(['Empleado', 'Desempleado', 'Independiente'], num_solicitudes)
-    antiguedad_empleo = np.random.choice(['Menos de 1 año', '1-3 años', 'Más de 3 años'], num_solicitudes)
-    ingreso_mensual = np.random.randint(1000000, 10000000, num_solicitudes)
-    estado_civil = np.random.choice(['Soltero/a', 'Casado/a', 'Divorciado/a', 'Viudo/a'], num_solicitudes)
-    patrimonio = np.random.choice(['< 10 millones', '10-50 millones', '50-100 millones', '100+ millones'], num_solicitudes)
-    desembolsos = np.random.randint(1, 13, num_solicitudes)
-
-    aprobado = np.random.choice([True, False], num_solicitudes, p=[0.7, 0.3])
-    legalizado = np.random.choice([True, False], num_solicitudes, p=[0.8, 0.2])
-    desembolso = np.random.choice([True, False], num_solicitudes, p=[0.9, 0.1])
-    
-    monto_solicitado = np.random.randint(5000000, 80000000, num_solicitudes)
-    monto_aprobado = monto_solicitado * np.random.uniform(0.7, 1, num_solicitudes)
-    monto_legalizado = monto_aprobado * np.random.uniform(0.8, 1, num_solicitudes)
-    monto_desembolsado = monto_legalizado * np.random.uniform(0.9, 1, num_solicitudes)
-
+    np.random.seed(1)  # Para reproducibilidad
     data = pd.DataFrame({
-        'Estrato Socioeconómico': estrato,
-        'Sexo Biológico': sexo,
-        'Rango de Edad': rango_edad,
-        'Ubicación de Residencia': ubicacion,
-        'Año de Finalización del Pregrado': año_pregrado,
-        'Área del Conocimiento (Pregrado)': area_pregrado,
-        'Área del Conocimiento (Aplicación)': area_aplicacion,
-        'Estado de Empleo': empleo_status,
-        'Antigüedad del Último Empleo': antiguedad_empleo,
-        'Ingreso Mensual (COP)': ingreso_mensual,
-        'Estado Civil': estado_civil,
-        'Patrimonio (Rango)': patrimonio,
-        'Cantidad de Desembolsos': desembolsos,
-        'Aprobado': aprobado,
-        'Legalizado': legalizado,
-        'Desembolso': desembolso,
-        'Monto Solicitado': monto_solicitado,
-        'Monto Aprobado': monto_aprobado,
-        'Monto Legalizado': monto_legalizado,
-        'Monto Desembolsado': monto_desembolsado
+        'Postulante': [f'Postulante {i+1}' for i in range(num_solicitudes)],
+        'Aprobado': np.random.choice([True, False], num_solicitudes),
+        'Legalizado': np.random.choice([True, False], num_solicitudes),
+        'Desembolso': np.random.choice([True, False], num_solicitudes),
+        'Monto Solicitado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
+        'Monto Aprobado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
+        'Monto Legalizado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
+        'Monto Desembolsado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
+        'Estrato Socioeconómico': np.random.choice([1, 2, 3, 4, 5], num_solicitudes),
+        'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], num_solicitudes),
+        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado'], num_solicitudes),
+        'Ingreso Mensual (COP)': np.random.randint(1000000, 6000000, num_solicitudes),
+        'Rango de Edad': np.random.choice(['18-25', '26-35', '36-45', '46-60'], num_solicitudes),
+        'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado'], num_solicitudes),
+        'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Salud', 'Humanidades'], num_solicitudes),
+        'Patrimonio (Rango)': np.random.choice(['Bajo', 'Medio', 'Alto'], num_solicitudes)
     })
-
     return data
 
-# Función para crear gráfico embudo para la cantidad de postulantes
+# Función para generar datos dummy para el bloque IES
+def generar_datos_ies(num_instituciones=20):
+    np.random.seed(1)  # Para reproducibilidad
+    modalidades = np.random.choice(['Presencial', 'Virtual', 'A Distancia'], num_instituciones)
+    niveles_estudio = np.random.choice(['Especialización', 'Maestría', 'Doctorado', 'Especialidades Médicas'], num_instituciones)
+    nombres_institucion = [f'Institución {i+1}' for i in range(num_instituciones)]
+    tipo_institucion = np.random.choice(['Pública', 'Privada'], num_instituciones)
+    renovaciones_requeridas = np.random.randint(5, 20, num_instituciones)
+    renovaciones_realizadas = np.random.randint(0, 15, num_instituciones)
+    estudiantes_renovaciones = np.random.randint(0, 100, num_instituciones)
+    deserciones = np.random.randint(0, 10, num_instituciones)
+    suspensiones = np.random.randint(0, 10, num_instituciones)
+
+    data_ies = pd.DataFrame({
+        'Modalidad': modalidades,
+        'Nivel de Estudios': niveles_estudio,
+        'Nombre de Institución': nombres_institucion,
+        'Tipo de Institución': tipo_institucion,
+        'Renovaciones Requeridas': renovaciones_requeridas,
+        'Renovaciones Realizadas': renovaciones_realizadas,
+        'Estudiantes con Renovaciones Desembolsadas': estudiantes_renovaciones,
+        'Deserciones': deserciones,
+        'Suspensiones': suspensiones
+    })
+
+    return data_ies
+
+# Función para el gráfico embudo de cantidad
 def grafico_funnel_cantidad(data):
     total_solicitudes = len(data)
     total_aprobados = len(data[data['Aprobado']])
@@ -63,6 +62,11 @@ def grafico_funnel_cantidad(data):
 
     etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Desembolsos']
     valores = [total_solicitudes, total_aprobados, total_legalizados, total_desembolsos]
+
+    # Ajustar valores para evitar inconsistencias
+    valores[1] = min(valores[1], valores[0])
+    valores[2] = min(valores[2], valores[1])
+    valores[3] = min(valores[3], valores[2])
 
     fig = go.Figure(go.Funnel(
         y=etapas,
@@ -74,12 +78,12 @@ def grafico_funnel_cantidad(data):
 
     return fig
 
-# Función para crear gráfico embudo para el monto de desembolso
+# Función para el gráfico embudo de monto
 def grafico_funnel_monto(data):
-    monto_solicitado = data['Monto Solicitado'].sum()
-    monto_aprobado = data['Monto Aprobado'].sum()
-    monto_legalizado = data['Monto Legalizado'].sum()
-    monto_desembolsado = data['Monto Desembolsado'].sum()
+    monto_solicitado = data['Monto Solicitado (COP)'].sum()
+    monto_aprobado = data['Monto Aprobado (COP)'].sum()
+    monto_legalizado = data['Monto Legalizado (COP)'].sum()
+    monto_desembolsado = data['Monto Desembolsado (COP)'].sum()
 
     etapas = ['Monto Solicitado', 'Monto Aprobado', 'Monto Legalizado', 'Monto Desembolsado']
     valores = [monto_solicitado, monto_aprobado, monto_legalizado, monto_desembolsado]
@@ -102,6 +106,10 @@ def pagina_principal():
     num_solicitudes = 300
     data = generar_datos_dummy(num_solicitudes)
     
+    # Datos para el bloque IES
+    num_instituciones = 20
+    data_ies = generar_datos_ies(num_instituciones)
+
     st.header("Bloque General")
     
     # Gráfico embudo para cantidad de postulantes, aprobados, legalizados y desembolsos
@@ -136,40 +144,37 @@ def pagina_principal():
     st.subheader("Distribución de Ingreso Mensual")
     st.bar_chart(data['Ingreso Mensual (COP)'].value_counts(bins=10))
     
-    # Botón para ir a la segunda página
-    if st.button("Ir a más detalles"):
-        st.session_state['page'] = 'segunda_pagina'
-
-# Función para la segunda página
-def segunda_pagina():
-    st.title("Segunda Página - Información Adicional")
+    # Gráficos del bloque IES
+    st.header("Bloque IES")
     
-    # Generar datos dummy
-    num_solicitudes = 300
-    data = generar_datos_dummy(num_solicitudes)
+    st.subheader("Modalidad de Estudio")
+    st.bar_chart(data_ies['Modalidad'].value_counts())
 
-    # Mostrar más detalles en gráficos
-    st.subheader("Distribución por Rango de Edad")
-    st.bar_chart(data['Rango de Edad'].value_counts())
+    st.subheader("Nivel de Estudios Ofrecido")
+    st.bar_chart(data_ies['Nivel de Estudios'].value_counts())
 
-    st.subheader("Distribución por Estado Civil")
-    st.bar_chart(data['Estado Civil'].value_counts())
+    st.subheader("Tipo de Institución")
+    st.bar_chart(data_ies['Tipo de Institución'].value_counts())
+
+    st.subheader("Renovaciones Realizadas vs Requeridas")
+    renovaciones_data = pd.DataFrame({
+        'Institución': data_ies['Nombre de Institución'],
+        'Renovaciones Requeridas': data_ies['Renovaciones Requeridas'],
+        'Renovaciones Realizadas': data_ies['Renovaciones Realizadas']
+    })
+    st.bar_chart(renovaciones_data.set_index('Institución'))
+
+    st.subheader("Estudiantes con el Total de Renovaciones Desembolsadas")
+    st.bar_chart(data_ies['Estudiantes con Renovaciones Desembolsadas'])
     
-    st.subheader("Distribución por Área del Conocimiento (Pregrado)")
-    st.bar_chart(data['Área del Conocimiento (Pregrado)'].value_counts())
+    st.subheader("Deserciones y Suspensiones")
+    deserciones_suspensiones_data = pd.DataFrame({
+        'Institución': data_ies['Nombre de Institución'],
+        'Deserciones': data_ies['Deserciones'],
+        'Suspensiones': data_ies['Suspensiones']
+    })
+    st.bar_chart(deserciones_suspensiones_data.set_index('Institución'))
 
-    st.subheader("Distribución por Patrimonio")
-    st.bar_chart(data['Patrimonio (Rango)'].value_counts())
-    
-    # Botón para volver a la página principal
-    if st.button("Volver a la página principal"):
-        st.session_state['page'] = 'principal'
+# Ejecutar la aplicación de Streamlit
+pagina_principal()
 
-# Control de navegación entre páginas
-if 'page' not in st.session_state:
-    st.session_state['page'] = 'principal'
-
-if st.session_state['page'] == 'principal':
-    pagina_principal()
-elif st.session_state['page'] == 'segunda_pagina':
-    segunda_pagina()
