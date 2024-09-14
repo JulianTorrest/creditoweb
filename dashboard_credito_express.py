@@ -51,47 +51,62 @@ def generar_datos_ies():
     })
     return data
 
-# Función para el gráfico de distribución de ingreso mensual
-def grafico_ingreso_mensual(data):
-    bins = [0, 1000000, 3000000, 6000000, 9000000, 12000000, 15000000, 20000000, 50000000, 100000000, 120000000, float('inf')]
-    labels = ['Menos de 1M', '1M-3M', '3M-6M', '6M-9M', '9M-12M', '12M-15M', '15M-20M', '20M-50M', '50M-100M', '100M-120M', 'Más de 120M']
-    data['Ingreso Mensual Rango'] = pd.cut(data['Ingreso Mensual'], bins=bins, labels=labels, right=False)
+# Función para el gráfico de cantidad de postulantes, aprobados, legalizados y con desembolso
+def grafico_cantidad_postulantes(data):
+    cantidad_postulantes = len(data)
+    cantidad_aprobados = data['Monto Aprobado'].apply(lambda x: x > 0).sum()
+    cantidad_legalizados = data['Monto Legalizado'].apply(lambda x: x > 0).sum()
+    cantidad_con_desembolso = data['Monto Desembolsado'].apply(lambda x: x > 0).sum()
     
-    ingreso_dist = data['Ingreso Mensual Rango'].value_counts().sort_index()
-
     fig = go.Figure(go.Bar(
-        x=ingreso_dist.index,
-        y=ingreso_dist.values,
-        text=ingreso_dist.values,
-        textposition='auto',
-        marker_color='royalblue'
+        x=['Postulantes Totales', 'Aprobados', 'Legalizados', 'Con Desembolso'],
+        y=[cantidad_postulantes, cantidad_aprobados, cantidad_legalizados, cantidad_con_desembolso],
+        marker_color=['lightblue', 'lightgreen', 'lightcoral', 'lightgoldenrodyellow']
     ))
-
+    
     fig.update_layout(
-        title='Distribución de Ingreso Mensual',
-        xaxis_title='Rango de Ingreso Mensual',
-        yaxis_title='Número de Postulantes',
+        title='Cantidad de Postulantes y Estado de Desembolsos',
+        xaxis_title='Categoría',
+        yaxis_title='Cantidad',
         template='plotly_dark'
     )
-
+    
     return fig
 
-# Función para el gráfico de distribución por patrimonio
-def grafico_patrimonio_rango(data):
-    patrimonio_dist = data['Patrimonio (Rango)'].value_counts().sort_index()
-
+# Función para el gráfico de monto solicitado, aprobado, legalizado y desembolsado
+def grafico_monto_solicitado(data):
+    monto_solicitado = data['Monto Solicitado'].sum()
+    monto_aprobado = data['Monto Aprobado'].sum()
+    monto_legalizado = data['Monto Legalizado'].sum()
+    monto_desembolsado = data['Monto Desembolsado'].sum()
+    
     fig = go.Figure(go.Bar(
-        x=patrimonio_dist.index,
-        y=patrimonio_dist.values,
-        text=patrimonio_dist.values,
-        textposition='auto',
-        marker_color='darkorange'
+        x=['Monto Solicitado', 'Monto Aprobado', 'Monto Legalizado', 'Monto Desembolsado'],
+        y=[monto_solicitado, monto_aprobado, monto_legalizado, monto_desembolsado],
+        marker_color=['lightblue', 'lightgreen', 'lightcoral', 'lightgoldenrodyellow']
+    ))
+    
+    fig.update_layout(
+        title='Monto Solicitado, Aprobado, Legalizado y Desembolsado',
+        xaxis_title='Categoría',
+        yaxis_title='Monto',
+        template='plotly_dark'
+    )
+    
+    return fig
+
+# Función para gráficos de información del postulante
+def grafico_informacion_postulante(data, columna, title):
+    dist = data[columna].value_counts()
+
+    fig = go.Figure(go.Pie(
+        labels=dist.index,
+        values=dist.values,
+        hole=0.3
     ))
 
     fig.update_layout(
-        title='Distribución por Patrimonio (Rango)',
-        xaxis_title='Rango de Patrimonio',
-        yaxis_title='Número de Postulantes',
+        title=title,
         template='plotly_dark'
     )
 
@@ -120,6 +135,40 @@ def grafico_desembolsos_periodos(data):
 
     return fig
 
+# Función para el gráfico de modalidades de IES
+def grafico_modalidad_ies(data_ies):
+    modalidad_dist = data_ies['Modalidad'].value_counts()
+
+    fig = go.Figure(go.Pie(
+        labels=modalidad_dist.index,
+        values=modalidad_dist.values,
+        hole=0.3
+    ))
+
+    fig.update_layout(
+        title='Modalidades de Instituciones de Educación Superior (IES)',
+        template='plotly_dark'
+    )
+
+    return fig
+
+# Función para el gráfico de nivel de estudios ofrecidos por IES
+def grafico_nivel_estudios_ies(data_ies):
+    nivel_estudios_dist = data_ies['Nivel de Estudios'].value_counts()
+
+    fig = go.Figure(go.Pie(
+        labels=nivel_estudios_dist.index,
+        values=nivel_estudios_dist.values,
+        hole=0.3
+    ))
+
+    fig.update_layout(
+        title='Niveles de Estudios Ofrecidos por IES',
+        template='plotly_dark'
+    )
+
+    return fig
+
 # Función para el gráfico de renovaciones realizadas vs requeridas
 def grafico_renovaciones(data_ies):
     universidades_principales = [
@@ -133,15 +182,15 @@ def grafico_renovaciones(data_ies):
     fig = go.Figure()
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Renovaciones Requeridas'],
-        name='Renovaciones Requeridas',
-        marker_color='lightcoral'
+        y=data_ies_filtrado['Renovaciones Realizadas'],
+        name='Renovaciones Realizadas',
+        marker_color='mediumseagreen'
     ))
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Renovaciones Realizadas'],
-        name='Renovaciones Realizadas',
-        marker_color='limegreen'
+        y=data_ies_filtrado['Renovaciones Requeridas'],
+        name='Renovaciones Requeridas',
+        marker_color='orange'
     ))
 
     fig.update_layout(
@@ -149,33 +198,6 @@ def grafico_renovaciones(data_ies):
         xaxis_title='Nombre de Institución',
         yaxis_title='Número de Renovaciones',
         barmode='group',
-        template='plotly_dark'
-    )
-
-    return fig
-
-# Función para el gráfico de estudiantes con total de renovaciones desembolsadas
-def grafico_renovaciones_desembolsadas(data_ies):
-    universidades_principales = [
-        'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
-        'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
-        'Universidad de la Sabana', 'Universidad de Cartagena', 'Universidad del Norte',
-        'Universidad de San Buenaventura'
-    ]
-    data_ies_filtrado = data_ies[data_ies['Nombre de Institución'].isin(universidades_principales)]
-
-    fig = go.Figure(go.Bar(
-        x=data_ies_filtrado['Nombre de Institución'],
-        y=data_ies_filtrado['Estudiantes con Renovaciones Desembolsadas'],
-        text=data_ies_filtrado['Estudiantes con Renovaciones Desembolsadas'],
-        textposition='auto',
-        marker_color='mediumseagreen'
-    ))
-
-    fig.update_layout(
-        title='Estudiantes con Total de Renovaciones Desembolsadas',
-        xaxis_title='Nombre de Institución',
-        yaxis_title='Número de Estudiantes',
         template='plotly_dark'
     )
 
@@ -224,43 +246,108 @@ data_ies = generar_datos_ies()
 
 st.header("Información General")
 
+# Cantidad de postulantes vs cantidad aprobados vs legalizados vs estudiantes con desembolso
+st.subheader("Cantidad de Postulantes, Aprobados, Legalizados y Con Desembolso")
+fig_cantidad_postulantes = grafico_cantidad_postulantes(data)
+st.plotly_chart(fig_cantidad_postulantes)
+
 # Monto solicitado vs monto aprobado vs monto legalizado vs monto desembolsado
 st.subheader("Monto Solicitado, Aprobado, Legalizado y Desembolsado")
-monto_solicitado = data['Monto Solicitado'].sum()
-monto_aprobado = data['Monto Aprobado'].sum()
-monto_legalizado = data['Monto Legalizado'].sum()
-monto_desembolsado = data['Monto Desembolsado'].sum()
+fig_monto_solicitado = grafico_monto_solicitado(data)
+st.plotly_chart(fig_monto_solicitado)
 
-st.write(f"Monto Solicitado: ${monto_solicitado:,.0f}")
-st.write(f"Monto Aprobado: ${monto_aprobado:,.0f}")
-st.write(f"Monto Legalizado: ${monto_legalizado:,.0f}")
-st.write(f"Monto Desembolsado: ${monto_desembolsado:,.0f}")
+st.header("Información del Postulante")
 
-st.header("Gráficos de Datos")
+# Gráficos de información del postulante
+st.subheader("Estrato Socioeconómico")
+fig_estrato_socioeconomico = grafico_informacion_postulante(data, 'Estrato Socioeconómico', 'Distribución por Estrato Socioeconómico')
+st.plotly_chart(fig_estrato_socioeconomico)
 
-st.subheader("Distribución de Ingreso Mensual")
-fig_ingreso_mensual = grafico_ingreso_mensual(data)
+st.subheader("Sexo Biológico")
+fig_sexo biologico = grafico_informacion_postulante(data, 'Sexo Biológico', 'Distribución por Sexo Biológico')
+st.plotly_chart(fig_sexo_biologico)
+
+st.subheader("Rango de Edad")
+fig_rango_edad = grafico_informacion_postulante(data, 'Rango de Edad', 'Distribución por Rango de Edad')
+st.plotly_chart(fig_rango_edad)
+
+st.subheader("Ubicación de Residencia")
+fig_ubicacion_residencia = grafico_informacion_postulante(data, 'Ubicación de Residencia', 'Distribución por Ubicación de Residencia')
+st.plotly_chart(fig_ubicacion_residencia)
+
+st.subheader("Año de Finalización del Pregrado")
+fig_ano_finalizacion = go.Figure(go.Histogram(
+    x=data['Año de Finalización del Pregrado'],
+    marker_color='lightcoral'
+))
+fig_ano_finalizacion.update_layout(
+    title='Año de Finalización del Pregrado',
+    xaxis_title='Año',
+    yaxis_title='Cantidad',
+    template='plotly_dark'
+)
+st.plotly_chart(fig_ano_finalizacion)
+
+st.subheader("Área del Conocimiento del Título de Pregrado")
+fig_area_conocimiento_pregrado = grafico_informacion_postulante(data, 'Área del Conocimiento (Pregrado)', 'Distribución por Área del Conocimiento del Título de Pregrado')
+st.plotly_chart(fig_area_conocimiento_pregrado)
+
+st.subheader("Áreas de Conocimiento de los Programas a los Cuales Desean Aplicar")
+fig_area_conocimiento_aplicacion = grafico_informacion_postulante(data, 'Área del Conocimiento (Aplicación)', 'Distribución por Área de Conocimiento de Programas')
+st.plotly_chart(fig_area_conocimiento_aplicacion)
+
+st.subheader("Empleado, Desempleado o Independiente")
+fig_empleo_estado = grafico_informacion_postulante(data, 'Empleado, Desempleado o Independiente', 'Distribución por Estado de Empleo')
+st.plotly_chart(fig_empleo_estado)
+
+st.subheader("Antigüedad de su Último Empleo")
+fig_antiguedad_empleo = grafico_informacion_postulante(data, 'Antigüedad Último Empleo', 'Distribución por Antigüedad de Último Empleo')
+st.plotly_chart(fig_antiguedad_empleo)
+
+st.subheader("Ingreso Mensual del Postulante")
+fig_ingreso_mensual = go.Figure(go.Histogram(
+    x=data['Ingreso Mensual'],
+    marker_color='lightseagreen'
+))
+fig_ingreso_mensual.update_layout(
+    title='Ingreso Mensual del Postulante',
+    xaxis_title='Ingreso Mensual',
+    yaxis_title='Cantidad',
+    template='plotly_dark'
+)
 st.plotly_chart(fig_ingreso_mensual)
 
-st.subheader("Distribución por Patrimonio (Rango)")
-fig_patrimonio_rango = grafico_patrimonio_rango(data)
+st.subheader("Estado Civil")
+fig_estado_civil = grafico_informacion_postulante(data, 'Estado Civil', 'Distribución por Estado Civil')
+st.plotly_chart(fig_estado_civil)
+
+st.subheader("Patrimonio (Rango)")
+fig_patrimonio_rango = grafico_informacion_postulante(data, 'Patrimonio (Rango)', 'Distribución por Patrimonio (Rango)')
 st.plotly_chart(fig_patrimonio_rango)
 
 st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
 fig_desembolsos_periodos = grafico_desembolsos_periodos(data)
 st.plotly_chart(fig_desembolsos_periodos)
 
+st.header("Información de Instituciones de Educación Superior (IES)")
+
+# Gráficos de IES
+st.subheader("Modalidades de Instituciones de Educación Superior (IES)")
+fig_modalidad_ies = grafico_modalidad_ies(data_ies)
+st.plotly_chart(fig_modalidad_ies)
+
+st.subheader("Niveles de Estudios Ofrecidos por IES")
+fig_nivel_estudios_ies = grafico_nivel_estudios_ies(data_ies)
+st.plotly_chart(fig_nivel_estudios_ies)
+
+st.header("Renovaciones y Deserciones")
+
+# Gráficos de renovaciones y deserciones
 st.subheader("Renovaciones Realizadas vs Renovaciones Requeridas")
 fig_renovaciones = grafico_renovaciones(data_ies)
 st.plotly_chart(fig_renovaciones)
 
-st.subheader("Estudiantes con Total de Renovaciones Desembolsadas")
-fig_renovaciones_desembolsadas = grafico_renovaciones_desembolsadas(data_ies)
-st.plotly_chart(fig_renovaciones_desembolsadas)
-
 st.subheader("Deserciones y Suspensiones")
 fig_deserciones_suspensiones = grafico_deserciones_suspensiones(data_ies)
 st.plotly_chart(fig_deserciones_suspensiones)
-
-
 
