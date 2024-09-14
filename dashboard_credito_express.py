@@ -9,7 +9,7 @@ def generar_datos_dummy():
     n = 1000
     data = pd.DataFrame({
         'Periodo Académico': np.random.choice(['2023-I', '2023-II', '2024-I'], n),
-        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 1000, n),
+        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 10000, n),
         'Ingreso Mensual': np.random.randint(1300000, 20000000, n),
         'Estrato Socioeconómico': np.random.choice(['1', '2', '3', '4', '5','6'], n),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], n),
