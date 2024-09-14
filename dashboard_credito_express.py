@@ -267,7 +267,7 @@ def grafico_deserciones_suspensiones(data_ies):
     ))
     fig.update_layout(title='Deserciones y Suspensiones por Institución',
                       xaxis_title='Nombre de Institución',
-                      yaxis_title='Cantidad',
+                      yaxis_title='Monto Promedio',
                       barmode='group')
     return fig
 
