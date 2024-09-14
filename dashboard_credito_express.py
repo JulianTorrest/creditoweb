@@ -501,25 +501,25 @@ def main():
     fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(data_ies)
     st.plotly_chart(fig_renovaciones_vs_requeridas)
 
-    st.subheader('Distribución por Modalidad')
+    st.subheader('17. Distribución por Modalidad')
     st.plotly_chart(grafico_modalidad(datos_ies))
 
-    st.subheader('Distribución por Nivel de Estudios')
+    st.subheader('18. Distribución por Nivel de Estudios')
     st.plotly_chart(grafico_nivel_estudios(datos_ies))
 
-    st.subheader('Distribución por Tipo de Institución (Pública vs Privada)')
+    st.subheader('19. Distribución por Tipo de Institución (Pública vs Privada)')
     st.plotly_chart(grafico_institucion_publica_privada(datos_ies))
 
-    st.subheader('Renovaciones Realizadas vs Requeridas')
+    st.subheader('20. Renovaciones Realizadas vs Requeridas')
     st.plotly_chart(grafico_renovaciones_vs_requeridas(datos_ies))
 
-    st.subheader('Total de Renovaciones Desembolsadas')
+    st.subheader('21. Total de Renovaciones Desembolsadas')
     st.plotly_chart(grafico_total_renovaciones_desembolsadas(datos_ies))
 
-    st.subheader('Deserciones y Suspensiones')
+    st.subheader('22. Deserciones y Suspensiones')
     st.plotly_chart(grafico_deserciones_suspensiones(datos_ies))
 
-    st.subheader('Nombre de la Institución vs Renovaciones Realizadas')
+    st.subheader('23. Nombre de la Institución vs Renovaciones Realizadas')
     st.plotly_chart(grafico_nombre_institucion(datos_ies))
 
 if __name__ == "__main__":
