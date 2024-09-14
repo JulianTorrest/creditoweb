@@ -29,37 +29,15 @@ def generar_datos_dummy():
     })
     return data
 
-# Datos ficticios para Instituciones de Educación Superior (IES)
-def generar_datos_ies():
-    universidades = [
-        'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
-        'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
-        'Universidad de la Sabana', 'Universidad de Cartagena', 'Universidad del Norte',
-        'Universidad de San Buenaventura'
-    ]
-    num_ies = len(universidades)
-    data = pd.DataFrame({
-        'Nombre de Institución': np.random.choice(universidades, 100),
-        'Modalidad': np.random.choice(['Presencial', 'Virtual', 'A Distancia'], 100),
-        'Nivel de Estudios': np.random.choice(['Especialización', 'Maestría', 'Doctorado', 'Especialidades Médicas'], 100),
-        'Tipo de Institución': np.random.choice(['Pública', 'Privada'], 100),
-        'Renovaciones Realizadas': np.random.randint(0, 50, 100),
-        'Renovaciones Requeridas': np.random.randint(0, 50, 100),
-        'Estudiantes con Renovaciones Desembolsadas': np.random.randint(0, 50, 100),
-        'Deserciones': np.random.randint(0, 10, 100),
-        'Suspensiones': np.random.randint(0, 10, 100)
-    })
-    return data
-
 # Función para el gráfico embudo de cantidad
 def grafico_funnel_cantidad(data):
-    total_solicitudes = len(data)
+    total_postulantes = len(data)
     total_aprobados = len(data[data['Monto Aprobado'] > 0])
     total_legalizados = len(data[data['Monto Legalizado'] > 0])
     total_desembolsos = len(data[data['Monto Desembolsado'] > 0])
 
-    etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Desembolsos']
-    valores = [total_solicitudes, total_aprobados, total_legalizados, total_desembolsos]
+    etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Con Desembolso']
+    valores = [total_postulantes, total_aprobados, total_legalizados, total_desembolsos]
 
     # Ajustar valores para evitar inconsistencias
     valores[1] = min(valores[1], valores[0])
