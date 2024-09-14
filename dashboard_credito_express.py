@@ -8,7 +8,7 @@ def generar_datos_dummy():
     np.random.seed(0)
     n = 1000
     data = pd.DataFrame({
-        'Estrato Socioeconómico': np.random.choice(['Alto', 'Medio', 'Bajo'], n),
+        'Estrato Socioeconómico': np.random.choice(['1', '2', '3','4','5','6'], n),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], n),
         'Rango de Edad': np.random.choice(['18-24', '25-34', '35-44', '45-54', '55-64', '65+'], n),
         'Ubicación de Residencia': np.random.choice(['Urbana', 'Rural'], n),
@@ -17,7 +17,7 @@ def generar_datos_dummy():
         'Área del Conocimiento (Aplicación)': np.random.choice(['Negocios', 'Tecnología', 'Salud', 'Educación', 'Ciencias'], n),
         'Empleado, Desempleado o Independiente': np.random.choice(['Empleado', 'Desempleado', 'Independiente'], n),
         'Antigüedad Último Empleo': np.random.choice(['<1 año', '1-3 años', '4-6 años', '7-10 años', '>10 años'], n),
-        'Ingreso Mensual': np.random.randint(500, 5000, size=n),
+        'Ingreso Mensual': np.random.randint(1500000, 20000000, size=n),
         'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado', 'Viudo'], n),
         'Patrimonio (Rango)': np.random.choice(['<10,000', '10,000-50,000', '50,000-100,000', '>100,000'], n),
         'Periodo Académico': np.random.choice(['2023-1', '2023-2', '2024-1', '2024-2'], n),
@@ -28,7 +28,7 @@ def generar_datos_dummy():
 # Función para generar datos dummy para IES
 def generar_datos_ies():
     np.random.seed(1)
-    n = 10
+    n = 1000
     data_ies = pd.DataFrame({
         'Nombre de Institución': ['Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad de Antioquia', 
                                   'Universidad del Rosario', 'Universidad Javeriana', 'Universidad del Norte',
@@ -46,7 +46,7 @@ def generar_datos_ies():
 def grafico_funnel_cantidad(data):
     cantidad_total = data.shape[0]
     
-    cantidad_aprobados = int(cantidad_total * 0.8)
+    cantidad_aprobados = int(cantidad_total * 0.95)
     cantidad_legalizados = int(cantidad_aprobados * 0.9)
     cantidad_desembolsos = int(cantidad_legalizados * 0.85)
     
@@ -71,7 +71,7 @@ def grafico_funnel_cantidad(data):
 # Función para el gráfico de embudo de monto
 def grafico_funnel_monto(data):
     monto_solicitado = data['Ingreso Mensual'].sum()
-    monto_aprobado = monto_solicitado * 0.8
+    monto_aprobado = monto_solicitado * 0.95
     monto_legalizado = monto_aprobado * 0.9
     monto_desembolsado = monto_legalizado * 0.85
 
