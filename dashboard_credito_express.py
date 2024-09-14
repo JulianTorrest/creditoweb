@@ -76,9 +76,9 @@ def grafico_cantidad_postulantes(data):
 # Función para el gráfico embudo de cantidad
 def grafico_funnel_cantidad(data):
     total_solicitudes = len(data)
-    total_aprobados = len(data[data['Aprobado']])
-    total_legalizados = len(data[data['Legalizado']])
-    total_desembolsos = len(data[data['Desembolso']])
+    total_aprobados = len(data[data['Monto Aprobado'] > 0])
+    total_legalizados = len(data[data['Monto Legalizado'] > 0])
+    total_desembolsos = len(data[data['Monto Desembolsado'] > 0])
 
     etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Desembolsos']
     valores = [total_solicitudes, total_aprobados, total_legalizados, total_desembolsos]
@@ -100,10 +100,10 @@ def grafico_funnel_cantidad(data):
 
 # Función para el gráfico embudo de monto
 def grafico_funnel_monto(data):
-    monto_solicitado = data['Monto Solicitado (COP)'].sum()
-    monto_aprobado = data['Monto Aprobado (COP)'].sum()
-    monto_legalizado = data['Monto Legalizado (COP)'].sum()
-    monto_desembolsado = data['Monto Desembolsado (COP)'].sum()
+    monto_solicitado = data['Monto Solicitado'].sum()
+    monto_aprobado = data['Monto Aprobado'].sum()
+    monto_legalizado = data['Monto Legalizado'].sum()
+    monto_desembolsado = data['Monto Desembolsado'].sum()
 
     etapas = ['Monto Solicitado', 'Monto Aprobado', 'Monto Legalizado', 'Monto Desembolsado']
     valores = [monto_solicitado, monto_aprobado, monto_legalizado, monto_desembolsado]
@@ -115,6 +115,24 @@ def grafico_funnel_monto(data):
     ))
 
     fig.update_layout(title='Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado')
+
+    return fig
+
+# Función para el gráfico de distribución de ingreso mensual
+def grafico_ingreso_mensual(data):
+    bins = [0, 1000000, 3000000, 6000000, 9000000, 12000000, 15000000, 18000000, 21000000, 24000000, 27000000, 30000000, 120000000]
+    labels = ['≤1M', '1M-3M', '3M-6M', '6M-9M', '9M-12M', '12M-15M', '15M-18M', '18M-21M', '21M-24M', '24M-27M', '27M-30M', '30M+']
+    data['Ingreso Mensual (COP)'] = pd.cut(data['Ingreso Mensual'], bins=bins, labels=labels)
+    ingreso_mensual_dist = data['Ingreso Mensual (COP)'].value_counts().sort_index()
+
+    fig = go.Figure(go.Bar(
+        x=ingreso_mensual_dist.index,
+        y=ingreso_mensual_dist.values,
+        text=ingreso_mensual_dist.values,
+        textposition='auto'
+    ))
+
+    fig.update_layout(title='Distribución de Ingreso Mensual', xaxis_title='Rango de Ingreso Mensual', yaxis_title='Número de Postulantes')
 
     return fig
 
