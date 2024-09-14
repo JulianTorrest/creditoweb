@@ -1,143 +1,99 @@
 import streamlit as st
+import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 
-# Función para generar datos dummy para el bloque general
-def generar_datos_dummy(num_solicitudes=300):
-    np.random.seed(1)  # Para reproducibilidad
+# Generar datos dummy para ejemplo
+def generar_datos_dummy():
+    np.random.seed(42)
+    num_postulantes = 1000
     data = pd.DataFrame({
-        'Postulante': [f'Postulante {i+1}' for i in range(num_solicitudes)],
-        'Aprobado': np.random.choice([True, False], num_solicitudes),
-        'Legalizado': np.random.choice([True, False], num_solicitudes),
-        'Desembolso': np.random.choice([True, False], num_solicitudes),
-        'Monto Solicitado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
-        'Monto Aprobado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
-        'Monto Legalizado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
-        'Monto Desembolsado (COP)': np.random.randint(1000000, 5000000, num_solicitudes),
-        'Estrato Socioeconómico': np.random.choice([1, 2, 3, 4, 5], num_solicitudes),
-        'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], num_solicitudes),
-        'Estado de Empleo': np.random.choice(['Empleado', 'Desempleado', 'Independiente'], num_solicitudes),
-        'Ingreso Mensual (COP)': np.random.randint(1000000, 15000000, num_solicitudes),
-        'Rango de Edad': np.random.choice(['18-25', '26-35', '36-45', '46-60'], num_solicitudes),
-        'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado'], num_solicitudes),
-        'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Salud', 'Humanidades'], num_solicitudes),
-        'Patrimonio (Rango)': np.random.choice(['Bajo', 'Medio', 'Alto'], num_solicitudes),
-        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 10, num_solicitudes),
-        'Periodo Académico': np.random.choice([f'Semestre {i+1}' for i in range(10)], num_solicitudes)
+        'Estrato Socioeconómico': np.random.choice(['Estrato 1', 'Estrato 2', 'Estrato 3', 'Estrato 4', 'Estrato 5'], num_postulantes),
+        'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], num_postulantes),
+        'Rango de Edad': np.random.choice(['18-25', '26-35', '36-45', '46-55', '56+'], num_postulantes),
+        'Ubicación de Residencia': np.random.choice(['Zona Urbana', 'Zona Rural'], num_postulantes),
+        'Año de Finalización del Pregrado': np.random.choice(range(2010, 2021), num_postulantes),
+        'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ciencias Exactas', 'Ingeniería', 'Salud', 'Humanidades'], num_postulantes),
+        'Área del Conocimiento (Aplicación)': np.random.choice(['Ciencias Sociales', 'Ciencias Exactas', 'Ingeniería', 'Salud', 'Humanidades'], num_postulantes),
+        'Empleado, Desempleado o Independiente': np.random.choice(['Empleado', 'Desempleado', 'Independiente'], num_postulantes),
+        'Antigüedad Último Empleo': np.random.choice(['Menos de 1 año', '1-3 años', '4-6 años', 'Más de 6 años'], num_postulantes),
+        'Ingreso Mensual': np.random.randint(1000000, 120000000, num_postulantes),
+        'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado', 'Viudo'], num_postulantes),
+        'Patrimonio (Rango)': np.random.choice(['Menos de 1M', '1M-3M', '3M-6M', '6M-10M', '10M-20M', '20M-50M', '50M-100M', '100M-120M', 'Más de 120M'], num_postulantes),
+        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 6, num_postulantes),
+        'Periodo Académico': np.random.choice([f'Semestre {i+1}' for i in range(10)], num_postulantes),
+        'Monto Solicitado': np.random.randint(1000000, 50000000, num_postulantes),
+        'Monto Aprobado': np.random.randint(1000000, 50000000, num_postulantes),
+        'Monto Legalizado': np.random.randint(1000000, 50000000, num_postulantes),
+        'Monto Desembolsado': np.random.randint(1000000, 50000000, num_postulantes)
     })
     return data
 
-# Función para generar datos dummy para el bloque IES
-def generar_datos_ies(num_instituciones=20):
-    np.random.seed(1)  # Para reproducibilidad
+# Datos ficticios para Instituciones de Educación Superior (IES)
+def generar_datos_ies():
     universidades = [
         'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
         'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
         'Universidad de la Sabana', 'Universidad de Cartagena', 'Universidad del Norte',
         'Universidad de San Buenaventura'
     ]
-    modalidades = np.random.choice(['Presencial', 'Virtual', 'A Distancia'], num_instituciones)
-    niveles_estudio = np.random.choice(['Especialización', 'Maestría', 'Doctorado', 'Especialidades Médicas'], num_instituciones)
-    nombres_institucion = np.random.choice(universidades, num_instituciones)
-    tipo_institucion = np.random.choice(['Pública', 'Privada'], num_instituciones)
-    renovaciones_requeridas = np.random.randint(5, 20, num_instituciones)
-    renovaciones_realizadas = np.random.randint(0, 15, num_instituciones)
-    estudiantes_renovaciones = np.random.randint(0, 100, num_instituciones)
-    deserciones = np.random.randint(0, 10, num_instituciones)
-    suspensiones = np.random.randint(0, 10, num_instituciones)
-
-    data_ies = pd.DataFrame({
-        'Modalidad': modalidades,
-        'Nivel de Estudios': niveles_estudio,
-        'Nombre de Institución': nombres_institucion,
-        'Tipo de Institución': tipo_institucion,
-        'Renovaciones Requeridas': renovaciones_requeridas,
-        'Renovaciones Realizadas': renovaciones_realizadas,
-        'Estudiantes con Renovaciones Desembolsadas': estudiantes_renovaciones,
-        'Deserciones': deserciones,
-        'Suspensiones': suspensiones
+    num_ies = len(universidades)
+    data = pd.DataFrame({
+        'Nombre de Institución': np.random.choice(universidades, 100),
+        'Modalidad': np.random.choice(['Presencial', 'Virtual', 'A Distancia'], 100),
+        'Nivel de Estudios': np.random.choice(['Especialización', 'Maestría', 'Doctorado', 'Especialidades Médicas'], 100),
+        'Tipo de Institución': np.random.choice(['Pública', 'Privada'], 100),
+        'Renovaciones Realizadas': np.random.randint(0, 50, 100),
+        'Renovaciones Requeridas': np.random.randint(0, 50, 100),
+        'Estudiantes con Renovaciones Desembolsadas': np.random.randint(0, 50, 100),
+        'Deserciones': np.random.randint(0, 10, 100),
+        'Suspensiones': np.random.randint(0, 10, 100)
     })
-
-    return data_ies
-
-# Función para el gráfico embudo de cantidad
-def grafico_funnel_cantidad(data):
-    total_solicitudes = len(data)
-    total_aprobados = len(data[data['Aprobado']])
-    total_legalizados = len(data[data['Legalizado']])
-    total_desembolsos = len(data[data['Desembolso']])
-
-    etapas = ['Postulantes', 'Aprobados', 'Legalizados', 'Desembolsos']
-    valores = [total_solicitudes, total_aprobados, total_legalizados, total_desembolsos]
-
-    # Ajustar valores para evitar inconsistencias
-    valores[1] = min(valores[1], valores[0])
-    valores[2] = min(valores[2], valores[1])
-    valores[3] = min(valores[3], valores[2])
-
-    fig = go.Figure(go.Funnel(
-        y=etapas,
-        x=valores,
-        textinfo="value+percent initial"
-    ))
-
-    fig.update_layout(title='Cantidad de Postulantes → Aprobados → Legalizados → Desembolsos')
-
-    return fig
-
-# Función para el gráfico embudo de monto
-def grafico_funnel_monto(data):
-    monto_solicitado = data['Monto Solicitado (COP)'].sum()
-    monto_aprobado = data['Monto Aprobado (COP)'].sum()
-    monto_legalizado = data['Monto Legalizado (COP)'].sum()
-    monto_desembolsado = data['Monto Desembolsado (COP)'].sum()
-
-    etapas = ['Monto Solicitado', 'Monto Aprobado', 'Monto Legalizado', 'Monto Desembolsado']
-    valores = [monto_solicitado, monto_aprobado, monto_legalizado, monto_desembolsado]
-
-    fig = go.Figure(go.Funnel(
-        y=etapas,
-        x=valores,
-        textinfo="value+percent initial"
-    ))
-
-    fig.update_layout(title='Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado')
-
-    return fig
+    return data
 
 # Función para el gráfico de distribución de ingreso mensual
 def grafico_ingreso_mensual(data):
-    bins = [0, 1000000, 3000000, 6000000, 9000000, 12000000, 15000000, 18000000, 21000000, 24000000, 27000000, 30000000, 120000000]
-    labels = ['≤1M', '1M-3M', '3M-6M', '6M-9M', '9M-12M', '12M-15M', '15M-18M', '18M-21M', '21M-24M', '24M-27M', '27M-30M', '30M+']
-    data['Ingreso Mensual (COP)'] = pd.cut(data['Ingreso Mensual (COP)'], bins=bins, labels=labels)
-    ingreso_mensual_dist = data['Ingreso Mensual (COP)'].value_counts().sort_index()
+    bins = [0, 1000000, 3000000, 6000000, 9000000, 12000000, 15000000, 20000000, 50000000, 100000000, 120000000, float('inf')]
+    labels = ['Menos de 1M', '1M-3M', '3M-6M', '6M-9M', '9M-12M', '12M-15M', '15M-20M', '20M-50M', '50M-100M', '100M-120M', 'Más de 120M']
+    data['Ingreso Mensual Rango'] = pd.cut(data['Ingreso Mensual'], bins=bins, labels=labels, right=False)
+    
+    ingreso_dist = data['Ingreso Mensual Rango'].value_counts().sort_index()
 
     fig = go.Figure(go.Bar(
-        x=ingreso_mensual_dist.index,
-        y=ingreso_mensual_dist.values,
-        text=ingreso_mensual_dist.values,
-        textposition='auto'
+        x=ingreso_dist.index,
+        y=ingreso_dist.values,
+        text=ingreso_dist.values,
+        textposition='auto',
+        marker_color='royalblue'
     ))
 
-    fig.update_layout(title='Distribución de Ingreso Mensual', xaxis_title='Rango de Ingreso Mensual', yaxis_title='Número de Postulantes')
+    fig.update_layout(
+        title='Distribución de Ingreso Mensual',
+        xaxis_title='Rango de Ingreso Mensual',
+        yaxis_title='Número de Postulantes',
+        template='plotly_dark'
+    )
 
     return fig
 
 # Función para el gráfico de distribución por patrimonio
 def grafico_patrimonio_rango(data):
-    # Ajustar para manejar valores ficticios
-    data['Patrimonio (Rango)'] = pd.Categorical(data['Patrimonio (Rango)'], categories=['Bajo', 'Medio', 'Alto'], ordered=True)
     patrimonio_dist = data['Patrimonio (Rango)'].value_counts().sort_index()
 
     fig = go.Figure(go.Bar(
         x=patrimonio_dist.index,
         y=patrimonio_dist.values,
         text=patrimonio_dist.values,
-        textposition='auto'
+        textposition='auto',
+        marker_color='darkorange'
     ))
 
-    fig.update_layout(title='Distribución por Patrimonio (Rango)', xaxis_title='Rango de Patrimonio', yaxis_title='Número de Postulantes')
+    fig.update_layout(
+        title='Distribución por Patrimonio (Rango)',
+        xaxis_title='Rango de Patrimonio',
+        yaxis_title='Número de Postulantes',
+        template='plotly_dark'
+    )
 
     return fig
 
@@ -147,14 +103,20 @@ def grafico_desembolsos_periodos(data):
     desembolsos_periodos = data[data['Periodo Académico'].isin(periodos_definidos)]
     cantidad_desembolsos_periodos = desembolsos_periodos.groupby('Periodo Académico')['Cantidad de Desembolsos Requeridos'].sum().reindex(periodos_definidos).fillna(0)
 
-    fig = go.Figure(go.Bar(
+    fig = go.Figure(go.Line(
         x=cantidad_desembolsos_periodos.index,
         y=cantidad_desembolsos_periodos.values,
-        text=cantidad_desembolsos_periodos.values,
-        textposition='auto'
+        mode='lines+markers',
+        line=dict(color='deepskyblue', width=2),
+        marker=dict(color='darkblue', size=8)
     ))
 
-    fig.update_layout(title='Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico', xaxis_title='Periodo Académico', yaxis_title='Cantidad de Desembolsos Requeridos')
+    fig.update_layout(
+        title='Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico',
+        xaxis_title='Periodo Académico',
+        yaxis_title='Cantidad de Desembolsos Requeridos',
+        template='plotly_dark'
+    )
 
     return fig
 
@@ -172,20 +134,28 @@ def grafico_renovaciones(data_ies):
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
         y=data_ies_filtrado['Renovaciones Requeridas'],
-        name='Renovaciones Requeridas'
+        name='Renovaciones Requeridas',
+        marker_color='lightcoral'
     ))
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
         y=data_ies_filtrado['Renovaciones Realizadas'],
-        name='Renovaciones Realizadas'
+        name='Renovaciones Realizadas',
+        marker_color='limegreen'
     ))
 
-    fig.update_layout(title='Renovaciones Realizadas vs Renovaciones Requeridas', barmode='group', xaxis_title='Nombre de Institución', yaxis_title='Cantidad')
+    fig.update_layout(
+        title='Renovaciones Realizadas vs Renovaciones Requeridas',
+        xaxis_title='Nombre de Institución',
+        yaxis_title='Número de Renovaciones',
+        barmode='group',
+        template='plotly_dark'
+    )
 
     return fig
 
 # Función para el gráfico de estudiantes con total de renovaciones desembolsadas
-def grafico_estudiantes_renovaciones(data_ies):
+def grafico_renovaciones_desembolsadas(data_ies):
     universidades_principales = [
         'Universidad Nacional de Colombia', 'Universidad de los Andes', 'Universidad Javeriana',
         'Universidad de Antioquia', 'Universidad del Rosario', 'Universidad EAFIT',
@@ -198,10 +168,16 @@ def grafico_estudiantes_renovaciones(data_ies):
         x=data_ies_filtrado['Nombre de Institución'],
         y=data_ies_filtrado['Estudiantes con Renovaciones Desembolsadas'],
         text=data_ies_filtrado['Estudiantes con Renovaciones Desembolsadas'],
-        textposition='auto'
+        textposition='auto',
+        marker_color='mediumseagreen'
     ))
 
-    fig.update_layout(title='Estudiantes con Total de Renovaciones Desembolsadas', xaxis_title='Nombre de Institución', yaxis_title='Número de Estudiantes')
+    fig.update_layout(
+        title='Estudiantes con Total de Renovaciones Desembolsadas',
+        xaxis_title='Nombre de Institución',
+        yaxis_title='Número de Estudiantes',
+        template='plotly_dark'
+    )
 
     return fig
 
@@ -219,92 +195,71 @@ def grafico_deserciones_suspensiones(data_ies):
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
         y=data_ies_filtrado['Deserciones'],
-        name='Deserciones'
+        name='Deserciones',
+        marker_color='orangered'
     ))
     fig.add_trace(go.Bar(
         x=data_ies_filtrado['Nombre de Institución'],
         y=data_ies_filtrado['Suspensiones'],
-        name='Suspensiones'
+        name='Suspensiones',
+        marker_color='gold'
     ))
 
-    fig.update_layout(title='Deserciones y Suspensiones', barmode='group', xaxis_title='Nombre de Institución', yaxis_title='Número')
+    fig.update_layout(
+        title='Deserciones y Suspensiones',
+        xaxis_title='Nombre de Institución',
+        yaxis_title='Número de Casos',
+        barmode='group',
+        template='plotly_dark'
+    )
 
     return fig
 
-# Función principal de la aplicación Streamlit
-def pagina_principal():
-    st.title('Dashboard de Convocatorias y Postulantes')
+# Página principal de Streamlit
+st.title("Dashboard de Convocatorias y Estudiantes")
 
-    # Cargar datos
-    data = generar_datos_dummy()
-    data_ies = generar_datos_ies()
+# Cargar datos
+data = generar_datos_dummy()
+data_ies = generar_datos_ies()
 
-    # Sección General
-    st.header("Información de la Convocatoria")
-    st.markdown("Consulta más información en [página de la convocatoria](http://example.com).")
-    st.markdown("Cronograma de la convocatoria: Fechas de apertura y cierre.")
+st.header("Información General")
 
-    st.subheader("Cantidad de Postulantes → Aprobados → Legalizados → Desembolsos")
-    st.plotly_chart(grafico_funnel_cantidad(data))
+# Monto solicitado vs monto aprobado vs monto legalizado vs monto desembolsado
+st.subheader("Monto Solicitado, Aprobado, Legalizado y Desembolsado")
+monto_solicitado = data['Monto Solicitado'].sum()
+monto_aprobado = data['Monto Aprobado'].sum()
+monto_legalizado = data['Monto Legalizado'].sum()
+monto_desembolsado = data['Monto Desembolsado'].sum()
 
-    st.subheader("Monto Solicitado → Monto Aprobado → Monto Legalizado → Monto Desembolsado")
-    st.plotly_chart(grafico_funnel_monto(data))
+st.write(f"Monto Solicitado: ${monto_solicitado:,.0f}")
+st.write(f"Monto Aprobado: ${monto_aprobado:,.0f}")
+st.write(f"Monto Legalizado: ${monto_legalizado:,.0f}")
+st.write(f"Monto Desembolsado: ${monto_desembolsado:,.0f}")
 
-    st.subheader("Distribución de Ingreso Mensual")
-    st.plotly_chart(grafico_ingreso_mensual(data))
+st.header("Gráficos de Datos")
 
-    st.subheader("Distribución por Patrimonio (Rango)")
-    st.plotly_chart(grafico_patrimonio_rango(data))
+st.subheader("Distribución de Ingreso Mensual")
+fig_ingreso_mensual = grafico_ingreso_mensual(data)
+st.plotly_chart(fig_ingreso_mensual)
 
-    st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
-    st.plotly_chart(grafico_desembolsos_periodos(data))
+st.subheader("Distribución por Patrimonio (Rango)")
+fig_patrimonio_rango = grafico_patrimonio_rango(data)
+st.plotly_chart(fig_patrimonio_rango)
 
-    # Sección Información del Postulante
-    st.header("Información del Postulante")
+st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
+fig_desembolsos_periodos = grafico_desembolsos_periodos(data)
+st.plotly_chart(fig_desembolsos_periodos)
 
-    st.subheader("Distribución por Estrato Socioeconómico")
-    st.bar_chart(data['Estrato Socioeconómico'].value_counts())
+st.subheader("Renovaciones Realizadas vs Renovaciones Requeridas")
+fig_renovaciones = grafico_renovaciones(data_ies)
+st.plotly_chart(fig_renovaciones)
 
-    st.subheader("Distribución por Sexo Biológico")
-    st.bar_chart(data['Sexo Biológico'].value_counts())
+st.subheader("Estudiantes con Total de Renovaciones Desembolsadas")
+fig_renovaciones_desembolsadas = grafico_renovaciones_desembolsadas(data_ies)
+st.plotly_chart(fig_renovaciones_desembolsadas)
 
-    st.subheader("Distribución por Rango de Edad")
-    st.bar_chart(data['Rango de Edad'].value_counts())
+st.subheader("Deserciones y Suspensiones")
+fig_deserciones_suspensiones = grafico_deserciones_suspensiones(data_ies)
+st.plotly_chart(fig_deserciones_suspensiones)
 
-    st.subheader("Distribución por Área del Conocimiento del Título de Pregrado")
-    st.bar_chart(data['Área del Conocimiento (Pregrado)'].value_counts())
-
-    st.subheader("Distribución por Estado Civil")
-    st.bar_chart(data['Estado Civil'].value_counts())
-
-    st.subheader("Distribución por Patrimonio (Rango)")
-    st.bar_chart(data['Patrimonio (Rango)'].value_counts())
-
-    st.subheader("Cantidad de Desembolsos Requeridos vs Periodos Definidos del Programa Académico")
-    cantidad_desembolsos_periodos = data.groupby('Periodo Académico')['Cantidad de Desembolsos Requeridos'].sum().reset_index()
-    st.bar_chart(cantidad_desembolsos_periodos.set_index('Periodo Académico'))
-
-    # Sección Información de las Instituciones de Educación Superior (IES)
-    st.header("Información de las Instituciones de Educación Superior (IES)")
-
-    st.subheader("Modalidad de la IES")
-    st.bar_chart(data_ies['Modalidad'].value_counts())
-
-    st.subheader("Nivel de Estudios Ofrecido")
-    st.bar_chart(data_ies['Nivel de Estudios'].value_counts())
-
-    st.subheader("Tipo de Institución")
-    st.bar_chart(data_ies['Tipo de Institución'].value_counts())
-
-    st.subheader("Renovaciones Realizadas vs Renovaciones Requeridas")
-    st.plotly_chart(grafico_renovaciones(data_ies))
-
-    st.subheader("Estudiantes con Total de Renovaciones Desembolsadas")
-    st.plotly_chart(grafico_estudiantes_renovaciones(data_ies))
-
-    st.subheader("Deserciones y Suspensiones")
-    st.plotly_chart(grafico_deserciones_suspensiones(data_ies))
-
-# Ejecutar la aplicación de Streamlit
-pagina_principal()
 
