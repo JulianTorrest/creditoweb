@@ -322,6 +322,108 @@ def grafico_desembolsos_periodo_academico(data):
 
     return fig
 
+# Función para el gráfico de modalidad
+def grafico_modalidad(data_ies):
+    fig = go.Figure()
+    modalidad_counts = data_ies['Modalidad'].value_counts()
+    fig.add_trace(go.Pie(
+        labels=modalidad_counts.index,
+        values=modalidad_counts.values,
+        name='Modalidad'
+    ))
+    fig.update_layout(title='Distribución por Modalidad')
+    return fig
+
+# Función para el gráfico de nivel de estudios
+def grafico_nivel_estudios(data_ies):
+    fig = go.Figure()
+    nivel_counts = data_ies['Nivel de Estudios'].value_counts()
+    fig.add_trace(go.Bar(
+        x=nivel_counts.index,
+        y=nivel_counts.values,
+        name='Nivel de Estudios'
+    ))
+    fig.update_layout(title='Distribución por Nivel de Estudios',
+                      xaxis_title='Nivel de Estudios',
+                      yaxis_title='Cantidad')
+    return fig
+
+# Función para el gráfico de institución pública vs privada
+def grafico_institucion_publica_privada(data_ies):
+    fig = go.Figure()
+    institucion_counts = data_ies['Institución Pública o Privada'].value_counts()
+    fig.add_trace(go.Pie(
+        labels=institucion_counts.index,
+        values=institucion_counts.values,
+        name='Institución Pública o Privada'
+    ))
+    fig.update_layout(title='Distribución por Tipo de Institución')
+    return fig
+
+# Función para el gráfico de renovaciones realizadas vs requeridas
+def grafico_renovaciones_vs_requeridas(data_ies):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Renovaciones Realizadas'],
+        name='Renovaciones Realizadas'
+    ))
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Renovaciones Requeridas'],
+        name='Renovaciones Requeridas'
+    ))
+    fig.update_layout(title='Renovaciones Realizadas vs Requeridas',
+                      xaxis_title='Nombre de Institución',
+                      yaxis_title='Número de Renovaciones',
+                      barmode='group')
+    return fig
+
+# Función para el gráfico de total de renovaciones desembolsadas
+def grafico_total_renovaciones_desembolsadas(data_ies):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Total Renovaciones Desembolsadas'],
+        name='Total Renovaciones Desembolsadas'
+    ))
+    fig.update_layout(title='Total de Renovaciones Desembolsadas',
+                      xaxis_title='Nombre de Institución',
+                      yaxis_title='Monto Total')
+    return fig
+
+# Función para el gráfico de deserciones y suspensiones
+def grafico_deserciones_suspensiones(data_ies):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Deserciones'],
+        name='Deserciones'
+    ))
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Suspensiones'],
+        name='Suspensiones'
+    ))
+    fig.update_layout(title='Deserciones y Suspensiones',
+                      xaxis_title='Nombre de Institución',
+                      yaxis_title='Número',
+                      barmode='group')
+    return fig
+
+# Función para el gráfico de nombre de la institución
+def grafico_nombre_institucion(data_ies):
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data_ies['Nombre de Institución'],
+        y=data_ies['Renovaciones Realizadas'],
+        name='Renovaciones Realizadas'
+    ))
+    fig.update_layout(title='Nombre de la Institución vs Renovaciones Realizadas',
+                      xaxis_title='Nombre de Institución',
+                      yaxis_title='Número de Renovaciones')
+    return fig
+
 # Función principal de Streamlit
 def main():
     st.title('Dashboard de Datos de Postulantes')
@@ -398,6 +500,27 @@ def main():
     st.subheader('16. Renovaciones Realizadas vs Requeridas')
     fig_renovaciones_vs_requeridas = grafico_renovaciones_vs_requeridas(data_ies)
     st.plotly_chart(fig_renovaciones_vs_requeridas)
+
+    st.subheader('Distribución por Modalidad')
+    st.plotly_chart(grafico_modalidad(datos_ies))
+
+    st.subheader('Distribución por Nivel de Estudios')
+    st.plotly_chart(grafico_nivel_estudios(datos_ies))
+
+    st.subheader('Distribución por Tipo de Institución (Pública vs Privada)')
+    st.plotly_chart(grafico_institucion_publica_privada(datos_ies))
+
+    st.subheader('Renovaciones Realizadas vs Requeridas')
+    st.plotly_chart(grafico_renovaciones_vs_requeridas(datos_ies))
+
+    st.subheader('Total de Renovaciones Desembolsadas')
+    st.plotly_chart(grafico_total_renovaciones_desembolsadas(datos_ies))
+
+    st.subheader('Deserciones y Suspensiones')
+    st.plotly_chart(grafico_deserciones_suspensiones(datos_ies))
+
+    st.subheader('Nombre de la Institución vs Renovaciones Realizadas')
+    st.plotly_chart(grafico_nombre_institucion(datos_ies))
 
 if __name__ == "__main__":
     main()
