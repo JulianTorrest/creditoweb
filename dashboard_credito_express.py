@@ -264,7 +264,7 @@ fig_estrato_socioeconomico = grafico_informacion_postulante(data, 'Estrato Socio
 st.plotly_chart(fig_estrato_socioeconomico)
 
 st.subheader("Sexo Biológico")
-fig_sexo biologico = grafico_informacion_postulante(data, 'Sexo Biológico', 'Distribución por Sexo Biológico')
+fig_sexo_biologico = grafico_informacion_postulante(data, 'Sexo Biológico', 'Distribución por Sexo Biológico')
 st.plotly_chart(fig_sexo_biologico)
 
 st.subheader("Rango de Edad")
