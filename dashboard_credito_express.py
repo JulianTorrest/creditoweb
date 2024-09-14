@@ -51,28 +51,6 @@ def generar_datos_ies():
     })
     return data
 
-# Función para el gráfico de cantidad de postulantes, aprobados, legalizados y con desembolso
-def grafico_cantidad_postulantes(data):
-    cantidad_postulantes = len(data)
-    cantidad_aprobados = data['Monto Aprobado'].apply(lambda x: x > 0).sum()
-    cantidad_legalizados = data['Monto Legalizado'].apply(lambda x: x > 0).sum()
-    cantidad_con_desembolso = data['Monto Desembolsado'].apply(lambda x: x > 0).sum()
-    
-    fig = go.Figure(go.Bar(
-        x=['Postulantes Totales', 'Aprobados', 'Legalizados', 'Con Desembolso'],
-        y=[cantidad_postulantes, cantidad_aprobados, cantidad_legalizados, cantidad_con_desembolso],
-        marker_color=['lightblue', 'lightgreen', 'lightcoral', 'lightgoldenrodyellow']
-    ))
-    
-    fig.update_layout(
-        title='Cantidad de Postulantes y Estado de Desembolsos',
-        xaxis_title='Categoría',
-        yaxis_title='Cantidad',
-        template='plotly_dark'
-    )
-    
-    return fig
-
 # Función para el gráfico embudo de cantidad
 def grafico_funnel_cantidad(data):
     total_solicitudes = len(data)
@@ -117,6 +95,7 @@ def grafico_funnel_monto(data):
     fig.update_layout(title='Embudo de Monto')
 
     return fig
+
 
 # Función para el gráfico de distribución de ingreso mensual
 def grafico_ingreso_mensual(data):
