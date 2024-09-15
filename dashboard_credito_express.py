@@ -434,6 +434,40 @@ def main():
     data = generar_datos_dummy()
     datos_ies = generar_datos_ies()
 
+    # Filtros para el DataFrame `data`
+    st.sidebar.header('Filtros de Postulantes')
+    estrato_socioeconomico = st.sidebar.multiselect('Estrato Socioeconómico', options=data['Estrato Socioeconómico'].unique(), default=data['Estrato Socioeconómico'].unique())
+    sexo_biologico = st.sidebar.multiselect('Sexo Biológico', options=data['Sexo Biológico'].unique(), default=data['Sexo Biológico'].unique())
+    rango_edad = st.sidebar.multiselect('Rango de Edad', options=data['Rango de Edad'].unique(), default=data['Rango de Edad'].unique())
+    ubicacion_residencia = st.sidebar.multiselect('Ubicación de Residencia', options=data['Ubicación de Residencia'].unique(), default=data['Ubicación de Residencia'].unique())
+    area_conocimiento_pregrado = st.sidebar.multiselect('Área del Conocimiento (Pregrado)', options=data['Área del Conocimiento (Pregrado)'].unique(), default=data['Área del Conocimiento (Pregrado)'].unique())
+    area_conocimiento_aplicacion = st.sidebar.multiselect('Área del Conocimiento (Aplicación)', options=data['Área del Conocimiento (Aplicación)'].unique(), default=data['Área del Conocimiento (Aplicación)'].unique())
+    periodo_academico = st.sidebar.multiselect('Periodo Académico', options=data['Periodo Académico'].unique(), default=data['Periodo Académico'].unique())
+    
+    # Aplicar filtros
+    filtered_data = data[
+        (data['Estrato Socioeconómico'].isin(estrato_socioeconomico)) &
+        (data['Sexo Biológico'].isin(sexo_biologico)) &
+        (data['Rango de Edad'].isin(rango_edad)) &
+        (data['Ubicación de Residencia'].isin(ubicacion_residencia)) &
+        (data['Área del Conocimiento (Pregrado)'].isin(area_conocimiento_pregrado)) &
+        (data['Área del Conocimiento (Aplicación)'].isin(area_conocimiento_aplicacion)) &
+        (data['Periodo Académico'].isin(periodo_academico))
+    ]
+    
+    # Filtros para el DataFrame `datos_ies`
+    st.sidebar.header('Filtros de IES')
+    modalidad = st.sidebar.multiselect('Modalidad', options=datos_ies['Modalidad'].unique(), default=datos_ies['Modalidad'].unique())
+    nivel_estudios = st.sidebar.multiselect('Nivel de Estudios', options=datos_ies['Nivel de Estudios'].unique(), default=datos_ies['Nivel de Estudios'].unique())
+    institucion_publica_privada = st.sidebar.multiselect('Institución Pública o Privada', options=datos_ies['Institución Pública o Privada'].unique(), default=datos_ies['Institución Pública o Privada'].unique())
+    
+    # Aplicar filtros
+    filtered_datos_ies = datos_ies[
+        (datos_ies['Modalidad'].isin(modalidad)) &
+        (datos_ies['Nivel de Estudios'].isin(nivel_estudios)) &
+        (datos_ies['Institución Pública o Privada'].isin(institucion_publica_privada))
+    ]
+
     # Gráficos para los postulantes
     st.header('Gráficos de Postulantes')
 
