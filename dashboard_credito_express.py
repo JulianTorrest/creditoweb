@@ -21,7 +21,11 @@ def generar_datos_dummy():
         'Estado Civil': np.random.choice(['Soltero', 'Casado', 'Divorciado', 'Viudo'], n),
         'Patrimonio (Rango)': np.random.choice(['<10,000', '10,000-50,000', '50,000-100,000', '>100,000'], n),
         'Periodo Académico': np.random.choice(['2023-1', '2023-2', '2024-1', '2024-2'], n),
-        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n)
+        'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n),
+        'Etapa': ['Otorgamiento', 'Otorgamiento', 'Otorgamiento', 'Etapa de Estudios', 'Etapa de Estudios', 'Etapa de Amortización', 'Etapa de Amortización', 'Transversales'],
+        'Estado': ['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Girado', 'Pendiente de renovación', 'Pendiente paso a cobro', 'Novedad cartera', 'Bloqueado'],
+        'Cantidad': [20, 15, 10, 30, 25, 12, 5, 8]
+
     })
     return data
 
