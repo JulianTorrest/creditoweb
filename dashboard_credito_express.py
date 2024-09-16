@@ -510,41 +510,103 @@ def main():
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
-    # Gráfico de Barras Apiladas
-    st.subheader('Gráfico de Barras Apiladas')
-    fig, ax = plt.subplots()
+# Gráfico de Barras Apiladas Separado por Etapa
+st.subheader('Gráfico de Barras Apiladas por Etapa')
+
+# Filtrar y crear gráficos para cada etapa
+etapas = data['Etapa'].unique()
+for etapa in etapas:
+    st.write(f'### {etapa}')
+    
+    # Filtrar datos para la etapa actual
+    data_etapa = data[data['Etapa'] == etapa]
+    
+    # Crear figura y ejes
+    fig, ax = plt.subplots(figsize=(10, 6))
     
     # Verificar si las columnas existen
-    if all(col in data.columns for col in ['Etapa', 'Estado', 'Cantidad']):
-        pivot_df = data.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
-        pivot_df.plot(kind='bar', stacked=True, ax=ax)
-        ax.set_title('Distribución de Estados por Etapa')
-        ax.set_xlabel('Etapa')
+    if all(col in data_etapa.columns for col in ['Estado', 'Cantidad']):
+        # Crear una tabla dinámica
+        pivot_df = data_etapa.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
+        
+        # Crear gráfico de barras apiladas
+        pivot_df.loc[etapa].plot(kind='bar', stacked=True, ax=ax)
+        
+        # Configurar título y etiquetas
+        ax.set_title(f'Distribución de Estados en {etapa}')
+        ax.set_xlabel('Estado')
         ax.set_ylabel('Cantidad')
         ax.set_xticklabels(ax.get_xticklabels(), rotation=45)  # Mejorar la legibilidad de las etiquetas
+        
+        # Colocar la leyenda fuera del gráfico
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
     else:
-        st.error("Las columnas 'Etapa', 'Estado' o 'Cantidad' no están presentes en el DataFrame.")
+        st.error(f"Las columnas 'Estado' o 'Cantidad' no están presentes en el DataFrame para la etapa '{etapa}'.")
 
+    # Mostrar el gráfico
     st.pyplot(fig)
 
-    # Gráfico de Columnas
-    st.subheader('Gráfico de Columnas')
-    fig, ax = plt.subplots()
-    pivot_df.plot(kind='bar', ax=ax)
-    plt.title('Cantidad de Estados por Etapa')
-    plt.xlabel('Etapa')
-    plt.ylabel('Cantidad')
-    plt.xticks(rotation=45)  # Mejorar la legibilidad de las etiquetas
+# Gráfico de Columnas Separado por Etapa
+st.subheader('Gráfico de Columnas por Etapa')
+
+# Filtrar y crear gráficos para cada etapa
+etapas = data['Etapa'].unique()
+for etapa in etapas:
+    st.write(f'### {etapa}')
+    
+    # Filtrar datos para la etapa actual
+    data_etapa = data[data['Etapa'] == etapa]
+    
+    # Crear figura y ejes
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Verificar si las columnas existen
+    if all(col in data_etapa.columns for col in ['Estado', 'Cantidad']):
+        # Crear una tabla dinámica
+        pivot_df = data_etapa.pivot_table(index='Estado', values='Cantidad', aggfunc='sum', fill_value=0)
+        
+        # Crear gráfico de columnas
+        pivot_df.plot(kind='bar', ax=ax)
+        
+        # Configurar título y etiquetas
+        ax.set_title(f'Cantidad de Estados en {etapa}')
+        ax.set_xlabel('Estado')
+        ax.set_ylabel('Cantidad')
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)  # Mejorar la legibilidad de las etiquetas
+        
+        # Colocar la leyenda fuera del gráfico
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    else:
+        st.error(f"Las columnas 'Estado' o 'Cantidad' no están presentes en el DataFrame para la etapa '{etapa}'.")
+
+    # Mostrar el gráfico
     st.pyplot(fig)
 
-    # Gráfico de Área
-    st.subheader('Gráfico de Área')
-    if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
-        fig = px.area(data_filtrada, x='Estado', y='Cantidad', color='Etapa', title='Distribución de Cantidad por Estado')
+    # Gráfico de Área Separado por Etapa
+st.subheader('Gráfico de Área por Etapa')
+
+# Verificar si las columnas existen
+if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
+    # Obtener una lista de etapas únicas
+    etapas = data_filtrada['Etapa'].unique()
+    
+    # Iterar sobre cada etapa y crear un gráfico
+    for etapa in etapas:
+        st.write(f'### {etapa}')
+        
+        # Filtrar datos para la etapa actual
+        data_etapa = data_filtrada[data_filtrada['Etapa'] == etapa]
+        
+        # Crear gráfico de área usando Plotly
+        fig = px.area(data_etapa, x='Estado', y='Cantidad', color='Etapa', title=f'Distribución de Cantidad por Estado - {etapa}')
+        
+        # Configurar la leyenda fuera del gráfico
+        fig.update_layout(legend_title_text='', legend=dict(x=1, y=1))
+        
+        # Mostrar el gráfico
         st.plotly_chart(fig)
-    else:
-        st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
-
+else:
+    st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
 
     st.subheader('3. Distribución del Ingreso Mensual')
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
