@@ -165,10 +165,59 @@ def gestion_comercial():
                 else:
                     st.warning(f"Beneficiario {oferta['Nombre']} decidió no proceder.")
 
+# Página de gestión para el ordenador del gasto
+def gestion_ordenador_gasto():
+    st.title("Gestión para el Ordenador del Gasto")
+
+    # Información de la liquidación automática del desembolso
+    st.header("Liquidación Automática del Desembolso")
+    st.write("Generando liquidación automática del desembolso...")
+    # Muestra detalles de la liquidación
+    st.write("Detalles del desembolso...")
+    # Aquí puedes agregar información más específica o datos de ejemplo
+
+    # Generación automática de la instrucción de giro
+    st.header("Generación Automática de Instrucción de Giro")
+    st.write("Generando instrucción de giro...")
+    # Muestra detalles de la instrucción de giro
+    st.write("Detalles de la instrucción de giro...")
+    # Agrega información adicional si es necesario
+
+    # Control presupuestal
+    st.header("Control Presupuestal")
+    presupuesto_disponible = st.number_input("Presupuesto disponible (en COP)", min_value=0, step=1000)
+    monto_solicitado = st.number_input("Monto solicitado (en COP)", min_value=0, step=1000)
+
+    if monto_solicitado > presupuesto_disponible:
+        st.error("El monto solicitado excede el presupuesto disponible.")
+    else:
+        st.success("Presupuesto dentro de los límites permitidos.")
+
+    st.write("Alertas de cumplimiento del presupuesto:")
+    if monto_solicitado > presupuesto_disponible * 0.8:
+        st.warning("El monto solicitado se acerca al límite del presupuesto.")
+
+    # Aprobación digital
+    st.header("Aprobación Digital por Ordenador del Gasto")
+    aprobado = st.checkbox("Aprobar desembolso")
+    if aprobado:
+        st.success("Desembolso aprobado.")
+    else:
+        st.warning("Desembolso no aprobado.")
+
+    # Seguimiento de solicitudes y presupuesto disponible
+    st.header("Seguimiento de Solicitudes y Presupuesto")
+    if aprobado:
+        st.write("Realizando seguimiento de las solicitudes aprobadas...")
+        st.write(f"Presupuesto disponible restante: {presupuesto_disponible - monto_solicitado} COP")
+        st.write("Proceso finalizado.")
+    else:
+        st.write("No se ha realizado seguimiento ya que el desembolso no fue aprobado.")
+
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
     "Selecciona una página",
-    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"]
+    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto"]
 )
 
 # Ejecutar la página seleccionada
@@ -180,3 +229,5 @@ elif menu == "Enviar Oferta":
     enviar_oferta()
 elif menu == "Gestión Comercial":
     gestion_comercial()
+elif menu == "Gestión Ordenador del Gasto":
+    gestion_ordenador_gasto()
