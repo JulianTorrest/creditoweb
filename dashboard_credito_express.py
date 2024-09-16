@@ -549,10 +549,10 @@ def main():
     # Gráfico de Columnas Separado por Etapa
     st.subheader('Gráfico de Columnas por Etapa')
 
-# Filtrar y crear gráficos para cada etapa
-etapas = data['Etapa'].unique()
-for etapa in etapas:
-    st.write(f'### {etapa}')
+    # Filtrar y crear gráficos para cada etapa
+    etapas = data['Etapa'].unique()
+    for etapa in etapas:
+        st.write(f'### {etapa}')
     
     # Filtrar datos para la etapa actual
     data_etapa = data[data['Etapa'] == etapa]
@@ -585,8 +585,8 @@ for etapa in etapas:
     # Gráfico de Área Separado por Etapa
     st.subheader('Gráfico de Área por Etapa')
 
-# Verificar si las columnas existen
-if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
+    # Verificar si las columnas existen
+    if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
     # Obtener una lista de etapas únicas
     etapas = data_filtrada['Etapa'].unique()
     
