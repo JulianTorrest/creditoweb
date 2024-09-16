@@ -479,16 +479,16 @@ def main():
     # Gráficos para los postulantes
     st.header('Gráficos de Postulantes')
 
-    st.subheader('1. Embudo de Cantidad')
+    st.subheader('Embudo de Cantidad')
     fig_cantidad = grafico_funnel_cantidad(data)
     st.plotly_chart(fig_cantidad)
 
-    st.subheader('2. Embudo de Monto')
+    st.subheader('Embudo de Monto')
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
     # Gráfico de Área Separado por Etapa
-    st.subheader('3. Gráfico de Área por Etapa')
+    st.subheader('Gráfico de Área por Etapa')
 
     # Verificar si las columnas existen
     if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
@@ -513,44 +513,44 @@ def main():
     else:
         st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
 
-    st.subheader('4. Distribución del Ingreso Mensual')
+    st.subheader('Distribución del Ingreso Mensual')
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
     st.plotly_chart(fig_ingreso_mensual)
 
-    st.subheader('7. Distribución por Rango de Edad')
+    st.subheader('Distribución por Rango de Edad')
     fig_rango_edad = grafico_rango_edad(data)
     st.plotly_chart(fig_rango_edad)
 
-    st.subheader('8. Distribución por Ubicación de Residencia')
+    st.subheader('Distribución por Ubicación de Residencia')
     fig_ubicacion_residencia = grafico_ubicacion_residencia(data)
     st.plotly_chart(fig_ubicacion_residencia)
 
-    st.subheader('9. Distribución por Área del Conocimiento (Aplicación)')
+    st.subheader('Distribución por Área del Conocimiento (Aplicación)')
     fig_area_conocimiento_aplicacion = grafico_area_conocimiento_aplicacion(data)
     st.plotly_chart(fig_area_conocimiento_aplicacion)
 
-    st.subheader('10. Distribución por Empleado, Desempleado o Independiente')
+    st.subheader('Distribución por Empleado, Desempleado o Independiente')
     fig_empleado_desempleado_independiente = grafico_empleado_desempleado_independiente(data)
     st.plotly_chart(fig_empleado_desempleado_independiente)
 
-    st.subheader('13. Distribución por Patrimonio')
+    st.subheader('Distribución por Patrimonio')
     fig_patrimonio = grafico_patrimonio(data)
     st.plotly_chart(fig_patrimonio)
 
-    st.subheader('14. Cantidad de Desembolsos Requeridos por Periodo Académico')
+    st.subheader('Cantidad de Desembolsos Requeridos por Periodo Académico')
     fig_desembolsos_periodo_academico = grafico_desembolsos_periodo_academico(data)
     st.plotly_chart(fig_desembolsos_periodo_academico)
 
     # Gráficos para las instituciones educativas
     st.header('Gráficos de Instituciones Educativas')
 
-    st.subheader('15. Distribución por Modalidad')
+    st.subheader('Distribución por Modalidad')
     st.plotly_chart(grafico_modalidad(datos_ies))
 
-    st.subheader('16. Distribución por Nivel de Estudios')
+    st.subheader('Distribución por Nivel de Estudios')
     st.plotly_chart(grafico_nivel_estudios(datos_ies))
 
-    st.subheader('17. Distribución por Tipo de Institución (Pública vs Privada)')
+    st.subheader('Distribución por Tipo de Institución (Pública vs Privada)')
     st.plotly_chart(grafico_institucion_publica_privada(datos_ies))
 
 if __name__ == "__main__":
