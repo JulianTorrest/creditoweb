@@ -4,6 +4,8 @@ import pandas as pd
 # Simulaciones de bases de datos
 beneficiarios_data = []
 ofertas_enviadas = []
+potenciales_beneficiarios = []
+base_referidos = []
 
 # Función para simular validaciones
 def realizar_validaciones(datos_beneficiario):
@@ -137,6 +139,47 @@ def gestion_comercial():
                     
             st.write("Generando módulo de herramientas de aprobación...")
             st.write("Seguimiento de solicitudes y presupuesto.")
+            
+            # Gestión de interés de potencial beneficiarios
+            interesado = st.selectbox("¿El potencial beneficiario está interesado?", ["Sí", "No"])
+            
+            if interesado == "Sí":
+                seguimiento_periodico(oferta)
+            else:
+                st.write("Actualizando registros y finalizando el flujo.")
+                ofertas_enviadas.remove(oferta)
+                st.success("Registros actualizados y flujo finalizado.")
+                
+# Seguimiento periódico y validaciones adicionales
+def seguimiento_periodico(oferta):
+    st.title(f"Seguimiento Periódico para {oferta['nombre']}")
+    
+    st.write("Realizando seguimiento periódico...")
+    # Verificación de antecedentes crediticios
+    antecedentes_dias = st.number_input("Días desde el último antecedente crediticio", min_value=0, max_value=365)
+    
+    if antecedentes_dias > 90:
+        st.write("Antecedentes crediticios mayores a 90 días, añadiendo a la base de referidos...")
+        base_referidos.append(oferta)
+        st.write("Seleccionando nuevos potenciales beneficiarios...")
+        return
+    
+    if antecedentes_dias <= 30:
+        st.write("Creando usuario...")
+        # Lógica para crear usuario
+        st.success("Usuario creado exitosamente.")
+    else:
+        st.write("Consultando SARLAFT...")
+        consulta_sarlaft = st.selectbox("Consulta SARLAFT aprobada?", ["Sí", "No"])
+        
+        if consulta_sarlaft == "Sí":
+            st.write("Creando usuario...")
+            # Lógica para crear usuario
+            st.success("Usuario creado exitosamente.")
+        else:
+            st.write("Notificando y actualizando base...")
+            # Lógica para notificar y actualizar base
+            st.success("Base actualizada y flujo finalizado.")
 
 # Función principal con navegación
 def main():
