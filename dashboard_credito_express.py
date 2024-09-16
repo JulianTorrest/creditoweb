@@ -22,12 +22,17 @@ def generar_datos_dummy():
         'Patrimonio (Rango)': np.random.choice(['<4000000', '4000000-12000000', '12000000-20000000', '>20000000'], n),
         'Periodo Académico': np.random.choice(['2023-1', '2023-2', '2024-1', '2024-2'], n),
         'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n),
-        'Etapa': ['Otorgamiento', 'Otorgamiento', 'Otorgamiento', 'Etapa de Estudios', 'Etapa de Estudios', 'Etapa de Amortización', 'Etapa de Amortización', 'Transversales'],
-        'Estado': ['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Girado', 'Pendiente de renovación', 'Pendiente paso a cobro', 'Novedad cartera', 'Bloqueado'],
-        'Cantidad': [150, 180, 250, 80, 75, 120, 50, 80]
-
+        
+        # Generar valores aleatorios para 'Etapa' y 'Estado'
+        'Etapa': np.random.choice(['Otorgamiento', 'Etapa de Estudios', 'Etapa de Amortización', 'Transversales'], n),
+        'Estado': np.random.choice(['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Girado', 'Pendiente de renovación', 'Pendiente paso a cobro', 'Novedad cartera', 'Bloqueado'], n),
+        
+        # Generar valores aleatorios para 'Cantidad'
+        'Cantidad': np.random.randint(50, 300, size=n)
     })
+
     return data
+
 
 # Función para generar datos dummy para IES
 def generar_datos_ies():
