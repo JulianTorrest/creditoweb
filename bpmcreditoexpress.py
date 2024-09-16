@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 
 # Simulaciones de bases de datos
 beneficiarios_data = []
@@ -112,72 +111,60 @@ def gestion_comercial():
     for i, oferta in enumerate(ofertas_enviadas):
         st.subheader(f"Oferta {i+1}: {oferta['nombre']}")
         
-        garantia_firmada = st.checkbox("Garantía firmada recibida")
+        interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"])
         
-        if garantia_firmada:
-            convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
+        if interesado == "Sí":
+            st.write("Generando marca positiva...")
+            # Proceder con la firma de garantías
+            firma_garantias(oferta)
+        elif interesado == "No":
+            st.write("Actualizando registros y finalizando el flujo.")
+            ofertas_enviadas.remove(oferta)
+            st.success("Registros actualizados y flujo finalizado.")
+        elif interesado == "Sí, pero después":
+            st.write("Generando marca 'Sí, pero después'...")
+            # Aquí se podría gestionar el seguimiento futuro
+            st.write("Realizando seguimiento periódico para retomar contacto.")
             
-            if convenio == "Sí":
-                st.write("Realizando liquidación automática del desembolso...")
-                st.write("Generando instrucción de giro...")
-                st.write("Realizando control presupuestal...")
-                st.write("Comprobación digital por el ordenador del gasto...")
+            # Pregunta sobre la garantía
+            garantia_firmada = st.checkbox("Garantía firmada recibida")
+            
+            if garantia_firmada:
+                convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
                 
-            elif convenio == "No":
-                st.write("Solicitando información para giro...")
-                nombre_banco = st.text_input("Nombre del banco")
-                tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"])
-                numero_cuenta = st.text_input("Número de cuenta")
-                
-                if st.button("Validar información para giro"):
-                    st.write("Validando información para giro...")
+                if convenio == "Sí":
                     st.write("Realizando liquidación automática del desembolso...")
                     st.write("Generando instrucción de giro...")
                     st.write("Realizando control presupuestal...")
                     st.write("Comprobación digital por el ordenador del gasto...")
-                    st.write("Proceso finalizado.")
                     
-            st.write("Generando módulo de herramientas de aprobación...")
-            st.write("Seguimiento de solicitudes y presupuesto.")
-            
-            # Gestión de interés de potencial beneficiarios
-            interesado = st.selectbox("¿El potencial beneficiario está interesado?", ["Sí", "No"])
-            
-            if interesado == "Sí":
-                seguimiento_periodico(oferta)
-            else:
-                st.write("Actualizando registros y finalizando el flujo.")
-                ofertas_enviadas.remove(oferta)
-                st.success("Registros actualizados y flujo finalizado.")
+                elif convenio == "No":
+                    st.write("Solicitando información para giro...")
+                    nombre_banco = st.text_input("Nombre del banco")
+                    tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"])
+                    numero_cuenta = st.text_input("Número de cuenta")
+                    
+                    if st.button("Validar información para giro"):
+                        st.write("Validando información para giro...")
+                        st.write("Realizando liquidación automática del desembolso...")
+                        st.write("Generando instrucción de giro...")
+                        st.write("Realizando control presupuestal...")
+                        st.write("Comprobación digital por el ordenador del gasto...")
+                        st.write("Proceso finalizado.")
                 
-# Seguimiento periódico y validaciones adicionales
-def seguimiento_periodico(oferta):
-    st.title(f"Seguimiento Periódico para {oferta['nombre']}")
-    
-    st.write("Realizando seguimiento periódico...")
-    # Verificación de antecedentes crediticios
-    antecedentes_dias = st.number_input("Días desde el último antecedente crediticio", min_value=0, max_value=365)
-    
-    if antecedentes_dias > 90:
-        st.write("Antecedentes crediticios mayores a 90 días, añadiendo a la base de referidos...")
-        base_referidos.append(oferta)
-        st.write("Seleccionando nuevos potenciales beneficiarios...")
-        return
-    
-    if antecedentes_dias <= 30:
-        st.write("Creando usuario...")
-        crear_usuario(oferta)
-    else:
-        st.write("Consultando SARLAFT...")
-        consulta_sarlaft = st.selectbox("Consulta SARLAFT aprobada?", ["Sí", "No"])
-        
-        if consulta_sarlaft == "Sí":
-            st.write("Creando usuario...")
-            crear_usuario(oferta)
-        else:
-            st.write("Notificando y actualizando base...")
-            # Lógica para notificar y actualizar base
-            st.success("Base actualizada y flujo finalizado.")
+                st.write("Generando módulo de herramientas de aprobación...")
+                st.write("Seguimiento de solicitudes y presupuesto.")
+                
+                # Gestión de interés de potencial beneficiarios
+                interesado_nuevo = st.selectbox("¿El potencial beneficiario está interesado después del seguimiento?", ["Sí", "No"])
+                
+                if interesado_nuevo == "Sí":
+                    st.write("Generando marca positiva...")
+                    firma_garantias(oferta)
+                else:
+                    st.write("Actualizando registros y finalizando el flujo.")
+                    ofertas_enviadas.remove(oferta)
+                    st.success("Registros actualizados y flujo finalizado.")
 
 # Crear usuario y validación de identidad
 def crear_usuario(oferta):
@@ -235,18 +222,15 @@ def firma_garantias(oferta):
     
     if firma_recibida:
         st.write("Conectando con el ICETEX para verificar convenio...")
-        # Aquí se integraría la lógica para verificar el convenio con ICETEX
         convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
         
         if convenio == "Sí":
             st.success("Proceso completado exitosamente.")
         else:
             st.write("Reiniciando proceso de firma de garantías...")
-            # Aquí se debería reiniciar el proceso o manejar la falta de convenio.
             st.write("Proceso finalizado.")
     else:
         st.write("Activando campaña OCM para firma de garantías...")
-        # Simulación de campaña OCM para firma de garantías
         firma_despues_OCM = st.selectbox("¿Firma de garantías después de campaña OCM?", ["Sí", "No"])
         
         if firma_despues_OCM == "Sí":
@@ -261,7 +245,7 @@ def firma_garantias(oferta):
 
 # Crear las pestañas en la aplicación de Streamlit
 st.sidebar.title("Navegación")
-page = st.sidebar.selectbox("Selecciona una página:", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"])
+page = st.sidebar.selectbox("Selecciona una página:", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Crear Usuario"])
 
 if page == "Captura de Datos":
     captura_datos()
@@ -271,3 +255,9 @@ elif page == "Enviar Oferta":
     enviar_oferta()
 elif page == "Gestión Comercial":
     gestion_comercial()
+elif page == "Crear Usuario":
+    if ofertas_enviadas:
+        for oferta in ofertas_enviadas:
+            crear_usuario(oferta)
+    else:
+        st.warning("No hay ofertas enviadas para crear usuario.")
