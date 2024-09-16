@@ -3,6 +3,7 @@ import pandas as pd
 
 # Simulaciones de bases de datos
 beneficiarios_data = []
+ofertas_enviadas = []
 
 # Función para simular validaciones
 def realizar_validaciones(datos_beneficiario):
@@ -93,12 +94,54 @@ def enviar_oferta():
     
     for i, beneficiario in enumerate(beneficiarios_data):
         st.subheader(f"Beneficiario {i+1}: {beneficiario['nombre']}")
-        st.write(f"Se ha enviado la oferta a {beneficiario['nombre']} al correo electrónico registrado.")
+        if st.button(f"Enviar oferta a {beneficiario['nombre']}"):
+            # Aquí se debería enviar el correo, en este caso se simula la acción
+            ofertas_enviadas.append(beneficiario)
+            st.success(f"Oferta enviada a {beneficiario['nombre']}.")
+
+# Página de gestión comercial de ofertas
+def gestion_comercial():
+    st.title("Gestión Comercial de Ofertas Enviadas")
+    
+    if not ofertas_enviadas:
+        st.warning("No hay ofertas enviadas para gestionar.")
+        return
+    
+    for i, oferta in enumerate(ofertas_enviadas):
+        st.subheader(f"Oferta {i+1}: {oferta['nombre']}")
+        
+        garantia_firmada = st.checkbox("Garantía firmada recibida")
+        
+        if garantia_firmada:
+            convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
+            
+            if convenio == "Sí":
+                st.write("Realizando liquidación automática del desembolso...")
+                st.write("Generando instrucción de giro...")
+                st.write("Realizando control presupuestal...")
+                st.write("Comprobación digital por el ordenador del gasto...")
+                
+            elif convenio == "No":
+                st.write("Solicitando información para giro...")
+                nombre_banco = st.text_input("Nombre del banco")
+                tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"])
+                numero_cuenta = st.text_input("Número de cuenta")
+                
+                if st.button("Validar información para giro"):
+                    st.write("Validando información para giro...")
+                    st.write("Realizando liquidación automática del desembolso...")
+                    st.write("Generando instrucción de giro...")
+                    st.write("Realizando control presupuestal...")
+                    st.write("Comprobación digital por el ordenador del gasto...")
+                    st.write("Proceso finalizado.")
+                    
+            st.write("Generando módulo de herramientas de aprobación...")
+            st.write("Seguimiento de solicitudes y presupuesto.")
 
 # Función principal con navegación
 def main():
     st.sidebar.title("Navegación")
-    page = st.sidebar.selectbox("Selecciona una página", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta"])
+    page = st.sidebar.selectbox("Selecciona una página", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"])
     
     if page == "Captura de Datos":
         captura_datos()
@@ -106,6 +149,9 @@ def main():
         validacion_beneficiarios()
     elif page == "Enviar Oferta":
         enviar_oferta()
+    elif page == "Gestión Comercial":
+        gestion_comercial()
 
 if __name__ == "__main__":
     main()
+
