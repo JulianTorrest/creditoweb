@@ -23,8 +23,23 @@ def generar_datos_ficticios(n):
         })
     return datos
 
-# Generar datos ficticios
+# Inicializar datos
 beneficiarios_data = generar_datos_ficticios(500)
+ofertas_enviadas = []
+
+# Funciones de la aplicación
+
+def realizar_validaciones(beneficiario):
+    errores = []
+    # Aquí puedes agregar validaciones según tus necesidades
+    if beneficiario["Score Crediticio"] < 200:
+        errores.append("Score crediticio muy bajo.")
+    if beneficiario["Capacidad de Pago (COP)"] < 3000000:
+        errores.append("Capacidad de pago insuficiente.")
+    return errores
+
+def firma_garantias(oferta):
+    st.write(f"Firmando garantías para {oferta['Nombre']}...")
 
 # Página de captura de datos
 def captura_datos():
@@ -165,70 +180,35 @@ def gestion_comercial():
                     st.success("Registros actualizados y flujo finalizado.")
 
 # Crear usuario y validación de identidad
-def crear_usuario(oferta):
-    st.title(f"Creación de Usuario para {oferta['Nombre']}")
+def usuario_validacion():
+    st.title("Validación de Identidad del Usuario")
     
-    # Validación de identidad
-    st.subheader("Validación de Identidad")
-    otp = st.text_input("Ingrese OTP")
-    rostro_vivo = st.checkbox("Validación de Rostro Vivo")
-    biometrico = st.checkbox("Validación Biométrica")
-    preguntas_reto = st.text_input("Responda Preguntas de Reto")
+    # Simulación de autenticación
+    usuario = st.text_input("Nombre de usuario")
+    password = st.text_input("Contraseña", type="password")
     
-    if st.button("Validar Identidad"):
-        if otp and rostro_vivo and biometrico and preguntas_reto:
-            st.write("Validación de identidad exitosa.")
-            
-            # Simulador y formulario
-            st.write("Accediendo al simulador...")
-            monto_sugerido = st.number_input("Monto sugerido", min_value=0)
-            limite_inferior = st.number_input("Límite inferior", min_value=0)
-            monto_solicitado = st.number_input("Monto solicitado", min_value=0)
-            
-            st.write("Formulario completado.")
-            
-            # Decisión de aceptación
-            acepta = st.radio("¿Acepta el monto solicitado?", ["Sí", "No"])
-            
-            if acepta == "Sí":
-                st.write("Generando marca positiva...")
-                st.write("Procediendo a la firma de garantías...")
-                firma_garantias(oferta)
-            else:
-                st.write("Activando campaña OCM...")
-                campaña_ocm = st.selectbox("¿El potencial beneficiario aceptará después de la campaña OCM?", ["Sí", "No"])
-                
-                if campaña_ocm == "Sí":
-                    st.write("Volviendo a la firma de garantías...")
-                    firma_garantias(oferta)
-                else:
-                    st.write("Conociendo causal de no aceptación...")
-                    causal = st.text_input("Diligencie la causal de no aceptación")
-                    valor_cuota = st.number_input("Valor de la cuota")
-                    plazo = st.number_input("Plazo")
-                    tasa = st.number_input("Tasa")
-                    otra = st.text_input("Otra razón")
-                    st.write("Generando marca negativa...")
-                    st.success("Proceso finalizado.")
+    if st.button("Iniciar sesión"):
+        if usuario == "admin" and password == "admin":
+            st.success("Autenticación exitosa.")
         else:
-            st.error("Faltan datos para completar la validación de identidad.")
+            st.error("Credenciales incorrectas.")
 
-# Crear las pestañas en la aplicación de Streamlit
-st.sidebar.title("Navegación")
-page = st.sidebar.selectbox("Selecciona una página:", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Crear Usuario"])
+# Configurar el menú de navegación
+PAGES = {
+    "Captura de Datos": captura_datos,
+    "Validación de Beneficiarios": validacion_beneficiarios,
+    "Enviar Oferta": enviar_oferta,
+    "Gestión Comercial": gestion_comercial,
+    "Validación de Usuario": usuario_validacion
+}
 
-if page == "Captura de Datos":
-    captura_datos()
-elif page == "Validación de Beneficiarios":
-    validacion_beneficiarios()
-elif page == "Enviar Oferta":
-    enviar_oferta()
-elif page == "Gestión Comercial":
-    gestion_comercial()
-elif page == "Crear Usuario":
-    if ofertas_enviadas:
-        for oferta in ofertas_enviadas:
-            crear_usuario(oferta)
-    else:
-        st.warning("No hay ofertas enviadas para crear usuario.")
+def main():
+    st.sidebar.title("Navegación")
+    selection = st.sidebar.radio("Ir a", list(PAGES.keys()))
+    page = PAGES[selection]
+    with st.spinner(f"Cargando {selection} ..."):
+        page()
+
+if __name__ == "__main__":
+    main()
 
