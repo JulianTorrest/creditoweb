@@ -1,25 +1,25 @@
 import streamlit as st
-import random
 import pandas as pd
+import random
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
     nombres = [f"Nombre_{i}" for i in range(n)]
     nacionalidades = ["Colombiano", "Otro"]
-    estados_credito = ["Ninguno", "castigado", "en mora y castigado"]
+    estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
     datos = []
     for nombre in nombres:
         datos.append({
-            "nombre": nombre,
-            "nacionalidad": random.choice(nacionalidades),
-            "edad": random.randint(18, 65),
-            "estado_credito": random.choice(estados_credito),
-            "lista_sarlaft": random.choice(listas_sarlaft),
-            "score_credito": random.randint(150, 900),
-            "capacidad_pago": random.randint(1500000, 20000000),
-            "limite_endeudamiento": random.randint(1500000, 20000000)
+            "Nombre": nombre,
+            "Nacionalidad": random.choice(nacionalidades),
+            "Edad": random.randint(18, 65),
+            "Estado Crédito": random.choice(estados_credito),
+            "Lista SARLAFT": random.choice(listas_sarlaft),
+            "Score Crediticio": random.randint(150, 900),
+            "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
+            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000)
         })
     return datos
 
@@ -32,26 +32,16 @@ def captura_datos():
     
     nombre = st.text_input("Nombre completo")
     nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
-    edad = st.slider("Edad", min_value=10, max_value=100, value=(18, 65), step=1)
-    estado_credito = st.multiselect("Estado del crédito anterior", ["Ninguno", "castigado", "en mora y castigado"])
+    edad = st.slider("Edad", min_value=10, max_value=65, value=(18, 65), step=1)
+    estado_credito = st.multiselect("Estado del crédito anterior", ["Ninguno", "Castigado", "En mora y castigado"])
     lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
     score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
     capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     
-    if st.button("Enviar formulario"):
-        datos_beneficiario = {
-            "nombre": nombre,
-            "nacionalidad": nacionalidad,
-            "edad": edad,
-            "estado_credito": estado_credito,
-            "lista_sarlaft": lista_sarlaft,
-            "score_credito": score_credito,
-            "capacidad_pago": capacidad_pago,
-            "limite_endeudamiento": limite_endeudamiento
-        }
-        beneficiarios_data.append(datos_beneficiario)
-        st.success(f"Datos del beneficiario {nombre} capturados exitosamente.")
+    if st.button("Mostrar datos de beneficiarios"):
+        df_beneficiarios = pd.DataFrame(beneficiarios_data)
+        st.dataframe(df_beneficiarios)
 
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
@@ -62,15 +52,15 @@ def validacion_beneficiarios():
         return
     
     for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario {i+1}: {beneficiario['nombre']}")
+        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
         
         errores = realizar_validaciones(beneficiario)
         if errores:
-            st.error(f"Errores encontrados para {beneficiario['nombre']}:")
+            st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
             for error in errores:
                 st.write(f"- {error}")
         else:
-            st.success(f"Beneficiario {beneficiario['nombre']} pasó todas las validaciones.")
+            st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
             st.write(f"Ofrecer crédito educativo.")
 
 # Página para enviar la oferta al beneficiario
@@ -82,11 +72,11 @@ def enviar_oferta():
         return
     
     for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario {i+1}: {beneficiario['nombre']}")
-        if st.button(f"Enviar oferta a {beneficiario['nombre']}"):
+        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
+        if st.button(f"Enviar oferta a {beneficiario['Nombre']}"):
             # Aquí se debería enviar el correo, en este caso se simula la acción
             ofertas_enviadas.append(beneficiario)
-            st.success(f"Oferta enviada a {beneficiario['nombre']}.")
+            st.success(f"Oferta enviada a {beneficiario['Nombre']}.")
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
@@ -97,7 +87,7 @@ def gestion_comercial():
         return
     
     for i, oferta in enumerate(ofertas_enviadas):
-        st.subheader(f"Oferta {i+1}: {oferta['nombre']}")
+        st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
         
         interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"])
         
@@ -156,7 +146,7 @@ def gestion_comercial():
 
 # Crear usuario y validación de identidad
 def crear_usuario(oferta):
-    st.title(f"Creación de Usuario para {oferta['nombre']}")
+    st.title(f"Creación de Usuario para {oferta['Nombre']}")
     
     # Validación de identidad
     st.subheader("Validación de Identidad")
@@ -215,7 +205,7 @@ def firma_garantias(oferta):
     firma_recibida = st.checkbox("Firma de garantías recibida")
     
     if firma_recibida:
-        st.write("Conectando con el ICETEX para verificar convenio...")
+        st.write("Conectando con ICETEX para verificar convenio...")
         convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
         
         if convenio == "Sí":
@@ -255,3 +245,4 @@ elif page == "Crear Usuario":
             crear_usuario(oferta)
     else:
         st.warning("No hay ofertas enviadas para crear usuario.")
+
