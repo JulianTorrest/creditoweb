@@ -510,8 +510,8 @@ def main():
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
-# Gráfico de Barras Apiladas Separado por Etapa
-st.subheader('Gráfico de Barras Apiladas por Etapa')
+    # Gráfico de Barras Apiladas Separado por Etapa
+    st.subheader('Gráfico de Barras Apiladas por Etapa')
 
 # Filtrar y crear gráficos para cada etapa
 etapas = data['Etapa'].unique()
@@ -583,7 +583,7 @@ for etapa in etapas:
     st.pyplot(fig)
 
     # Gráfico de Área Separado por Etapa
-st.subheader('Gráfico de Área por Etapa')
+    st.subheader('Gráfico de Área por Etapa')
 
 # Verificar si las columnas existen
 if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
