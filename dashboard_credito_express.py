@@ -27,9 +27,9 @@ def generar_datos_dummy():
         'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n),
         'Etapa': np.random.choice(['OTORGAMIENTO', 'ETAPA DE ESTUDIOS', 'ETAPA DE AMORTIZACIÓN', 'TRANSVERSALES'], n),
         'Estado': np.random.choice(['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Aprobado', 'No aprobado', 'Desistido', 
-                                'Legalizado', 'No legalizado', 'Girado', 'Pendiente de renovación', 'Renovación', 
-                                'Aplazado', 'Terminación de crédito', 'Pendiente paso a cobro', 'Novedad cartera', 
-                                'En amortización', 'Cancelado', 'Bloqueado', 'Anulado'], n),
+                                    'Legalizado', 'No legalizado', 'Girado', 'Pendiente de renovación', 'Renovación', 
+                                    'Aplazado', 'Terminación de crédito', 'Pendiente paso a cobro', 'Novedad cartera', 
+                                    'En amortización', 'Cancelado', 'Bloqueado', 'Anulado'], n),
         'Cantidad': np.random.randint(50, 300, size=n)
     })
 
@@ -510,41 +510,45 @@ def main():
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
-    # Gráfico de Barras Apiladas Separado por Etapa
-    st.subheader('Gráfico de Barras Apiladas por Etapa')
+# Gráfico de Barras Apiladas Separado por Etapa
+st.subheader('Gráfico de Barras Apiladas por Etapa')
 
-    # Filtrar y crear gráficos para cada etapa
-    etapas = data['Etapa'].unique()
-    for etapa in etapas:
-        st.write(f'### {etapa}')
+# Filtrar y crear gráficos para cada etapa
+etapas = data['Etapa'].unique()
+for etapa in etapas:
+    st.write(f'### {etapa}')
     
-        # Filtrar datos para la etapa actual
-        data_etapa = data[data['Etapa'] == etapa]
+    # Filtrar datos para la etapa actual
+    data_etapa = data[data['Etapa'] == etapa]
     
-        # Crear figura y ejes
-        fig, ax = plt.subplots(figsize=(10, 6))
+    # Filtrar los estados válidos para la etapa actual
+    estados_validos = etapas_estados_validos.get(etapa, [])
+    data_etapa = data_etapa[data_etapa['Estado'].isin(estados_validos)]
     
-        # Verificar si las columnas existen
-        if all(col in data_etapa.columns for col in ['Estado', 'Cantidad']):
-            # Crear una tabla dinámica
-            pivot_df = data_etapa.pivot_table(index='Estado', columns='Etapa', values='Cantidad', fill_value=0)
+    # Crear figura y ejes
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Verificar si las columnas existen
+    if all(col in data_etapa.columns for col in ['Estado', 'Cantidad']):
+        # Crear una tabla dinámica
+        pivot_df = data_etapa.pivot_table(index='Estado', values='Cantidad', aggfunc='sum', fill_value=0)
         
-            # Crear gráfico de barras apiladas
-            pivot_df.plot(kind='bar', stacked=True, ax=ax)
+        # Crear gráfico de barras apiladas
+        pivot_df.plot(kind='bar', stacked=True, ax=ax)
         
-            # Configurar título y etiquetas
-            ax.set_title(f'Distribución de Estados en {etapa}')
-            ax.set_xlabel('Estado')
-            ax.set_ylabel('Cantidad')
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=45)  # Mejorar la legibilidad de las etiquetas
+        # Configurar título y etiquetas
+        ax.set_title(f'Distribución de Estados en {etapa}')
+        ax.set_xlabel('Estado')
+        ax.set_ylabel('Cantidad')
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)  # Mejorar la legibilidad de las etiquetas
         
-            # Colocar la leyenda fuera del gráfico
-            ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
-        else:
-            st.error(f"Las columnas 'Estado' o 'Cantidad' no están presentes en el DataFrame para la etapa '{etapa}'.")
+        # Colocar la leyenda fuera del gráfico
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
+    else:
+        st.error(f"Las columnas 'Estado' o 'Cantidad' no están presentes en el DataFrame para la etapa '{etapa}'.")
 
-        # Mostrar el gráfico
-        st.pyplot(fig)
+    # Mostrar el gráfico
+    st.pyplot(fig)
 
     # Gráfico de Columnas Separado por Etapa
     st.subheader('Gráfico de Columnas por Etapa')
