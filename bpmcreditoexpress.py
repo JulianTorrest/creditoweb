@@ -30,9 +30,10 @@ beneficiarios_data = generar_datos_ficticios(500)
 def captura_datos():
     st.title("Formulario de Búsqueda de Captura de Datos para ICETEX")
     
+    # Entradas del formulario
     nombre = st.text_input("Nombre completo")
     nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
-    edad = st.slider("Edad", min_value=10, max_value=65, value=(18, 65), step=1)
+    edad = st.slider("Edad", min_value=10, max_value=65, value=(10, 65), step=1)
     estado_credito = st.multiselect("Estado del crédito anterior", ["Ninguno", "Castigado", "En mora y castigado"])
     lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
     score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
@@ -40,7 +41,26 @@ def captura_datos():
     limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     
     if st.button("Mostrar datos de beneficiarios"):
+        # Crear un DataFrame con los datos de beneficiarios
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
+        
+        # Aplicar filtros basados en los valores del formulario
+        if nacionalidad:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
+        if estado_credito:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
+        if lista_sarlaft:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
+        if edad:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Edad"].between(edad[0], edad[1])]
+        if score_credito:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Score Crediticio"].between(score_credito[0], score_credito[1])]
+        if capacidad_pago:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Capacidad de Pago (COP)"].between(capacidad_pago[0], capacidad_pago[1])]
+        if limite_endeudamiento:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Límite de Endeudamiento (COP)"].between(limite_endeudamiento[0], limite_endeudamiento[1])]
+        
+        # Mostrar el DataFrame filtrado
         st.dataframe(df_beneficiarios)
 
 # Página de validación de beneficiarios
@@ -157,75 +177,41 @@ def crear_usuario(oferta):
     
     if st.button("Validar Identidad"):
         if otp and rostro_vivo and biometrico and preguntas_reto:
-            st.success("Identidad validada exitosamente.")
-            st.write("Entrando al simulador...")
-            simulador(oferta)
-        else:
-            st.error("No se completaron todos los métodos de validación.")
-
-# Simulador para el monto a pagar
-def simulador(oferta):
-    st.title("Simulador de Monto a Pagar")
-    
-    monto_sugerido = st.number_input("Monto sugerido para pagar mensualmente", min_value=0)
-    limite_inferior = st.number_input("Límite inferior del parámetro establecido", min_value=0)
-    monto_solicitado = st.number_input("Monto solicitado", min_value=0)
-    
-    st.write(f"Monto sugerido: {monto_sugerido}")
-    st.write(f"Límite inferior: {limite_inferior}")
-    st.write(f"Monto solicitado: {monto_solicitado}")
-    
-    acepta = st.selectbox("¿Acepta el monto solicitado?", ["Sí", "No"])
-    
-    if acepta == "Sí":
-        st.write("Generando marca positiva...")
-        firma_garantias(oferta)
-    else:
-        st.write("Activando campaña OCM para incentivar al potencial beneficiario...")
-        # Simulación de campaña OCM
-        interes_despues_OCM = st.selectbox("¿El potencial beneficiario está interesado después de la campaña OCM?", ["Sí", "No"])
-        
-        if interes_despues_OCM == "Sí":
-            st.write("Generando marca positiva...")
-            firma_garantias(oferta)
-        else:
-            st.write("Conociendo causal de no aceptación...")
-            causal = st.text_input("Diligencie la causal de no aceptación")
-            valor_cuota = st.number_input("Valor de la cuota")
-            plazo = st.number_input("Plazo")
-            tasa = st.number_input("Tasa")
-            otra = st.text_input("Otra razón")
-            st.write("Generando marca negativa...")
-            st.success("Proceso finalizado.")
-
-# Firma de garantías
-def firma_garantias(oferta):
-    st.title("Firma de Garantías")
-    
-    firma_recibida = st.checkbox("Firma de garantías recibida")
-    
-    if firma_recibida:
-        st.write("Conectando con ICETEX para verificar convenio...")
-        convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
-        
-        if convenio == "Sí":
-            st.success("Proceso completado exitosamente.")
-        else:
-            st.write("Reiniciando proceso de firma de garantías...")
-            st.write("Proceso finalizado.")
-    else:
-        st.write("Activando campaña OCM para firma de garantías...")
-        firma_despues_OCM = st.selectbox("¿Firma de garantías después de campaña OCM?", ["Sí", "No"])
-        
-        if firma_despues_OCM == "Sí":
-            st.write("Conectando con ICETEX para verificar convenio...")
-            convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
-            if convenio == "Sí":
-                st.success("Proceso completado exitosamente.")
+            st.write("Validación de identidad exitosa.")
+            
+            # Simulador y formulario
+            st.write("Accediendo al simulador...")
+            monto_sugerido = st.number_input("Monto sugerido", min_value=0)
+            limite_inferior = st.number_input("Límite inferior", min_value=0)
+            monto_solicitado = st.number_input("Monto solicitado", min_value=0)
+            
+            st.write("Formulario completado.")
+            
+            # Decisión de aceptación
+            acepta = st.radio("¿Acepta el monto solicitado?", ["Sí", "No"])
+            
+            if acepta == "Sí":
+                st.write("Generando marca positiva...")
+                st.write("Procediendo a la firma de garantías...")
+                firma_garantias(oferta)
             else:
-                st.write("Proceso finalizado.")
+                st.write("Activando campaña OCM...")
+                campaña_ocm = st.selectbox("¿El potencial beneficiario aceptará después de la campaña OCM?", ["Sí", "No"])
+                
+                if campaña_ocm == "Sí":
+                    st.write("Volviendo a la firma de garantías...")
+                    firma_garantias(oferta)
+                else:
+                    st.write("Conociendo causal de no aceptación...")
+                    causal = st.text_input("Diligencie la causal de no aceptación")
+                    valor_cuota = st.number_input("Valor de la cuota")
+                    plazo = st.number_input("Plazo")
+                    tasa = st.number_input("Tasa")
+                    otra = st.text_input("Otra razón")
+                    st.write("Generando marca negativa...")
+                    st.success("Proceso finalizado.")
         else:
-            st.success("Proceso finalizado.")
+            st.error("Faltan datos para completar la validación de identidad.")
 
 # Crear las pestañas en la aplicación de Streamlit
 st.sidebar.title("Navegación")
