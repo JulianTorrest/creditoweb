@@ -40,7 +40,7 @@ def realizar_validaciones(datos_beneficiario):
 
 # Página de captura de datos
 def captura_datos():
-    st.title("Formulario de Captura de Datos para ICETEX")
+    st.title("Formulario de Busqueda de Captura de Datos para ICETEX")
     
     nombre = st.text_input("Nombre completo")
     nacionalidad = st.selectbox("Nacionalidad", ["Colombiano", "Otro"])
