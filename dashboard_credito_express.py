@@ -519,7 +519,7 @@ def main():
 
     # Gráfico de Área
     st.subheader('Gráfico de Área')
-    fig = px.area(df, x='Estado', y='Cantidad', color='Etapa', title='Distribución de Cantidad por Estado')
+    fig = px.area(data, x='Estado', y='Cantidad', color='Etapa', title='Distribución de Cantidad por Estado')
     st.plotly_chart(fig)
 
     st.subheader('3. Distribución del Ingreso Mensual')
