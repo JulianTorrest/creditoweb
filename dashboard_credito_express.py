@@ -605,8 +605,8 @@ def main():
         
         # Mostrar el gráfico
         st.plotly_chart(fig)
-else:
-    st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
+    else:
+        st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
 
     st.subheader('3. Distribución del Ingreso Mensual')
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
