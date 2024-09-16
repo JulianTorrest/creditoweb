@@ -517,10 +517,6 @@ def main():
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
     st.plotly_chart(fig_ingreso_mensual)
 
-    st.subheader('6. Distribución por Sexo Biológico')
-    fig_sexo_biologico = grafico_sexo_biologico(data)
-    st.plotly_chart(fig_sexo_biologico)
-
     st.subheader('7. Distribución por Rango de Edad')
     fig_rango_edad = grafico_rango_edad(data)
     st.plotly_chart(fig_rango_edad)
