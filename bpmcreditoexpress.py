@@ -166,35 +166,108 @@ def seguimiento_periodico(oferta):
     
     if antecedentes_dias <= 30:
         st.write("Creando usuario...")
-        # Lógica para crear usuario
-        st.success("Usuario creado exitosamente.")
+        crear_usuario(oferta)
     else:
         st.write("Consultando SARLAFT...")
         consulta_sarlaft = st.selectbox("Consulta SARLAFT aprobada?", ["Sí", "No"])
         
         if consulta_sarlaft == "Sí":
             st.write("Creando usuario...")
-            # Lógica para crear usuario
-            st.success("Usuario creado exitosamente.")
+            crear_usuario(oferta)
         else:
             st.write("Notificando y actualizando base...")
             # Lógica para notificar y actualizar base
             st.success("Base actualizada y flujo finalizado.")
 
-# Función principal con navegación
-def main():
-    st.sidebar.title("Navegación")
-    page = st.sidebar.selectbox("Selecciona una página", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"])
+# Crear usuario y validación de identidad
+def crear_usuario(oferta):
+    st.title(f"Creación de Usuario para {oferta['nombre']}")
     
-    if page == "Captura de Datos":
-        captura_datos()
-    elif page == "Validación de Beneficiarios":
-        validacion_beneficiarios()
-    elif page == "Enviar Oferta":
-        enviar_oferta()
-    elif page == "Gestión Comercial":
-        gestion_comercial()
+    # Validación de identidad
+    st.subheader("Validación de Identidad")
+    otp = st.text_input("Ingrese OTP")
+    rostro_vivo = st.checkbox("Validación de Rostro Vivo")
+    biometrico = st.checkbox("Validación Biométrica")
+    preguntas_reto = st.text_input("Responda Preguntas de Reto")
+    
+    if st.button("Validar Identidad"):
+        if otp and rostro_vivo and biometrico and preguntas_reto:
+            st.success("Identidad validada exitosamente.")
+            st.write("Entrando al simulador...")
+            simulador(oferta)
+        else:
+            st.error("No se completaron todos los métodos de validación.")
 
-if __name__ == "__main__":
-    main()
+# Simulador para el monto a pagar
+def simulador(oferta):
+    st.title("Simulador de Monto a Pagar")
+    
+    monto_sugerido = st.number_input("Monto sugerido para pagar mensualmente", min_value=0)
+    limite_inferior = st.number_input("Límite inferior del parámetro establecido", min_value=0)
+    monto_solicitado = st.number_input("Monto solicitado", min_value=0)
+    
+    if st.button("Aceptar monto"):
+        st.write("Generando marca positiva...")
+        firma_garantias(oferta)
+    else:
+        st.write("Activando campaña OCM para incentivar al potencial beneficiario...")
+        # Simulación de campaña OCM
+        interes_despues_OCM = st.selectbox("¿El potencial beneficiario está interesado después de la campaña OCM?", ["Sí", "No"])
+        
+        if interes_despues_OCM == "Sí":
+            st.write("Generando marca positiva...")
+            firma_garantias(oferta)
+        else:
+            st.write("Conociendo causal de no aceptación...")
+            causal = st.text_input("Diligencie la causal de no aceptación")
+            valor_cuota = st.number_input("Valor de la cuota")
+            plazo = st.number_input("Plazo")
+            tasa = st.number_input("Tasa")
+            otra = st.text_input("Otra razón")
+            st.write("Generando marca negativa...")
+            st.success("Proceso finalizado.")
 
+# Firma de garantías
+def firma_garantias(oferta):
+    st.title("Firma de Garantías")
+    
+    firma_recibida = st.checkbox("Firma de garantías recibida")
+    
+    if firma_recibida:
+        st.write("Conectando con el ICETEX para verificar convenio...")
+        # Aquí se integraría la lógica para verificar el convenio con ICETEX
+        convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
+        
+        if convenio == "Sí":
+            st.success("Proceso completado exitosamente.")
+        else:
+            st.write("Reiniciando proceso de firma de garantías...")
+            # Aquí se debería reiniciar el proceso o manejar la falta de convenio.
+            st.write("Proceso finalizado.")
+    else:
+        st.write("Activando campaña OCM para firma de garantías...")
+        # Simulación de campaña OCM para firma de garantías
+        firma_despues_OCM = st.selectbox("¿Firma de garantías después de campaña OCM?", ["Sí", "No"])
+        
+        if firma_despues_OCM == "Sí":
+            st.write("Conectando con ICETEX para verificar convenio...")
+            convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
+            if convenio == "Sí":
+                st.success("Proceso completado exitosamente.")
+            else:
+                st.write("Proceso finalizado.")
+        else:
+            st.success("Proceso finalizado.")
+
+# Crear las pestañas en la aplicación de Streamlit
+st.sidebar.title("Navegación")
+page = st.sidebar.selectbox("Selecciona una página:", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"])
+
+if page == "Captura de Datos":
+    captura_datos()
+elif page == "Validación de Beneficiarios":
+    validacion_beneficiarios()
+elif page == "Enviar Oferta":
+    enviar_oferta()
+elif page == "Gestión Comercial":
+    gestion_comercial()
