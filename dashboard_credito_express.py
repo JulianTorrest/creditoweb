@@ -556,14 +556,6 @@ def main():
     fig_ubicacion_residencia = grafico_ubicacion_residencia(data)
     st.plotly_chart(fig_ubicacion_residencia)
 
-    st.subheader('8. Distribución por Año de Finalización del Pregrado')
-    fig_anio_finalizacion_pregrado = grafico_anio_finalizacion_pregrado(data)
-    st.plotly_chart(fig_anio_finalizacion_pregrado)
-
-    st.subheader('9. Distribución por Área del Conocimiento (Pregrado)')
-    fig_area_conocimiento_pregrado = grafico_area_conocimiento_pregrado(data)
-    st.plotly_chart(fig_area_conocimiento_pregrado)
-
     st.subheader('10. Distribución por Área del Conocimiento (Aplicación)')
     fig_area_conocimiento_aplicacion = grafico_area_conocimiento_aplicacion(data)
     st.plotly_chart(fig_area_conocimiento_aplicacion)
