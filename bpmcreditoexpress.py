@@ -36,7 +36,7 @@ def realizar_validaciones(datos_beneficiario):
     
     return errores
 
-# 1. Página de captura de datos
+# Página de captura de datos
 def captura_datos():
     st.title("Formulario de Captura de Datos para ICETEX")
     
@@ -63,7 +63,7 @@ def captura_datos():
         beneficiarios_data.append(datos_beneficiario)
         st.success(f"Datos del beneficiario {nombre} capturados exitosamente.")
 
-# 2. Validación de datos
+# Página de validación de beneficiarios
 def validacion_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
     
@@ -83,7 +83,7 @@ def validacion_beneficiarios():
             st.success(f"Beneficiario {beneficiario['nombre']} pasó todas las validaciones.")
             st.write(f"Ofrecer crédito educativo.")
 
-# 3. Enviar oferta por correo
+# Página para enviar la oferta al beneficiario
 def enviar_oferta():
     st.title("Enviar Oferta al Beneficiario")
     
@@ -93,3 +93,19 @@ def enviar_oferta():
     
     for i, beneficiario in enumerate(beneficiarios_data):
         st.subheader(f"Beneficiario {i+1}: {beneficiario['nombre']}")
+        st.write(f"Se ha enviado la oferta a {beneficiario['nombre']} al correo electrónico registrado.")
+
+# Función principal con navegación
+def main():
+    st.sidebar.title("Navegación")
+    page = st.sidebar.selectbox("Selecciona una página", ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta"])
+    
+    if page == "Captura de Datos":
+        captura_datos()
+    elif page == "Validación de Beneficiarios":
+        validacion_beneficiarios()
+    elif page == "Enviar Oferta":
+        enviar_oferta()
+
+if __name__ == "__main__":
+    main()
