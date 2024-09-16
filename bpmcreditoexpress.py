@@ -104,7 +104,7 @@ def enviar_oferta():
     for i, beneficiario in enumerate(beneficiarios_data):
         st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
         if st.button(f"Enviar oferta a {beneficiario['Nombre']}"):
-            st.session_state.ofertas_enviadas.append(beneficiario)
+            st.session_state.ofertas_enviadas.append(beneficiario.copy())
             st.success(f"Oferta enviada a {beneficiario['Nombre']}.")
 
 # Página de gestión comercial de ofertas
@@ -118,7 +118,7 @@ def gestion_comercial():
     for i, oferta in enumerate(st.session_state.ofertas_enviadas):
         st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
         
-        interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"])
+        interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
         
         if interesado == "Sí":
             st.write("Generando marca positiva...")
@@ -131,10 +131,10 @@ def gestion_comercial():
             st.write("Generando marca 'Sí, pero después'...")
             st.write("Realizando seguimiento periódico para retomar contacto.")
             
-            garantia_firmada = st.checkbox("Garantía firmada recibida")
+            garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
             
             if garantia_firmada:
-                convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"])
+                convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"], key=f"convenio_{i}")
                 
                 if convenio == "Sí":
                     st.write("Realizando liquidación automática del desembolso...")
@@ -144,11 +144,11 @@ def gestion_comercial():
                     
                 elif convenio == "No":
                     st.write("Solicitando información para giro...")
-                    nombre_banco = st.text_input("Nombre del banco")
-                    tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"])
-                    numero_cuenta = st.text_input("Número de cuenta")
+                    nombre_banco = st.text_input("Nombre del banco", key=f"nombre_banco_{i}")
+                    tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"], key=f"tipo_cuenta_{i}")
+                    numero_cuenta = st.text_input("Número de cuenta", key=f"numero_cuenta_{i}")
                     
-                    if st.button("Validar información para giro"):
+                    if st.button("Validar información para giro", key=f"validar_info_{i}"):
                         st.write("Validando información para giro...")
                         st.write("Realizando liquidación automática del desembolso...")
                         st.write("Generando instrucción de giro...")
@@ -159,7 +159,7 @@ def gestion_comercial():
                 st.write("Generando módulo de herramientas de aprobación...")
                 st.write("Seguimiento de solicitudes y presupuesto.")
                 
-                interesado_nuevo = st.selectbox("¿El potencial beneficiario está interesado después del seguimiento?", ["Sí", "No"])
+                interesado_nuevo = st.selectbox("¿El potencial beneficiario está interesado después del seguimiento?", ["Sí", "No"], key=f"interesado_nuevo_{i}")
                 
                 if interesado_nuevo == "Sí":
                     st.write("Generando marca positiva...")
@@ -169,16 +169,16 @@ def gestion_comercial():
                     st.session_state.ofertas_enviadas.remove(oferta)
                     st.success("Registros actualizados y flujo finalizado.")
 
-# Crear usuario y validación de identidad
+# Página de validación de usuario
 def usuario_validacion():
-    st.title("Validación de Identidad del Usuario")
+    st.title("Validación de Usuario")
     
-    usuario = st.text_input("Nombre de usuario")
-    password = st.text_input("Contraseña", type="password")
+    usuario = st.text_input("Usuario")
+    contrasena = st.text_input("Contraseña", type="password")
     
     if st.button("Iniciar sesión"):
-        if usuario == "admin" and password == "admin":
-            st.success("Autenticación exitosa.")
+        if usuario == "admin" and contrasena == "admin":
+            st.success("Inicio de sesión exitoso.")
         else:
             st.error("Autenticación fallida. Verifique su usuario y contraseña.")
 
