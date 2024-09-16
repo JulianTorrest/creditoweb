@@ -493,12 +493,18 @@ def main():
     # Gráfico de Barras Apiladas
     st.subheader('Gráfico de Barras Apiladas')
     fig, ax = plt.subplots()
-    pivot_df = df.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
-    pivot_df.plot(kind='bar', stacked=True, ax=ax)
-    plt.title('Distribución de Estados por Etapa')
-    plt.xlabel('Etapa')
-    plt.ylabel('Cantidad')
-    plt.xticks(rotation=45)  # Mejorar la legibilidad de las etiquetas
+    
+    # Verificar si las columnas existen
+    if all(col in df.columns for col in ['Etapa', 'Estado', 'Cantidad']):
+        pivot_df = df.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
+        pivot_df.plot(kind='bar', stacked=True, ax=ax)
+        ax.set_title('Distribución de Estados por Etapa')
+        ax.set_xlabel('Etapa')
+        ax.set_ylabel('Cantidad')
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=45)  # Mejorar la legibilidad de las etiquetas
+    else:
+        st.error("Las columnas 'Etapa', 'Estado' o 'Cantidad' no están presentes en el DataFrame.")
+
     st.pyplot(fig)
 
     # Gráfico de Columnas
