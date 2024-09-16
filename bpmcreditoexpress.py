@@ -1,55 +1,43 @@
 import streamlit as st
+import random
+import pandas as pd
 
-# Simulaciones de bases de datos
-beneficiarios_data = []
-ofertas_enviadas = []
-potenciales_beneficiarios = []
-base_referidos = []
+# Crear una función para generar datos ficticios
+def generar_datos_ficticios(n):
+    nombres = [f"Nombre_{i}" for i in range(n)]
+    nacionalidades = ["Colombiano", "Otro"]
+    estados_credito = ["Ninguno", "castigado", "en mora y castigado"]
+    listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
+    
+    datos = []
+    for nombre in nombres:
+        datos.append({
+            "nombre": nombre,
+            "nacionalidad": random.choice(nacionalidades),
+            "edad": random.randint(18, 65),
+            "estado_credito": random.choice(estados_credito),
+            "lista_sarlaft": random.choice(listas_sarlaft),
+            "score_credito": random.randint(150, 900),
+            "capacidad_pago": random.randint(1500000, 20000000),
+            "limite_endeudamiento": random.randint(1500000, 20000000)
+        })
+    return datos
 
-# Función para simular validaciones
-def realizar_validaciones(datos_beneficiario):
-    errores = []
-    
-    # Validación 1: Nacionalidad y edad
-    if datos_beneficiario["nacionalidad"] != "Colombiano":
-        errores.append("El beneficiario no es colombiano.")
-    if datos_beneficiario["edad"] >= 65:
-        errores.append("El beneficiario es mayor de 65 años.")
-    
-    # Validación 2: Estado de crédito
-    if datos_beneficiario["estado_credito"] == "castigado":
-        errores.append("El beneficiario tiene un crédito castigado.")
-    elif datos_beneficiario["estado_credito"] == "en mora y castigado":
-        errores.append("El beneficiario tiene un crédito en mora y está castigado.")
-    
-    # Validación 3: SARLAFT
-    if datos_beneficiario["lista_sarlaft"] == "Vinculantes":
-        errores.append("El beneficiario está en lista SARLAFT vinculante.")
-    
-    # Validación 4: Score crediticio
-    if datos_beneficiario["score_credito"] == "":
-        errores.append("El beneficiario no tiene score crediticio.")
-    elif datos_beneficiario["score_credito"] < 500:
-        errores.append("El score es bajo. Se requiere codeudor.")
-    
-    # Validación 5: Modelo de pre-aprobación
-    if datos_beneficiario["capacidad_pago"] < datos_beneficiario["limite_endeudamiento"]:
-        errores.append("El beneficiario no tiene suficiente capacidad de pago.")
-    
-    return errores
+# Generar datos ficticios
+beneficiarios_data = generar_datos_ficticios(500)
 
 # Página de captura de datos
 def captura_datos():
-    st.title("Formulario de Busqueda de Captura de Datos para ICETEX")
+    st.title("Formulario de Búsqueda de Captura de Datos para ICETEX")
     
     nombre = st.text_input("Nombre completo")
-    nacionalidad = st.selectbox("Nacionalidad", ["Colombiano", "Otro"])
-    edad = st.number_input("Edad", min_value=18, max_value=80, step=1)
-    estado_credito = st.selectbox("Estado del crédito anterior", ["Ninguno", "castigado", "en mora y castigado"])
-    lista_sarlaft = st.selectbox("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
-    score_credito = st.number_input("Score crediticio", min_value=0, max_value=850, step=1)
-    capacidad_pago = st.number_input("Capacidad de pago (en COP)")
-    limite_endeudamiento = st.number_input("Límite de endeudamiento (en COP)")
+    nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
+    edad = st.slider("Edad", min_value=10, max_value=100, value=(18, 65), step=1)
+    estado_credito = st.multiselect("Estado del crédito anterior", ["Ninguno", "castigado", "en mora y castigado"])
+    lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
+    score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
+    capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
+    limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     
     if st.button("Enviar formulario"):
         datos_beneficiario = {
@@ -193,7 +181,13 @@ def simulador(oferta):
     limite_inferior = st.number_input("Límite inferior del parámetro establecido", min_value=0)
     monto_solicitado = st.number_input("Monto solicitado", min_value=0)
     
-    if st.button("Aceptar monto"):
+    st.write(f"Monto sugerido: {monto_sugerido}")
+    st.write(f"Límite inferior: {limite_inferior}")
+    st.write(f"Monto solicitado: {monto_solicitado}")
+    
+    acepta = st.selectbox("¿Acepta el monto solicitado?", ["Sí", "No"])
+    
+    if acepta == "Sí":
         st.write("Generando marca positiva...")
         firma_garantias(oferta)
     else:
