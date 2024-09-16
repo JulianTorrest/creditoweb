@@ -44,6 +44,13 @@ etapas_estados_validos = {
 }
 
 # Filtrar combinaciones válidas
+def filtrar_combinaciones_validas(df, etapas_estados_validos):
+    df_filtrado = pd.DataFrame()
+    for etapa, estados in etapas_estados_validos.items():
+        df_filtrado = pd.concat([df_filtrado, df[(df['Etapa'] == etapa) & (df['Estado'].isin(estados))]])
+    return df_filtrado
+
+# Filtrar combinaciones válidas
 data_filtrada = filtrar_combinaciones_validas(data, etapas_estados_validos)
 
 # Función para generar datos dummy para IES
