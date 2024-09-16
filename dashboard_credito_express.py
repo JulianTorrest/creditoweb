@@ -50,6 +50,9 @@ def filtrar_combinaciones_validas(data, etapas_estados_validos):
         df_filtrado = pd.concat([df_filtrado, data[(data['Etapa'] == etapa) & (data['Estado'].isin(estados))]])
     return df_filtrado
 
+# Generar los datos dummy
+data = generar_datos_dummy()
+
 # Filtrar combinaciones válidas
 data_filtrada = filtrar_combinaciones_validas(data, etapas_estados_validos)
 
