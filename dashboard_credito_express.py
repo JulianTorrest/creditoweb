@@ -25,17 +25,26 @@ def generar_datos_dummy():
         'Patrimonio (Rango)': np.random.choice(['<4000000', '4000000-12000000', '12000000-20000000', '>20000000'], n),
         'Periodo Académico': np.random.choice(['2023-1', '2023-2', '2024-1', '2024-2'], n),
         'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n),
-        
-        # Generar valores aleatorios para 'Etapa' y 'Estado'
-        'Etapa': np.random.choice(['Otorgamiento', 'Etapa de Estudios', 'Etapa de Amortización', 'Transversales'], n),
-        'Estado': np.random.choice(['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Girado', 'Pendiente de renovación', 'Pendiente paso a cobro', 'Novedad cartera', 'Bloqueado'], n),
-        
-        # Generar valores aleatorios para 'Cantidad'
+        'Etapa': np.random.choice(['OTORGAMIENTO', 'ETAPA DE ESTUDIOS', 'ETAPA DE AMORTIZACIÓN', 'TRANSVERSALES'], n),
+        'Estado': np.random.choice(['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Aprobado', 'No aprobado', 'Desistido', 
+                                'Legalizado', 'No legalizado', 'Girado', 'Pendiente de renovación', 'Renovación', 
+                                'Aplazado', 'Terminación de crédito', 'Pendiente paso a cobro', 'Novedad cartera', 
+                                'En amortización', 'Cancelado', 'Bloqueado', 'Anulado'], n),
         'Cantidad': np.random.randint(50, 300, size=n)
     })
 
     return data
 
+# Definir etapas y estados válidos
+etapas_estados_validos = {
+    'OTORGAMIENTO': ['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Aprobado', 'No aprobado', 'Desistido', 'Legalizado', 'No legalizado'],
+    'ETAPA DE ESTUDIOS': ['Girado', 'Pendiente de renovación', 'Renovación', 'Aplazado', 'Terminación de crédito'],
+    'ETAPA DE AMORTIZACIÓN': ['Pendiente paso a cobro', 'Novedad cartera', 'En amortización', 'Cancelado'],
+    'TRANSVERSALES': ['Bloqueado', 'Anulado']
+}
+
+# Filtrar combinaciones válidas
+data_filtrada = filtrar_combinaciones_validas(data, etapas_estados_validos)
 
 # Función para generar datos dummy para IES
 def generar_datos_ies():
