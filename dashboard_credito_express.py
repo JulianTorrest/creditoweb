@@ -483,6 +483,32 @@ def main():
     fig_monto = grafico_funnel_monto(data)
     st.plotly_chart(fig_monto)
 
+    # Gráfico de Barras Apiladas
+    st.subheader('Gráfico de Barras Apiladas')
+    fig, ax = plt.subplots()
+    pivot_df = df.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
+    pivot_df.plot(kind='bar', stacked=True, ax=ax)
+    plt.title('Distribución de Estados por Etapa')
+    plt.xlabel('Etapa')
+    plt.ylabel('Cantidad')
+    plt.xticks(rotation=45)  # Mejorar la legibilidad de las etiquetas
+    st.pyplot(fig)
+
+    # Gráfico de Columnas
+    st.subheader('Gráfico de Columnas')
+    fig, ax = plt.subplots()
+    pivot_df.plot(kind='bar', ax=ax)
+    plt.title('Cantidad de Estados por Etapa')
+    plt.xlabel('Etapa')
+    plt.ylabel('Cantidad')
+    plt.xticks(rotation=45)  # Mejorar la legibilidad de las etiquetas
+    st.pyplot(fig)
+
+    # Gráfico de Área
+    st.subheader('Gráfico de Área')
+    fig = px.area(df, x='Estado', y='Cantidad', color='Etapa', title='Distribución de Cantidad por Estado')
+    st.plotly_chart(fig)
+
     st.subheader('3. Distribución del Ingreso Mensual')
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
     st.plotly_chart(fig_ingreso_mensual)
