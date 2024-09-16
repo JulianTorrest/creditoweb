@@ -120,15 +120,15 @@ def gestion_comercial():
         
         interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
         
-        if interesado == "Sí":
-            st.write("Generando marca positiva...")
+        if interesado == "Sí, pero después":
+            st.write("Generando marca 'Sí, pero después'...")
             firma_garantias(oferta)
         elif interesado == "No":
             st.write("Actualizando registros y finalizando el flujo.")
             st.session_state.ofertas_enviadas.remove(oferta)
             st.success("Registros actualizados y flujo finalizado.")
-        elif interesado == "Sí, pero después":
-            st.write("Generando marca 'Sí, pero después'...")
+        elif interesado == "Sí":
+            st.write("Generando marca positiva...")
             st.write("Realizando seguimiento periódico para retomar contacto.")
             
             garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
