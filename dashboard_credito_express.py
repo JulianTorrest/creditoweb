@@ -532,8 +532,8 @@ def main():
     if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
         fig = px.area(data_filtrada, x='Estado', y='Cantidad', color='Etapa', title='Distribución de Cantidad por Estado')
         st.plotly_chart(fig)
-        else:
-    st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
+    else:
+        st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
 
 
     st.subheader('3. Distribución del Ingreso Mensual')
