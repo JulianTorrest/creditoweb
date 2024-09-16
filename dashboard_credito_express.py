@@ -515,10 +515,10 @@ def main():
 
     st.subheader('Diagrama de Sankey por Etapa')
 
-# Verificar si las columnas existen
-if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
+    # Verificar si las columnas existen
+    if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
     # Obtener una lista de etapas únicas
-    etapas = data_filtrada['Etapa'].unique()
+        etapas = data_filtrada['Etapa'].unique()
     
     # Crear una lista de nodos y un diccionario para mapear nombres a índices
     nodos = list(data_filtrada['Estado'].unique()) + list(etapas)
