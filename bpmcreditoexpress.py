@@ -92,4 +92,4 @@ def enviar_oferta():
         return
     
     for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario
+        st.subheader(f"Beneficiario {i+1}: {beneficiario['nombre']}")
