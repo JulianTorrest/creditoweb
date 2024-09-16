@@ -527,10 +527,10 @@ for etapa in etapas:
     # Verificar si las columnas existen
     if all(col in data_etapa.columns for col in ['Estado', 'Cantidad']):
         # Crear una tabla dinámica
-        pivot_df = data_etapa.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
+        pivot_df = data_etapa.pivot_table(index='Estado', columns='Etapa', values='Cantidad', fill_value=0)
         
         # Crear gráfico de barras apiladas
-        pivot_df.loc[etapa].plot(kind='bar', stacked=True, ax=ax)
+        pivot_df.plot(kind='bar', stacked=True, ax=ax)
         
         # Configurar título y etiquetas
         ax.set_title(f'Distribución de Estados en {etapa}')
