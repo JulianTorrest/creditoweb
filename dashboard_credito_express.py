@@ -127,29 +127,6 @@ def grafico_funnel_monto(data):
 
     return fig
 
-# Función para el gráfico de renovaciones realizadas vs requeridas
-def grafico_renovaciones_vs_requeridas(data_ies):
-    fig = go.Figure()
-
-    fig.add_trace(go.Bar(
-        x=data_ies['Nombre de Institución'],
-        y=data_ies['Renovaciones Realizadas'],
-        name='Renovaciones Realizadas'
-    ))
-
-    fig.add_trace(go.Bar(
-        x=data_ies['Nombre de Institución'],
-        y=data_ies['Renovaciones Requeridas'],
-        name='Renovaciones Requeridas'
-    ))
-
-    fig.update_layout(title='Renovaciones Realizadas vs Requeridas',
-                      xaxis_title='Nombre de Institución',
-                      yaxis_title='Número de Renovaciones',
-                      barmode='group')
-
-    return fig
-
 # Función para el gráfico de distribución del ingreso mensual
 def grafico_ingreso_mensual(data):
     fig = go.Figure()
