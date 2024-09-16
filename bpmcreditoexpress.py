@@ -27,6 +27,8 @@ def generar_datos_ficticios(n):
 beneficiarios_data = generar_datos_ficticios(500)
 if "ofertas_enviadas" not in st.session_state:
     st.session_state.ofertas_enviadas = []
+if "ofertas_en_proceso" not in st.session_state:
+    st.session_state.ofertas_en_proceso = []
 
 # Funciones de la aplicación
 def realizar_validaciones(beneficiario):
@@ -105,17 +107,21 @@ def enviar_oferta():
         st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
         if st.button(f"Enviar oferta a {beneficiario['Nombre']}"):
             st.session_state.ofertas_enviadas.append(beneficiario.copy())
+            st.session_state.ofertas_en_proceso.append({
+                "Nombre": beneficiario["Nombre"],
+                "Estado": "Enviada"
+            })
             st.success(f"Oferta enviada a {beneficiario['Nombre']}.")
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
     
-    if not st.session_state.ofertas_enviadas:
-        st.warning("No hay ofertas enviadas para gestionar.")
+    if not st.session_state.ofertas_en_proceso:
+        st.warning("No hay ofertas en proceso para gestionar.")
         return
     
-    for i, oferta in enumerate(st.session_state.ofertas_enviadas):
+    for i, oferta in enumerate(st.session_state.ofertas_en_proceso):
         st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
         
         interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
@@ -123,9 +129,11 @@ def gestion_comercial():
         if interesado == "Sí, pero después":
             st.write("Generando marca 'Sí, pero después'...")
             firma_garantias(oferta)
+            st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
         elif interesado == "No":
             st.write("Actualizando registros y finalizando el flujo.")
-            st.session_state.ofertas_enviadas.remove(oferta)
+            st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
+            st.session_state.ofertas_en_proceso.remove(oferta)
             st.success("Registros actualizados y flujo finalizado.")
         elif interesado == "Sí":
             st.write("Generando marca positiva...")
@@ -141,6 +149,7 @@ def gestion_comercial():
                     st.write("Generando instrucción de giro...")
                     st.write("Realizando control presupuestal...")
                     st.write("Comprobación digital por el ordenador del gasto...")
+                    st.session_state.ofertas_en_proceso[i]["Estado"] = "En Proceso"
                     
                 elif convenio == "No":
                     st.write("Solicitando información para giro...")
@@ -154,65 +163,43 @@ def gestion_comercial():
                         st.write("Generando instrucción de giro...")
                         st.write("Realizando control presupuestal...")
                         st.write("Comprobación digital por el ordenador del gasto...")
-                        st.write("Proceso finalizado.")
-                
-                st.write("Generando módulo de herramientas de aprobación...")
-                st.write("Seguimiento de solicitudes y presupuesto.")
-                
-                interesado_nuevo = st.selectbox("¿El potencial beneficiario está interesado después del seguimiento?", ["Sí", "No"], key=f"interesado_nuevo_{i}")
-                if interesado_nuevo == "Sí":
-                    st.success(f"Beneficiario {oferta['Nombre']} está listo para proceder con la oferta.")
-                else:
-                    st.warning(f"Beneficiario {oferta['Nombre']} decidió no proceder.")
+                        st.session_state.ofertas_en_proceso[i]["Estado"] = "En Proceso"
+                        
+                    st.write("Generando módulo de herramientas de aprobación...")
+                    st.write("Seguimiento de solicitudes y presupuesto.")
+                    
+                    if st.button("Finalizar proceso", key=f"finalizar_proceso_{i}"):
+                        st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
+                        st.success("Proceso finalizado y oferta gestionada.")
 
-# Página de gestión para el ordenador del gasto
+# Página de gestión del ordenador del gasto
 def gestion_ordenador_gasto():
-    st.title("Gestión para el Ordenador del Gasto")
-
-    # Información de la liquidación automática del desembolso
-    st.header("Liquidación Automática del Desembolso")
-    st.write("Generando liquidación automática del desembolso...")
-    # Muestra detalles de la liquidación
-    st.write("Detalles del desembolso...")
-    # Aquí puedes agregar información más específica o datos de ejemplo
-
-    # Generación automática de la instrucción de giro
-    st.header("Generación Automática de Instrucción de Giro")
-    st.write("Generando instrucción de giro...")
-    # Muestra detalles de la instrucción de giro
-    st.write("Detalles de la instrucción de giro...")
-    # Agrega información adicional si es necesario
-
-    # Control presupuestal
-    st.header("Control Presupuestal")
-    presupuesto_disponible = st.number_input("Presupuesto disponible (en COP)", min_value=0, step=1000)
-    monto_solicitado = st.number_input("Monto solicitado (en COP)", min_value=0, step=1000)
-
-    if monto_solicitado > presupuesto_disponible:
-        st.error("El monto solicitado excede el presupuesto disponible.")
-    else:
-        st.success("Presupuesto dentro de los límites permitidos.")
-
-    st.write("Alertas de cumplimiento del presupuesto:")
-    if monto_solicitado > presupuesto_disponible * 0.8:
-        st.warning("El monto solicitado se acerca al límite del presupuesto.")
-
-    # Aprobación digital
-    st.header("Aprobación Digital por Ordenador del Gasto")
-    aprobado = st.checkbox("Aprobar desembolso")
-    if aprobado:
-        st.success("Desembolso aprobado.")
-    else:
-        st.warning("Desembolso no aprobado.")
-
-    # Seguimiento de solicitudes y presupuesto disponible
-    st.header("Seguimiento de Solicitudes y Presupuesto")
-    if aprobado:
-        st.write("Realizando seguimiento de las solicitudes aprobadas...")
-        st.write(f"Presupuesto disponible restante: {presupuesto_disponible - monto_solicitado} COP")
-        st.write("Proceso finalizado.")
-    else:
-        st.write("No se ha realizado seguimiento ya que el desembolso no fue aprobado.")
+    st.title("Gestión Ordenador del Gasto")
+    
+    if not st.session_state.ofertas_en_proceso:
+        st.warning("No hay ofertas en proceso para gestionar.")
+        return
+    
+    for i, oferta in enumerate(st.session_state.ofertas_en_proceso):
+        st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
+        
+        if oferta["Estado"] == "En Proceso":
+            st.write(f"Estado actual de la oferta: {oferta['Estado']}")
+            st.write("Detalles del proceso en curso:")
+            st.write("Realizando liquidación automática del desembolso...")
+            st.write("Generando instrucción de giro...")
+            st.write("Realizando control presupuestal...")
+            st.write("Comprobación digital por el ordenador del gasto...")
+            st.write("Generando módulo de herramientas de aprobación...")
+            st.write("Seguimiento de solicitudes y presupuesto.")
+            
+            aprobado = st.checkbox(f"Aprobar oferta {i+1}", key=f"aprobar_oferta_{i}")
+            if aprobado:
+                st.success(f"Oferta {i+1} aprobada.")
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "Aprobada"
+            else:
+                st.warning(f"Oferta {i+1} no aprobada.")
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "No Aprobada"
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
