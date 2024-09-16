@@ -24,7 +24,7 @@ def generar_datos_dummy():
         'Cantidad de Desembolsos Requeridos': np.random.randint(1, 5, size=n),
         'Etapa': ['Otorgamiento', 'Otorgamiento', 'Otorgamiento', 'Etapa de Estudios', 'Etapa de Estudios', 'Etapa de Amortización', 'Etapa de Amortización', 'Transversales'],
         'Estado': ['No pre-aprobado', 'Pre-aprobado', 'En estudio', 'Girado', 'Pendiente de renovación', 'Pendiente paso a cobro', 'Novedad cartera', 'Bloqueado'],
-        'Cantidad': [20, 15, 10, 30, 25, 12, 5, 8]
+        'Cantidad': [150, 180, 250, 80, 75, 120, 50, 80]
 
     })
     return data
