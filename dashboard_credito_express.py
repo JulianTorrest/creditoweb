@@ -512,48 +512,53 @@ def main():
         st.plotly_chart(fig)
     else:
         st.error("Las columnas 'Estado', 'Cantidad' o 'Etapa' no están presentes en el DataFrame.")
+        
+  #Mapear etapas a categorías
+    categoria_map = {
+     'OTORGAMIENTO': 'Otorgamiento',
+     'ETAPA DE ESTUDIOS': 'Etapa de Estudios',
+     'ETAPA DE AMORTIZACIÓN': 'Etapa de Amortización',
+     'TRANSVERSALES': 'Transversales'
+    }
 
-    st.subheader('Diagrama de Sankey por Etapa')
+# Asignar categorías principales a cada estado
+    data_filtrada['Categoria'] = data_filtrada['Etapa'].map(categoria_map)
 
-    # Verificar si las columnas existen
-    if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
-    # Obtener una lista de etapas únicas
-        etapas = data_filtrada['Etapa'].unique()
-    
-    # Crear una lista de nodos y un diccionario para mapear nombres a índices
-    nodos = list(data_filtrada['Estado'].unique()) + list(etapas)
+# Crear una lista de nodos únicos
+    nodos = list(data_filtrada['Estado'].unique()) + list(categoria_map.values())
     nodo_map = {nodo: i for i, nodo in enumerate(nodos)}
-    
-    # Crear una lista de links para el diagrama de Sankey
-    links = []
-    for etapa in etapas:
-        data_etapa = data_filtrada[data_filtrada['Etapa'] == etapa]
-        for _, row in data_etapa.iterrows():
-            links.append({
-                'source': nodo_map[row['Estado']],
-                'target': nodo_map[etapa],
-                'value': row['Cantidad']
-            })
-    
-    # Crear el gráfico de Sankey
-    fig = go.Figure(go.Sankey(
-        node=dict(
-            pad=15,
-            thickness=20,
-            line=dict(color='black', width=0.5),
-            label=nodos
-        ),
-        link=dict(
-            source=[link['source'] for link in links],
-            target=[link['target'] for link in links],
-            value=[link['value'] for link in links]
-        )
-    ))
 
-    fig.update_layout(title_text='Diagrama de Sankey de Cantidades por Estado y Etapa', font_size=10)
-    
-    # Mostrar el gráfico en Streamlit
+# Crear una lista de enlaces para el diagrama de Sankey
+    links = []
+    for _, row in data_filtrada.iterrows():
+     links.append({
+        'source': nodo_map[row['Estado']],
+        'target': nodo_map[row['Categoria']],
+        'value': row['Cantidad']
+    })
+
+# Crear el gráfico de Sankey
+    fig = go.Figure(go.Sankey(
+    node=dict(
+        pad=15,
+        thickness=20,
+        line=dict(color='black', width=0.5),
+        label=nodos
+    ),
+    link=dict(
+        source=[link['source'] for link in links],
+        target=[link['target'] for link in links],
+        value=[link['value'] for link in links]
+    )
+))
+
+    fig.update_layout(title_text='Diagrama de Sankey de Cantidades por Estado y Categoría', font_size=10)
+
+# Mostrar el gráfico en Streamlit
+    st.title('Visualización de Datos')
+    st.subheader('Diagrama de Sankey')
     st.plotly_chart(fig)
+
 
     st.subheader('Distribución del Ingreso Mensual')
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
