@@ -546,8 +546,8 @@ for etapa in etapas:
     # Mostrar el gráfico
     st.pyplot(fig)
 
-# Gráfico de Columnas Separado por Etapa
-st.subheader('Gráfico de Columnas por Etapa')
+    # Gráfico de Columnas Separado por Etapa
+    st.subheader('Gráfico de Columnas por Etapa')
 
 # Filtrar y crear gráficos para cada etapa
 etapas = data['Etapa'].unique()
