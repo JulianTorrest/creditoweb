@@ -588,7 +588,7 @@ def main():
     # Verificar si las columnas existen
     if all(col in data_filtrada.columns for col in ['Estado', 'Cantidad', 'Etapa']):
     # Obtener una lista de etapas únicas
-    etapas = data_filtrada['Etapa'].unique()
+        etapas = data_filtrada['Etapa'].unique()
     
     # Iterar sobre cada etapa y crear un gráfico
     for etapa in etapas:
