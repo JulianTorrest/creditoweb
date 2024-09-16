@@ -13,7 +13,7 @@ def generar_datos_dummy():
     data = pd.DataFrame({
         'Estrato Socioeconómico': np.random.choice(['1', '2', '3','4','5','6'], n),
         'Sexo Biológico': np.random.choice(['Masculino', 'Femenino'], n),
-        'Rango de Edad': np.random.choice(['18-24', '25-34', '35-44', '45-54', '55-64', '65+'], n),
+        'Rango de Edad': np.random.choice(['18-24', '25-34', '35-44', '45-54', '55-64'], n),
         'Ubicación de Residencia': np.random.choice(['Urbana', 'Rural'], n),
         'Año de Finalización del Pregrado': np.random.choice(range(2000, 2023), n),
         'Área del Conocimiento (Pregrado)': np.random.choice(['Ciencias Sociales', 'Ingeniería', 'Ciencias de la Salud', 'Ciencias Exactas', 'Humanidades'], n),
