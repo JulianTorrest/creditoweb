@@ -160,45 +160,23 @@ def gestion_comercial():
                 st.write("Seguimiento de solicitudes y presupuesto.")
                 
                 interesado_nuevo = st.selectbox("¿El potencial beneficiario está interesado después del seguimiento?", ["Sí", "No"], key=f"interesado_nuevo_{i}")
-                
                 if interesado_nuevo == "Sí":
-                    st.write("Generando marca positiva...")
-                    firma_garantias(oferta)
+                    st.success(f"Beneficiario {oferta['Nombre']} está listo para proceder con la oferta.")
                 else:
-                    st.write("Actualizando registros y finalizando el flujo.")
-                    st.session_state.ofertas_enviadas.remove(oferta)
-                    st.success("Registros actualizados y flujo finalizado.")
+                    st.warning(f"Beneficiario {oferta['Nombre']} decidió no proceder.")
 
-# Página de validación de usuario
-def usuario_validacion():
-    st.title("Validación de Usuario")
-    
-    usuario = st.text_input("Usuario")
-    contrasena = st.text_input("Contraseña", type="password")
-    
-    if st.button("Iniciar sesión"):
-        if usuario == "admin" and contrasena == "admin":
-            st.success("Inicio de sesión exitoso.")
-        else:
-            st.error("Autenticación fallida. Verifique su usuario y contraseña.")
+# Configurar el menú de la aplicación
+menu = st.sidebar.selectbox(
+    "Selecciona una página",
+    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial"]
+)
 
-# Aplicación principal
-def main():
-    st.sidebar.title("Menú de navegación")
-    opciones = ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial de Ofertas", "Validación de Usuario"]
-    seleccion = st.sidebar.radio("Selecciona una opción:", opciones)
-    
-    if seleccion == "Captura de Datos":
-        captura_datos()
-    elif seleccion == "Validación de Beneficiarios":
-        validacion_beneficiarios()
-    elif seleccion == "Enviar Oferta":
-        enviar_oferta()
-    elif seleccion == "Gestión Comercial de Ofertas":
-        gestion_comercial()
-    elif seleccion == "Validación de Usuario":
-        usuario_validacion()
-
-if __name__ == "__main__":
-    main()
-
+# Ejecutar la página seleccionada
+if menu == "Captura de Datos":
+    captura_datos()
+elif menu == "Validación de Beneficiarios":
+    validacion_beneficiarios()
+elif menu == "Enviar Oferta":
+    enviar_oferta()
+elif menu == "Gestión Comercial":
+    gestion_comercial()
