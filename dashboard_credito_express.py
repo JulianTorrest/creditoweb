@@ -495,7 +495,7 @@ def main():
     fig, ax = plt.subplots()
     
     # Verificar si las columnas existen
-    if all(col in df.columns for col in ['Etapa', 'Estado', 'Cantidad']):
+    if all(col in data.columns for col in ['Etapa', 'Estado', 'Cantidad']):
         pivot_df = df.pivot_table(index='Etapa', columns='Estado', values='Cantidad', fill_value=0)
         pivot_df.plot(kind='bar', stacked=True, ax=ax)
         ax.set_title('Distribución de Estados por Etapa')
