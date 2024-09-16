@@ -517,10 +517,6 @@ def main():
     fig_ingreso_mensual = grafico_ingreso_mensual(data)
     st.plotly_chart(fig_ingreso_mensual)
 
-    st.subheader('5. Distribución por Estrato Socioeconómico')
-    fig_estrato_socioeconomico = grafico_estrato_socioeconomico(data)
-    st.plotly_chart(fig_estrato_socioeconomico)
-
     st.subheader('6. Distribución por Sexo Biológico')
     fig_sexo_biologico = grafico_sexo_biologico(data)
     st.plotly_chart(fig_sexo_biologico)
@@ -541,14 +537,6 @@ def main():
     fig_empleado_desempleado_independiente = grafico_empleado_desempleado_independiente(data)
     st.plotly_chart(fig_empleado_desempleado_independiente)
 
-    st.subheader('11. Distribución por Antigüedad en el Último Empleo')
-    fig_antiguedad_ultimo_empleo = grafico_antiguedad_ultimo_empleo(data)
-    st.plotly_chart(fig_antiguedad_ultimo_empleo)
-
-    st.subheader('12. Distribución por Estado Civil')
-    fig_estado_civil = grafico_estado_civil(data)
-    st.plotly_chart(fig_estado_civil)
-
     st.subheader('13. Distribución por Patrimonio')
     fig_patrimonio = grafico_patrimonio(data)
     st.plotly_chart(fig_patrimonio)
@@ -568,18 +556,6 @@ def main():
 
     st.subheader('17. Distribución por Tipo de Institución (Pública vs Privada)')
     st.plotly_chart(grafico_institucion_publica_privada(datos_ies))
-
-    st.subheader('18. Renovaciones Realizadas vs Requeridas')
-    st.plotly_chart(grafico_renovaciones_vs_requeridas(datos_ies))
-
-    st.subheader('19. Total de Renovaciones Desembolsadas')
-    st.plotly_chart(grafico_total_renovaciones_desembolsadas(datos_ies))
-
-    st.subheader('20. Deserciones y Suspensiones')
-    st.plotly_chart(grafico_deserciones_suspensiones(datos_ies))
-
-    st.subheader('21. Nombre de la Institución vs Renovaciones Realizadas')
-    st.plotly_chart(grafico_nombre_institucion(datos_ies))
 
 if __name__ == "__main__":
     main()
