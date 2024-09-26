@@ -30,6 +30,59 @@ if "ofertas_enviadas" not in st.session_state:
 if "ofertas_en_proceso" not in st.session_state:
     st.session_state.ofertas_en_proceso = []
 
+# Funciones de validación
+def validar_deudor(deudor):
+    if deudor['Nacionalidad'] == 'Colombiano' and deudor['Edad'] < 65:
+        if deudor['Estado Crédito'] == 'Castigado':
+            return False, "Estado Crédito es Castigado"
+        if deudor['Estado Crédito'] == 'En mora y castigado':
+            return False, "Estado en Mora/Castigado"
+        return True, ""
+    return False, "No es colombiano o mayor de 65 años"
+
+def validar_sarlaft(deudor):
+    if deudor['Lista SARLAFT'] in ['Vinculantes', 'Restrictivas', 'Informativas']:
+        return False, f"Listas SARLAFT: {deudor['Lista SARLAFT']}"
+    return True, ""
+
+def validar_antecedentes(deudor):
+    if (datetime.now() - deudor['Antecedentes']).days < 90:
+        return False, "Antecedentes menores a 90 días"
+    return True, ""
+
+# Procesar validaciones y estadísticas
+def procesar_validaciones(beneficiarios):
+    validaciones = {
+        "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
+        "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
+        "Validación 3": {"Aprobados": 0, "No Aprobados": 0},
+    }
+
+    for deudor in beneficiarios.to_dict(orient='records'):
+        # Validación 1
+        valido1, motivo1 = validar_deudor(deudor)
+        if valido1:
+            validaciones["Validación 1"]["Aprobados"] += 1
+        else:
+            validaciones["Validación 1"]["No Aprobados"] += 1
+            validaciones["Validación 1"]["Motivo No Aprobación"].append(motivo1)
+
+        # Validación 2
+        valido2, motivo2 = validar_sarlaft(deudor)
+        if valido2:
+            validaciones["Validación 2"]["Aprobados"] += 1
+        else:
+            validaciones["Validación 2"]["No Aprobados"] += 1
+
+        # Validación 3
+        valido3, motivo3 = validar_antecedentes(deudor)
+        if valido3:
+            validaciones["Validación 3"]["Aprobados"] += 1
+        else:
+            validaciones["Validación 3"]["No Aprobados"] += 1
+
+    return validaciones
+    
 # Funciones de la aplicación
 def realizar_validaciones(beneficiario):
     errores = []
@@ -235,6 +288,27 @@ def gestion_ordenador_gasto():
             else:
                 st.warning(f"Oferta {i+1} no aprobada.")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "No Aprobada"
+
+#Pagina de creación de indicadores 
+def Indicadores_Proceso
+    st.title("Dashboard")
+
+    if st.button("Generar Estadísticas"):
+        validaciones_resultado = procesar_validaciones(beneficiarios_data)
+
+        st.subheader("Validación 1")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 1']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 1']['No Aprobados']}")
+        st.write("Motivos de No Aprobación:")
+        st.write(validaciones_resultado['Validación 1']['Motivo No Aprobación'])
+
+        st.subheader("Validación 2")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 2']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 2']['No Aprobados']}")
+
+        st.subheader("Validación 3")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 3']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 3']['No Aprobados']}")
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
