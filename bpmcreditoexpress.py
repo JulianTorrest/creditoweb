@@ -78,7 +78,11 @@ def captura_datos():
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
-    
+
+    # Paso 1: Listas para almacenar beneficiarios
+    beneficiarios_validados = []
+    beneficiarios_con_errores = []
+
     if not beneficiarios_data:
         st.warning("No hay datos de beneficiarios disponibles.")
         return
@@ -91,27 +95,58 @@ def validacion_beneficiarios():
             st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
             for error in errores:
                 st.write(f"- {error}")
+            # Agregar a la lista de beneficiarios con errores
+            beneficiarios_con_errores.append(beneficiario)
         else:
             st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
             st.write(f"Ofrecer crédito educativo.")
+            # Agregar a la lista de beneficiarios validados
+            beneficiarios_validados.append(beneficiario)
+
+    # Guardar las listas en el estado para usarlas en otras páginas
+    st.session_state['beneficiarios_validados'] = beneficiarios_validados
+    st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
-    st.title("Enviar Oferta al Beneficiario")
-    
-    if not beneficiarios_data:
-        st.warning("No hay datos de beneficiarios disponibles.")
+    st.title("Enviar Oferta a los Beneficiarios")
+
+    # Verificar si hay datos de beneficiarios validados y con errores
+    if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
+        st.warning("No se ha realizado la validación de beneficiarios.")
         return
     
-    for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
-        if st.button(f"Enviar oferta a {beneficiario['Nombre']}"):
-            st.session_state.ofertas_enviadas.append(beneficiario.copy())
-            st.session_state.ofertas_en_proceso.append({
-                "Nombre": beneficiario["Nombre"],
-                "Estado": "Enviada"
-            })
-            st.success(f"Oferta enviada a {beneficiario['Nombre']}.")
+    beneficiarios_validados = st.session_state['beneficiarios_validados']
+    beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
+
+    # Mostrar cuántos beneficiarios pasaron las validaciones
+    st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
+    
+    if len(beneficiarios_validados) > 0:
+        # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
+        if st.button("Enviar oferta a todos los beneficiarios validados"):
+            for beneficiario in beneficiarios_validados:
+                st.session_state.ofertas_enviadas.append(beneficiario.copy())
+                st.session_state.ofertas_en_proceso.append({
+                    "Nombre": beneficiario["Nombre"],
+                    "Estado": "Enviada"
+                })
+            st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+
+    # Mostrar cuántos beneficiarios tienen errores
+    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
+    
+    if len(beneficiarios_con_errores) > 0:
+        # Botón para no enviar ofertas a beneficiarios con errores
+        if st.button("No enviar oferta a beneficiarios con errores"):
+            for beneficiario in beneficiarios_con_errores:
+                st.session_state.ofertas_en_proceso.append({
+                    "Nombre": beneficiario["Nombre"],
+                    "Estado": "No enviada por errores"
+                })
+            st.info("No se enviaron ofertas a beneficiarios con errores.")
+
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
