@@ -290,7 +290,7 @@ def gestion_ordenador_gasto():
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "No Aprobada"
 
 #Pagina de creación de indicadores 
-def Indicadores_Proceso
+def Indicadores_Proceso():
     st.title("Dashboard")
 
     if st.button("Generar Estadísticas"):
