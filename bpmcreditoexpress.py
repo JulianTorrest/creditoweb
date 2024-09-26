@@ -313,7 +313,7 @@ def Indicadores_Proceso():
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
     "Selecciona una página",
-    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto"]
+    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto", "Indicadores Proceso"]
 )
 
 # Ejecutar la página seleccionada
@@ -327,3 +327,5 @@ elif menu == "Gestión Comercial":
     gestion_comercial()
 elif menu == "Gestión Ordenador del Gasto":
     gestion_ordenador_gasto()
+elif menu == "Indicadores Proceso":
+    Indicadores_Proceso()
