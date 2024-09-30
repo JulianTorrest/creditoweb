@@ -16,6 +16,15 @@ def cargar_hoja_posgrado_y_exterior(df):
     df = df.reset_index(drop=True)
     return df
 
+# Función para manejar nombres de columnas duplicados
+def handle_duplicate_columns(df):
+    # Renombrar columnas duplicadas
+    cols = pd.Series(df.columns)
+    for dup in cols[cols.duplicated()].unique():
+        cols[cols[cols == dup].index.values.tolist()] = [dup + '_' + str(i) if i != 0 else dup for i in range(sum(cols == dup))]
+    df.columns = cols
+    return df
+
 # Cargar el archivo desde la interfaz de Streamlit
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
 
@@ -37,6 +46,9 @@ if uploaded_file is not None:
     # Limpiar el DataFrame
     df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
     df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
+
+    # Manejar columnas duplicadas
+    df = handle_duplicate_columns(df)
 
     # Intentar mostrar el DataFrame
     try:
