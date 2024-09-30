@@ -18,15 +18,12 @@ def cargar_hoja_posgrado_y_exterior(df):
 
 # Función para manejar nombres de columnas duplicados
 def handle_duplicate_columns(df):
-    # Reemplaza los valores NaN por un string vacío para evitar errores
     df.columns = df.columns.fillna('')
     cols = pd.Series(df.columns)
     
-    # Crear un índice para cada nombre de columna duplicado
     for dup in cols[cols.duplicated()].unique():
         cols[cols[cols == dup].index.values.tolist()] = [f"{dup}_{i+1}" if i != 0 else dup for i in range(sum(cols == dup))]
     
-    # Asignar nombres únicos a las columnas
     df.columns = cols
     return df
 
@@ -42,6 +39,10 @@ if uploaded_file is not None:
     sheet_to_work = st.selectbox("Selecciona una hoja para trabajar", sheet_names)
     raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)
 
+    # Mostrar datos crudos para ver si hay datos
+    st.write("Datos crudos de la hoja seleccionada:")
+    st.write(raw_df)
+
     if sheet_to_work == 'POSGRADO Y EXTERIOR':
         df = cargar_hoja_posgrado_y_exterior(raw_df)
     else:
@@ -55,14 +56,13 @@ if uploaded_file is not None:
     # Manejar columnas duplicadas
     df = handle_duplicate_columns(df)
 
-    # Intentar mostrar el DataFrame
-    try:
+    # Verificar si el DataFrame está vacío
+    if df.empty:
+        st.warning("El DataFrame está vacío después de limpiar los datos.")
+    else:
         st.write(f"Datos de la hoja '{sheet_to_work}':")
         st.write(df.head())  # Mostrar las primeras filas
-    except Exception as e:
-        st.error(f"Ocurrió un error al mostrar los datos: {e}")
-        st.write("Aquí hay una vista previa del DataFrame:")
-        st.write(df)
 else:
     st.write("Por favor, carga un archivo Excel.")
+
 
