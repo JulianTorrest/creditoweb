@@ -40,23 +40,26 @@ def limpiar_dataframe(df):
     
     for dup in cols[cols.duplicated()].unique():
         cols[cols[cols == dup].index.values.tolist()] = [f"{dup}_{i+1}" if i != 0 else dup for i in range(sum(cols == dup))]
-    
+
     df.columns = cols
     return df
 
 # Función para calcular estadísticas sin incluir encabezados
 def calcular_estadisticas(df):
     estadisticas = {}
-    
+
     for col in df.columns:
+        # Convertir todos los valores a strings para evitar errores de comparación
+        df[col] = df[col].astype(str)
+
         # Excluir filas que contengan valores vacíos o que sean iguales a los encabezados
         conteo = df[col].value_counts(dropna=False)
-        
+
         # Filtrar para no incluir el encabezado mismo como opción de respuesta
-        conteo = conteo[conteo.index != col]  # Asegurarse de que el encabezado no se cuente
-        
+        conteo = conteo[conteo.index != col]
+
         estadisticas[col] = conteo
-    
+
     return pd.DataFrame(estadisticas)
 
 # Cargar el archivo desde la interfaz de Streamlit
