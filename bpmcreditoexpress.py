@@ -208,32 +208,33 @@ def enviar_oferta():
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
-    
+
+    # Verificar si hay ofertas en proceso
     if not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
 
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
-    
+
     # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
-    
+
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
-    
+
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
-    
+
+    # Contar interesados y garantías
     total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
     total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
     total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
-    
+
     # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
     total_garantias_firmadas = sum(1 for oferta in st.session_state.ofertas_en_proceso 
                                     if oferta.get('Interesado') == "Sí" and oferta.get('GarantiaFirmada', False))
-    
-    total_garantias_no_firmadas = total_interesados - total_garantias_firmadas
+    total_garantias_no_firmadas = total_interesados - total_garantias_firmadas if total_interesados > 0 else 0
 
     # Mostrar informe
     st.write(f"Total ofertas de beneficiarios interesados: {total_interesados}")
@@ -266,21 +267,14 @@ def gestion_comercial():
     # Mostrar las ofertas filtradas
     if not df_ofertas.empty:
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
-            st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
+            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
-            
-            # Simulación de respuestas aleatorias para demostración
-            oferta['Interesado'] = random.choice(["Sí", "No", "Sí, pero después"])
-            oferta['GarantiaFirmada'] = random.choice([True, False]) if oferta['Interesado'] == "Sí" else None
-            
-            st.session_state.ofertas_en_proceso[i].update(oferta)
 
             interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
             st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
             
             if interesado == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
-                firma_garantias(oferta)
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
             elif interesado == "No":
                 st.write("Actualizando registros y finalizando el flujo.")
@@ -296,6 +290,7 @@ def gestion_comercial():
                 if garantia_firmada:
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
                     st.write("Garantía firmada registrada.")
+
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
