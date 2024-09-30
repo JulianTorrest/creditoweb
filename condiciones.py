@@ -12,7 +12,7 @@ def cargar_hoja_pregrado_posgrado(df):
 
 # Función para cargar la hoja de "RECURSOS ICETEX" y "TERCEROS", "Hoja1"
 def cargar_hoja_recursos(df):
-    encabezado_fila = 3  # Iniciar desde la fila 3, que corresponde al índice 2
+    encabezado_fila = 2  # Iniciar desde la fila 3, que corresponde al índice 2
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
@@ -46,11 +46,15 @@ def limpiar_dataframe(df):
 
 # Función para calcular estadísticas sin incluir encabezados
 def calcular_estadisticas(df):
-    # Asegurarnos de que solo tomamos columnas categóricas para estadísticas
     estadisticas = {}
     
     for col in df.columns:
-        conteo = df[col].value_counts()
+        # Excluir filas que contengan valores vacíos o que sean iguales a los encabezados
+        conteo = df[col].value_counts(dropna=False)
+        
+        # Filtrar para no incluir el encabezado mismo como opción de respuesta
+        conteo = conteo[conteo.index != col]  # Asegurarse de que el encabezado no se cuente
+        
         estadisticas[col] = conteo
     
     return pd.DataFrame(estadisticas)
@@ -129,4 +133,5 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
 
