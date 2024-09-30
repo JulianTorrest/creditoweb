@@ -12,7 +12,7 @@ def cargar_hoja_pregrado_posgrado(df):
 
 # Función para cargar la hoja de "RECURSOS ICETEX" y "TERCEROS", "Hoja1"
 def cargar_hoja_recursos(df):
-    encabezado_fila = 3  # Iniciar desde la fila 3, que corresponde al índice 2
+    encabezado_fila = 2  # Iniciar desde la fila 3, que corresponde al índice 2
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
@@ -114,7 +114,12 @@ if uploaded_file is not None:
                                              key=col)
 
                 # 4. Seleccionar color para el gráfico
-                color = st.color_picker(f"Selecciona un color para {col}", "#1f77b4")
+                color_options = [
+                    "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", 
+                    "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", 
+                    "#bcbd22", "#17becf"
+                ]
+                color = st.selectbox(f"Selecciona un color para {col}", color_options)
 
                 # 5. Título del gráfico
                 titulo_grafico = st.text_input(f"Título del gráfico para {col}", f"Gráfico de {col}")
