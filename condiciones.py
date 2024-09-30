@@ -3,7 +3,7 @@ import pandas as pd
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
-    encabezado_fila = 1  # Iniciar desde la fila 2, que corresponde al índice 1
+    encabezado_fila = 2  # Iniciar desde la fila 2, que corresponde al índice 1
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
