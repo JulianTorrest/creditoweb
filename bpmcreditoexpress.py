@@ -301,30 +301,43 @@ def gestion_comercial():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
-    if not st.session_state.ofertas_en_proceso:
-        st.warning("No hay ofertas en proceso para gestionar.")
+    if not st.session_state.beneficiarios:
+        st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
-    
-    for i, oferta in enumerate(st.session_state.ofertas_en_proceso):
-        st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
+
+    # Verificar información de la IES para cada beneficiario
+    for beneficiario in st.session_state.beneficiarios:
+        st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
-        if oferta["Estado"] == "En Proceso":
-            st.write(f"Estado actual de la oferta: {oferta['Estado']}")
-            st.write("Detalles del proceso en curso:")
-            st.write("Realizando liquidación automática del desembolso...")
-            st.write("Generando instrucción de giro...")
-            st.write("Realizando control presupuestal...")
-            st.write("Comprobación digital por el ordenador del gasto...")
-            st.write("Generando módulo de herramientas de aprobación...")
-            st.write("Seguimiento de solicitudes y presupuesto.")
-            
-            aprobado = st.checkbox(f"Aprobar oferta {i+1}", key=f"aprobar_oferta_{i}")
-            if aprobado:
-                st.success(f"Oferta {i+1} aprobada.")
-                st.session_state.ofertas_en_proceso[i]["Estado"] = "Aprobada"
-            else:
-                st.warning(f"Oferta {i+1} no aprobada.")
-                st.session_state.ofertas_en_proceso[i]["Estado"] = "No Aprobada"
+        # Preguntar si la IES tiene convenio
+        tiene_convenio = st.selectbox(f"¿La {beneficiario['IES']} tiene convenio?", ["Selecciona", "Sí", "No"], key=f"convenio_{beneficiario['Nombre']}")
+        
+        if tiene_convenio == "No":
+            info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{beneficiario['Nombre']}")
+            if st.button("Enviar información", key=f"enviar_{beneficiario['Nombre']}"):
+                # Aquí iría la lógica para procesar la información de giro
+                st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
+                # Simulación de validación
+                # Puedes implementar lógica adicional para verificar que el beneficiario envíe la información
+                # Asumimos que la validación es exitosa
+                st.session_state.beneficiarios.remove(beneficiario)
+        elif tiene_convenio == "Sí":
+            # Liquidación automática de desembolso
+            st.success("Iniciando liquidación automática del desembolso...")
+            # Aquí iría la lógica para la liquidación automática
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
+            st.write(instruccion_giro)
+
+            # Control presupuestal
+            alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
+            st.write(alertas_presupuestales)
+
+    # Botón para aprobación digital
+    if st.button("Aprobar Digitalmente", key="aprobar"):
+        st.success("Aprobación digital registrada por el ordenador del gasto.")
+
+# Llamar a la función principal
+gestion_ordenador_gasto()
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
