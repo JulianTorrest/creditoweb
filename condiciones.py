@@ -103,16 +103,16 @@ if uploaded_file is not None:
 
                 # 4. Generar el gráfico
                 if grafico_tipo == "Barra":
-                    fig = px.bar(conteo, x='index', y='count', labels={'index': col, 'count': 'Conteo'})
+                    fig = px.bar(conteo, x=col, y='count', labels={col: col, 'count': 'Conteo'})
                 elif grafico_tipo == "Torta":
                     fig = px.pie(conteo, names=col, values='count', title=f'Distribución de {col}')
                 elif grafico_tipo == "Histograma":
-                    fig = px.histogram(conteo, x='index', y='count', title=f'Histograma de {col}')
+                    fig = px.histogram(conteo, x=col, y='count', title=f'Histograma de {col}')
 
                 # Mostrar el gráfico
                 st.plotly_chart(fig)
 
-            # 3. Mostrar estadísticas descriptivas
+            # 5. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas:")
             estadisticas = calcular_estadisticas(df)
             if not estadisticas.empty:
@@ -124,4 +124,3 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
-
