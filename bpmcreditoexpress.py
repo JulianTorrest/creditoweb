@@ -297,37 +297,44 @@ def gestion_comercial():
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
                     st.write("Garantía firmada registrada.")
 
-# Página de gestión del ordenador del gasto
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
+    # Verificar si hay beneficiarios con garantía firmada
     if not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
-    # Verificar información de la IES para cada beneficiario
+    # Procesar cada beneficiario
     for beneficiario in st.session_state.beneficiarios:
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
         # Preguntar si la IES tiene convenio
-        tiene_convenio = st.selectbox(f"¿La {beneficiario['IES']} tiene convenio?", ["Selecciona", "Sí", "No"], key=f"convenio_{beneficiario['Nombre']}")
+        tiene_convenio = st.selectbox(
+            f"¿La {beneficiario['IES']} tiene convenio?", 
+            ["Selecciona", "Sí", "No"], 
+            key=f"convenio_{beneficiario['Nombre']}"
+        )
         
         if tiene_convenio == "No":
             info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{beneficiario['Nombre']}")
             if st.button("Enviar información", key=f"enviar_{beneficiario['Nombre']}"):
-                # Aquí iría la lógica para procesar la información de giro
+                # Lógica para procesar la información de giro
                 st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
-                # Simulación de validación
-                # Puedes implementar lógica adicional para verificar que el beneficiario envíe la información
-                # Asumimos que la validación es exitosa
-                st.session_state.beneficiarios.remove(beneficiario)
+                # Aquí puedes implementar la lógica para validar la información recibida del beneficiario
+                # Por ejemplo:
+                # if validar_info_giro(info_giro):
+                #     st.success("Información validada correctamente.")
+                #     # Continúa el proceso
+                # else:
+                #     st.error("Información no válida.")
+                
         elif tiene_convenio == "Sí":
             # Liquidación automática de desembolso
             st.success("Iniciando liquidación automática del desembolso...")
-            # Aquí iría la lógica para la liquidación automática
             instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
             st.write(instruccion_giro)
-
+            
             # Control presupuestal
             alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
             st.write(alertas_presupuestales)
