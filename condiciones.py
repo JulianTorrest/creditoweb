@@ -3,7 +3,7 @@ import pandas as pd
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
-    encabezado_fila = 1  # Iniciar desde la fila 2, que corresponde al índice 1
+    encabezado_fila = 2  # Iniciar desde la fila 2, que corresponde al índice 1
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
@@ -41,19 +41,12 @@ def limpiar_dataframe(df):
         cols[cols[cols == dup].index.values.tolist()] = [f"{dup}_{i+1}" if i != 0 else dup for i in range(sum(cols == dup))]
     
     df.columns = cols
-
-    # Convertir columnas a tipo numérico donde sea posible
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce')  # Convertir a numérico, poniendo nan si no se puede
-    
-    # Eliminar columnas que no son numéricas
-    df = df.select_dtypes(include='number')  # Mantener solo columnas numéricas
     return df
 
 # Función para calcular estadísticas
 def calcular_estadisticas(df):
-    # Calcular estadísticas de columnas numéricas
-    estadisticas = df.describe()  # Calcular estadísticas
+    # Asegurarnos de que solo tomamos columnas numéricas para estadísticas
+    estadisticas = df.select_dtypes(include='number').describe()  # Calcular estadísticas de columnas numéricas
     return estadisticas
 
 # Cargar el archivo desde la interfaz de Streamlit
@@ -95,16 +88,17 @@ if uploaded_file is not None:
         else:
             st.write(df.head())  # Mostrar las primeras filas
 
-            # Mostrar estadísticas si corresponde
-            if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
-                st.write("Estadísticas descriptivas:")
-                if not estadisticas.empty:
-                    st.write(estadisticas)  # Mostrar las estadísticas
-                else:
-                    st.warning("No se encontraron columnas numéricas para calcular estadísticas.")
+        # Mostrar estadísticas si corresponde
+        if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
+            st.write("Estadísticas descriptivas:")
+            if not estadisticas.empty:
+                st.write(estadisticas)  # Mostrar las estadísticas
+            else:
+                st.warning("No se encontraron columnas numéricas para calcular estadísticas.")
 
     except Exception as e:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
 
