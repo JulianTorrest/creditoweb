@@ -92,9 +92,9 @@ if uploaded_file is not None:
             st.write(df.columns.tolist())
 
             # 2. Contar opciones de respuesta de cada columna
-            opciones_respuestas = {col: df[col].value_counts() for col in df.columns}
-            st.write("Conteo de opciones de respuesta de cada columna:")
-            for col, conteo in opciones_respuestas.items():
+            for col in df.columns:
+                conteo = df[col].value_counts().reset_index()
+                conteo.columns = [col, 'count']  # Renombrar las columnas para el gráfico
                 st.write(f"**{col}:**")
                 st.write(conteo)
 
@@ -103,11 +103,11 @@ if uploaded_file is not None:
 
                 # 4. Generar el gráfico
                 if grafico_tipo == "Barra":
-                    fig = px.bar(conteo.reset_index(), x='index', y=col, labels={'index': col, col: 'Conteo'})
+                    fig = px.bar(conteo, x='index', y='count', labels={'index': col, 'count': 'Conteo'})
                 elif grafico_tipo == "Torta":
-                    fig = px.pie(conteo.reset_index(), names='index', values=col, title=f'Distribución de {col}')
+                    fig = px.pie(conteo, names=col, values='count', title=f'Distribución de {col}')
                 elif grafico_tipo == "Histograma":
-                    fig = px.histogram(conteo.reset_index(), x='index', y=col, title=f'Histograma de {col}')
+                    fig = px.histogram(conteo, x='index', y='count', title=f'Histograma de {col}')
 
                 # Mostrar el gráfico
                 st.plotly_chart(fig)
@@ -124,3 +124,4 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
