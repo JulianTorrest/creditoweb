@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import random
+from datetime import datetime
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
