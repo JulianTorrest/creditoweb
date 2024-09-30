@@ -3,26 +3,26 @@ import pandas as pd
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
-    encabezado_fila = 1  # Cambiado a 1 para que empiece desde la fila 2 (índice 1)
-    df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
-    df = df.reset_index(drop=True)
+    encabezado_fila = 1  # Iniciar desde la fila 2, que corresponde al índice 1
+    df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
+    df = df.reset_index(drop=True)  # Reiniciar los índices
     return df
 
 # Función para cargar la hoja de "RECURSOS ICETEX" y "TERCEROS", "Hoja1"
 def cargar_hoja_recursos(df):
-    encabezado_fila = 2  # Cambiado a 2 para que empiece desde la fila 3 (índice 2)
-    df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
-    df = df.reset_index(drop=True)
+    encabezado_fila = 2  # Iniciar desde la fila 3, que corresponde al índice 2
+    df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
+    df = df.reset_index(drop=True)  # Reiniciar los índices
     return df
 
 # Función para cargar la hoja de "Tabla 1"
 def cargar_hoja_tabla_1(df):
     encabezado_fila = 0  # Para "Tabla 1", comenzamos desde la fila 0
-    df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
-    df = df.reset_index(drop=True)
+    df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
+    df = df.reset_index(drop=True)  # Reiniciar los índices
     return df
 
 # Función para manejar nombres de columnas duplicados
@@ -46,7 +46,7 @@ if uploaded_file is not None:
     st.write(sheet_names)
 
     sheet_to_work = st.selectbox("Selecciona una hoja para trabajar", sheet_names)
-    raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)
+    raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)  # Leer sin encabezados
 
     # Mostrar datos crudos para ver si hay datos
     st.write("Datos crudos de la hoja seleccionada:")
@@ -60,7 +60,7 @@ if uploaded_file is not None:
     elif sheet_to_work == 'Tabla 1':
         df = cargar_hoja_tabla_1(raw_df)
     else:
-        df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)
+        df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)  # Cargar sin cambios
 
     # Limpiar el DataFrame
     df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
