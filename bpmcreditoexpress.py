@@ -301,12 +301,12 @@ def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
     # Verificar si hay beneficiarios con garantía firmada
-    if not st.session_state.beneficiarios:
+    if not st.session_state:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
     # Procesar cada beneficiario
-    for beneficiario in st.session_state.beneficiarios:
+    for beneficiario in st.session_state:
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
         # Preguntar si la IES tiene convenio
