@@ -101,6 +101,8 @@ def captura_datos():
     st.title("Formulario de Búsqueda de Captura de Datos para ICETEX")
     
     nombre = st.text_input("Nombre completo")
+    tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
+    numero_documento = st.text_input("Número de Documento")
     nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
     edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
     estado_credito = st.multiselect("Estado del crédito anterior", ["Ninguno", "Castigado", "En mora y castigado"])
