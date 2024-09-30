@@ -300,13 +300,13 @@ def gestion_comercial():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
-    # Verificar si hay beneficiarios con garantía firmada
-    if not st.session_state:
+    # Verificar si hay beneficiarios en el estado de sesión
+    if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
     # Procesar cada beneficiario
-    for beneficiario in st.session_state:
+    for beneficiario in st.session_state.beneficiarios:  # Acceder a la lista de beneficiarios
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
         # Preguntar si la IES tiene convenio
@@ -321,13 +321,6 @@ def gestion_ordenador_gasto():
             if st.button("Enviar información", key=f"enviar_{beneficiario['Nombre']}"):
                 # Lógica para procesar la información de giro
                 st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
-                # Aquí puedes implementar la lógica para validar la información recibida del beneficiario
-                # Por ejemplo:
-                # if validar_info_giro(info_giro):
-                #     st.success("Información validada correctamente.")
-                #     # Continúa el proceso
-                # else:
-                #     st.error("Información no válida.")
                 
         elif tiene_convenio == "Sí":
             # Liquidación automática de desembolso
@@ -343,8 +336,17 @@ def gestion_ordenador_gasto():
     if st.button("Aprobar Digitalmente", key="aprobar"):
         st.success("Aprobación digital registrada por el ordenador del gasto.")
 
+# Asegúrate de que los beneficiarios estén en el estado de sesión antes de llamar a la función
+if "beneficiarios" not in st.session_state:
+    # Inicializar datos de beneficiarios si no están presentes
+    st.session_state.beneficiarios = [
+        {"Nombre": "Juan Pérez", "IES": "Universidad A"},
+        {"Nombre": "María Gómez", "IES": "Universidad B"}
+    ]  # Ejemplo de beneficiarios
+
 # Llamar a la función principal
 gestion_ordenador_gasto()
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
