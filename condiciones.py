@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
@@ -96,22 +96,21 @@ if uploaded_file is not None:
             st.write("Conteo de opciones de respuesta de cada columna:")
             for col, conteo in opciones_respuestas.items():
                 st.write(f"**{col}:**")
-                
-                # Eliminar el encabezado de la tabla (si aparece como respuesta)
-                conteo = conteo[conteo.index != col]  # Eliminar el título de la columna si está en los conteos
-
-                # Mostrar conteo
                 st.write(conteo)
 
-                # Graficar
-                fig, ax = plt.subplots()
-                conteo.plot(kind='bar', ax=ax)
-                ax.set_title(f'Distribución de {col}')
-                ax.set_ylabel('Frecuencia')
-                ax.set_xlabel(col)
-                st.pyplot(fig)  # Mostrar el gráfico en Streamlit
-                
-                st.write("")  # Línea en blanco para mejor separación
+                # 3. Seleccionar el tipo de gráfico
+                grafico_tipo = st.selectbox(f"Selecciona tipo de gráfico para {col}", ["Barra", "Torta", "Histograma"], key=col)
+
+                # 4. Generar el gráfico
+                if grafico_tipo == "Barra":
+                    fig = px.bar(conteo.reset_index(), x='index', y=col, labels={'index': col, col: 'Conteo'})
+                elif grafico_tipo == "Torta":
+                    fig = px.pie(conteo.reset_index(), names='index', values=col, title=f'Distribución de {col}')
+                elif grafico_tipo == "Histograma":
+                    fig = px.histogram(conteo.reset_index(), x='index', y=col, title=f'Histograma de {col}')
+
+                # Mostrar el gráfico
+                st.plotly_chart(fig)
 
             # 3. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas:")
@@ -125,5 +124,3 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
-
-
