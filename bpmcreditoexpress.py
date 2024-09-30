@@ -178,6 +178,13 @@ def enviar_oferta():
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
     
+    # Inicializar listas en el estado de sesión si no existen
+    if 'ofertas_enviadas' not in st.session_state:
+        st.session_state.ofertas_enviadas = []
+    
+    if 'ofertas_en_proceso' not in st.session_state:
+        st.session_state.ofertas_en_proceso = []
+
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
