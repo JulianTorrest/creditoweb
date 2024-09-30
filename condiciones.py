@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.io as pio
+
+# Título de la aplicación
+st.title("Análisis de Datos de Condiciones de Crédito ICETEX 2024")
+st.subheader("Desarrollado por: Equipo Innovación I3 - ICETEX")
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
@@ -161,19 +164,16 @@ if uploaded_file is not None:
                 # Mostrar el gráfico
                 st.plotly_chart(fig)
 
-                # 7. Botones para descargar gráfico en PDF y PNG
-                btn_pdf = st.button(f"Descargar gráfico en PDF para {col}")
-                btn_png = st.button(f"Descargar gráfico en PNG para {col}")
-
-                if btn_pdf:
-                    pio.write_image(fig, f"grafico_{col}.pdf")
-                    with open(f"grafico_{col}.pdf", "rb") as f:
-                        st.download_button("Descargar PDF", f, file_name=f"grafico_{col}.pdf", mime="application/pdf")
-
-                if btn_png:
-                    pio.write_image(fig, f"grafico_{col}.png")
-                    with open(f"grafico_{col}.png", "rb") as f:
-                        st.download_button("Descargar PNG", f, file_name=f"grafico_{col}.png", mime="image/png")
-
+            # 7. Mostrar estadísticas descriptivas
+            st.write("Estadísticas descriptivas (sin encabezados):")
+            estadisticas = calcular_estadisticas(df)
+            if not estadisticas.empty:
+                st.write(estadisticas)  # Mostrar las estadísticas
+            else:
+                st.warning("No se encontraron columnas con respuestas.")
+    
     except Exception as e:
-        st.error(f"Ocurrió un error: {e}")
+        st.error(f"Error al procesar el archivo: {e}")
+
+# Mensaje de agradecimiento
+st.write("¡Gracias por usar la aplicación de análisis de datos ICETEX!")
