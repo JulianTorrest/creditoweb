@@ -105,8 +105,13 @@ if uploaded_file is not None:
 
             # 2. Contar opciones de respuesta de cada columna
             for col in df.columns:
+                # Excluir el encabezado de la columna en el conteo de valores
                 conteo = df[col].value_counts().reset_index()
                 conteo.columns = [col, 'count']  # Renombrar las columnas para el gráfico
+                
+                # Filtrar para no incluir el nombre de la columna como opción
+                conteo = conteo[conteo[col] != col]
+
                 st.write(f"**{col}:**")
                 st.write(conteo)
 
@@ -161,10 +166,6 @@ if uploaded_file is not None:
             if not estadisticas.empty:
                 st.write(estadisticas)  # Mostrar las estadísticas
             else:
-                st.warning("No se encontraron columnas categóricas para calcular estadísticas.")
-
+                st.warning("No se encontraron columnas con respuestas.")
     except Exception as e:
-        st.error(f"Ocurrió un error: {e}")
-else:
-    st.write("Por favor, carga un archivo Excel.")
-
+        st.error(f"Error al procesar el archivo: {e}")
