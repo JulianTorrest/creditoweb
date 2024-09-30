@@ -3,25 +3,25 @@ import pandas as pd
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
-    encabezado_fila = 2  # Encabezado inicia en la fila 2 (índice 2)
+    encabezado_fila = 1  # Cambiado a 1 para que empiece desde la fila 2 (índice 1)
     df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
     df = df.reset_index(drop=True)
     return df
 
 # Función para cargar la hoja de "RECURSOS ICETEX" y "TERCEROS", "Hoja1"
 def cargar_hoja_recursos(df):
-    encabezado_fila = 3  # Encabezado inicia en la fila 3 (índice 3)
+    encabezado_fila = 2  # Cambiado a 2 para que empiece desde la fila 3 (índice 2)
     df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
     df = df.reset_index(drop=True)
     return df
 
 # Función para cargar la hoja de "Tabla 1"
 def cargar_hoja_tabla_1(df):
-    encabezado_fila = 0  # Encabezado inicia en la fila 0 (índice 0)
+    encabezado_fila = 0  # Para "Tabla 1", comenzamos desde la fila 0
     df.columns = df.iloc[encabezado_fila]
-    df = df.drop(index=list(range(encabezado_fila + 1)))
+    df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar las filas de encabezado
     df = df.reset_index(drop=True)
     return df
 
@@ -60,7 +60,6 @@ if uploaded_file is not None:
     elif sheet_to_work == 'Tabla 1':
         df = cargar_hoja_tabla_1(raw_df)
     else:
-        # Para otras hojas, puedes elegir un encabezado por defecto o adaptarlo
         df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)
 
     # Limpiar el DataFrame
@@ -78,4 +77,5 @@ if uploaded_file is not None:
         st.write(df.head())  # Mostrar las primeras filas
 else:
     st.write("Por favor, carga un archivo Excel.")
+
 
