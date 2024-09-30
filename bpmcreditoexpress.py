@@ -191,6 +191,12 @@ def enviar_oferta():
     # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
     
+    # Mostrar ofertas ya enviadas
+    if st.session_state.ofertas_enviadas:
+        st.write("Ofertas ya enviadas:")
+        for oferta in st.session_state.ofertas_enviadas:
+            st.write(oferta)
+
     if len(beneficiarios_validados) > 0:
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
@@ -209,7 +215,7 @@ def enviar_oferta():
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
     if len(beneficiarios_con_errores) > 0:
-        # Información de que no se envían ofertas a beneficiarios con errores
+        # Información de que no se enviarán ofertas a beneficiarios con errores
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
 # Página de gestión comercial de ofertas
