@@ -34,7 +34,7 @@ def limpiar_dataframe(df):
     df = df.dropna(axis=0, how='all')
     
     # Manejar nombres de columnas duplicados
-    df.columns = df.columns.fillna('')
+    df.columns = df.columns.fillna('')  # Llenar los NaN con cadenas vacías
     cols = pd.Series(df.columns)
     
     for dup in cols[cols.duplicated()].unique():
@@ -45,7 +45,8 @@ def limpiar_dataframe(df):
 
 # Función para calcular estadísticas
 def calcular_estadisticas(df):
-    estadisticas = df.describe(include='all')  # Calcular estadísticas de todas las columnas
+    # Asegurarnos de que solo tomamos columnas numéricas para estadísticas
+    estadisticas = df.select_dtypes(include='number').describe()  # Calcular estadísticas de columnas numéricas
     return estadisticas
 
 # Cargar el archivo desde la interfaz de Streamlit
@@ -90,9 +91,13 @@ if uploaded_file is not None:
         # Mostrar estadísticas si corresponde
         if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
             st.write("Estadísticas descriptivas:")
-            st.write(estadisticas)  # Mostrar las estadísticas
+            if not estadisticas.empty:
+                st.write(estadisticas)  # Mostrar las estadísticas
+            else:
+                st.warning("No se encontraron columnas numéricas para calcular estadísticas.")
 
     except Exception as e:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
