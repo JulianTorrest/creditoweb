@@ -1,12 +1,15 @@
 import streamlit as st
 import pandas as pd
 
-# Cargar el archivo de Excel directamente desde la ruta proporcionada
-file_path = '/mnt/data/tabla Condiciones Credito ICETEX 2024-1 - Revisión Pagina Web.xlsx'
+# Cargar el archivo desde la interfaz de Streamlit
+uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
 
-# Leer el archivo Excel
-df = pd.read_excel(file_path)
+if uploaded_file is not None:
+    # Leer el archivo Excel cargado por el usuario
+    df = pd.read_excel(uploaded_file)
 
-# Mostrar la tabla en Streamlit
-st.write("Datos del archivo Excel:")
-st.write(df.head())  # Mostrar las primeras filas
+    # Mostrar la tabla en Streamlit
+    st.write("Datos del archivo Excel:")
+    st.write(df.head())  # Mostrar las primeras filas
+else:
+    st.write("Por favor, carga un archivo Excel.")
