@@ -3,64 +3,49 @@ import pandas as pd
 
 # Función para detectar la fila de inicio de datos
 def detect_header_row(df):
-    """
-    Detecta la primera fila que parece contener los encabezados de las columnas.
-    Retorna el índice de la fila donde comienzan los datos (encabezados).
-    """
     for i, row in df.iterrows():
-        if row.notna().sum() > 3:  # Umbral para detectar una fila válida con más de 3 valores no nulos
+        if row.notna().sum() > 3:
             return i
-    return 0  # Por defecto, si no encuentra ninguna, usar la primera fila
+    return 0
 
-# Función para cargar la hoja de "POSGRADO Y EXTERIOR" con su estructura específica
+# Función para cargar la hoja de "POSGRADO Y EXTERIOR"
 def cargar_hoja_posgrado_y_exterior(df):
-    """
-    Procesa la hoja 'POSGRADO Y EXTERIOR' ajustando el encabezado y las columnas específicas.
-    """
-    # Detectar la fila del encabezado para la hoja de POSGRADO Y EXTERIOR (se espera que empiece en la fila 3)
     encabezado_fila = 2
-    
-    # Renombrar el DataFrame a partir de la fila identificada como encabezado
     df.columns = df.iloc[encabezado_fila]
-    
-    # Eliminar filas innecesarias (encabezados anteriores)
     df = df.drop(index=list(range(encabezado_fila + 1)))
-    
-    # Resetear los índices
     df = df.reset_index(drop=True)
-
     return df
 
 # Cargar el archivo desde la interfaz de Streamlit
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
 
 if uploaded_file is not None:
-    # Cargar todas las hojas del archivo Excel
     xls = pd.ExcelFile(uploaded_file)
-    
-    # Mostrar las hojas disponibles
     st.write("Hojas disponibles en el archivo:")
     sheet_names = xls.sheet_names
     st.write(sheet_names)
 
-    # Seleccionar la hoja con la que el usuario quiere trabajar
     sheet_to_work = st.selectbox("Selecciona una hoja para trabajar", sheet_names)
-
-    # Leer los datos de la hoja seleccionada sin encabezado inicialmente
     raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)
 
     if sheet_to_work == 'POSGRADO Y EXTERIOR':
-        # Procesar la hoja "POSGRADO Y EXTERIOR" con la estructura específica
         df = cargar_hoja_posgrado_y_exterior(raw_df)
     else:
-        # Para las otras hojas, detectar la fila donde comienzan los encabezados
         header_row = detect_header_row(raw_df)
         df = pd.read_excel(xls, sheet_name=sheet_to_work, header=header_row)
 
-    # Mostrar la tabla procesada
-    st.write(f"Datos de la hoja '{sheet_to_work}':")
-    st.write(df.head())  # Mostrar las primeras filas
+    # Limpiar el DataFrame
+    df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
+    df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
+
+    # Intentar mostrar el DataFrame
+    try:
+        st.write(f"Datos de la hoja '{sheet_to_work}':")
+        st.write(df.head())  # Mostrar las primeras filas
+    except Exception as e:
+        st.error(f"Ocurrió un error al mostrar los datos: {e}")
+        st.write("Aquí hay una vista previa del DataFrame:")
+        st.write(df)
 else:
     st.write("Por favor, carga un archivo Excel.")
-
 
