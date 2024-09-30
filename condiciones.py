@@ -88,15 +88,15 @@ if uploaded_file is not None:
             
             # 1. Listar las columnas
             st.write("Columnas disponibles en el DataFrame:")
-            st.write(df.columns.tolist())
+            columns = df.columns.tolist()
+            st.table(columns)  # Mostrar las columnas como tabla
 
             # 2. Contar opciones de respuesta de cada columna
-            opciones_respuestas = {col: df[col].value_counts() for col in df.columns}
+            conteos = {col: df[col].value_counts() for col in df.columns}
+            conteos_df = pd.DataFrame.from_dict(conteos, orient='index').fillna(0).astype(int).reset_index()
+            conteos_df.columns = ['Columna'] + [f'Opción {i+1}' for i in range(conteos_df.shape[1] - 1)]  # Renombrar columnas
             st.write("Conteo de opciones de respuesta de cada columna:")
-            for col, conteo in opciones_respuestas.items():
-                st.write(f"**{col}:**")
-                st.write(conteo)
-                st.write("")  # Línea en blanco para mejor separación
+            st.table(conteos_df)  # Mostrar conteos como tabla
 
             # 3. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas:")
@@ -110,3 +110,4 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
