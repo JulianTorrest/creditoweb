@@ -3,7 +3,7 @@ import pandas as pd
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
-    encabezado_fila = 2  # Iniciar desde la fila 2, que corresponde al índice 1
+    encabezado_fila = 1  # Iniciar desde la fila 2, que corresponde al índice 1
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
@@ -43,6 +43,11 @@ def limpiar_dataframe(df):
     df.columns = cols
     return df
 
+# Función para calcular estadísticas
+def calcular_estadisticas(df):
+    estadisticas = df.describe(include='all')  # Calcular estadísticas de todas las columnas
+    return estadisticas
+
 # Cargar el archivo desde la interfaz de Streamlit
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
 
@@ -63,6 +68,8 @@ if uploaded_file is not None:
         # Cargar datos según la hoja seleccionada
         if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
             df = cargar_hoja_pregrado_posgrado(raw_df)
+            # Calcular estadísticas
+            estadisticas = calcular_estadisticas(df)
         elif sheet_to_work in ['RECURSOS ICETEX', 'TERCEROS', 'Hoja1']:
             df = cargar_hoja_recursos(raw_df)
         elif sheet_to_work == 'Tabla 1':
@@ -80,8 +87,12 @@ if uploaded_file is not None:
         else:
             st.write(df.head())  # Mostrar las primeras filas
 
+        # Mostrar estadísticas si corresponde
+        if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
+            st.write("Estadísticas descriptivas:")
+            st.write(estadisticas)  # Mostrar las estadísticas
+
     except Exception as e:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
-
