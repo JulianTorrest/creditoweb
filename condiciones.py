@@ -4,7 +4,7 @@ import pandas as pd
 # Función para detectar la fila de inicio de datos
 def detect_header_row(df):
     for i, row in df.iterrows():
-        if row.notna().sum() > 3:
+        if row.notna().sum() > 3:  # Puedes ajustar el número según sea necesario
             return i
     return 0
 
@@ -18,10 +18,15 @@ def cargar_hoja_posgrado_y_exterior(df):
 
 # Función para manejar nombres de columnas duplicados
 def handle_duplicate_columns(df):
+    # Reemplaza los valores NaN por un string vacío para evitar errores
+    df.columns = df.columns.fillna('')
     cols = pd.Series(df.columns)
+    
+    # Crear un índice para cada nombre de columna duplicado
     for dup in cols[cols.duplicated()].unique():
-        # Crear un índice único para las columnas duplicadas
         cols[cols[cols == dup].index.values.tolist()] = [f"{dup}_{i+1}" if i != 0 else dup for i in range(sum(cols == dup))]
+    
+    # Asignar nombres únicos a las columnas
     df.columns = cols
     return df
 
