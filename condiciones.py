@@ -12,7 +12,7 @@ def cargar_hoja_pregrado_posgrado(df):
 
 # Función para cargar la hoja de "RECURSOS ICETEX" y "TERCEROS", "Hoja1"
 def cargar_hoja_recursos(df):
-    encabezado_fila = 2  # Iniciar desde la fila 3, que corresponde al índice 2
+    encabezado_fila = 3  # Iniciar desde la fila 3, que corresponde al índice 2
     df.columns = df.iloc[encabezado_fila]  # Establecer los encabezados
     df = df.drop(index=list(range(encabezado_fila + 1)))  # Eliminar filas hasta el encabezado
     df = df.reset_index(drop=True)  # Reiniciar los índices
