@@ -186,35 +186,33 @@ def enviar_oferta():
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
+                # Agregar beneficiarios validados a la lista de ofertas enviadas y en proceso
                 st.session_state.ofertas_enviadas.append(beneficiario.copy())
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
                     "Estado": "Enviada"
                 })
             st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+        else:
+            st.info("No se han enviado ofertas todavía.")
 
     # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
     if len(beneficiarios_con_errores) > 0:
-        # Botón para no enviar ofertas a beneficiarios con errores
-        if st.button("No enviar oferta a beneficiarios con errores"):
-            for beneficiario in beneficiarios_con_errores:
-                st.session_state.ofertas_en_proceso.append({
-                    "Nombre": beneficiario["Nombre"],
-                    "Estado": "No enviada por errores"
-                })
-            st.info("No se enviaron ofertas a beneficiarios con errores.")
-
+        # Información de que no se envían ofertas a beneficiarios con errores
+        st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
     
-    if not st.session_state.ofertas_en_proceso:
+    # Verificar si hay ofertas en proceso
+    if 'ofertas_en_proceso' not in st.session_state or len(st.session_state.ofertas_en_proceso) == 0:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
     
+    # Mostrar las ofertas en proceso
     for i, oferta in enumerate(st.session_state.ofertas_en_proceso):
         st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
         
@@ -222,7 +220,6 @@ def gestion_comercial():
         
         if interesado == "Sí, pero después":
             st.write("Generando marca 'Sí, pero después'...")
-            firma_garantias(oferta)
             st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
         elif interesado == "No":
             st.write("Actualizando registros y finalizando el flujo.")
