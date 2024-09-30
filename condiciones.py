@@ -92,27 +92,25 @@ if uploaded_file is not None:
             st.write(df.columns.tolist())
 
             # 2. Contar opciones de respuesta de cada columna
-            columnas_excluir = ["Estrato", "Estado de la información", "Sisbén para Acceso", "Observación", "Merito Académico"]
             for col in df.columns:
-                if col not in columnas_excluir:  # Excluir columnas no deseadas
-                    conteo = df[col].value_counts().reset_index()
-                    conteo.columns = [col, 'count']  # Renombrar las columnas para el gráfico
-                    st.write(f"**{col}:**")
-                    st.write(conteo)
+                conteo = df[col].value_counts().reset_index()
+                conteo.columns = [col, 'count']  # Renombrar las columnas para el gráfico
+                st.write(f"**{col}:**")
+                st.write(conteo)
 
-                    # 3. Seleccionar el tipo de gráfico
-                    grafico_tipo = st.selectbox(f"Selecciona tipo de gráfico para {col}", ["Barra", "Torta", "Histograma"], key=col)
+                # 3. Seleccionar el tipo de gráfico
+                grafico_tipo = st.selectbox(f"Selecciona tipo de gráfico para {col}", ["Barra", "Torta", "Histograma"], key=col)
 
-                    # 4. Generar el gráfico
-                    if grafico_tipo == "Barra":
-                        fig = px.bar(conteo, x=col, y='count', labels={col: col, 'count': 'Conteo'})
-                    elif grafico_tipo == "Torta":
-                        fig = px.pie(conteo, names=col, values='count', title=f'Distribución de {col}')
-                    elif grafico_tipo == "Histograma":
-                        fig = px.histogram(conteo, x=col, y='count', title=f'Histograma de {col}')
+                # 4. Generar el gráfico
+                if grafico_tipo == "Barra":
+                    fig = px.bar(conteo, x=col, y='count', labels={col: col, 'count': 'Conteo'})
+                elif grafico_tipo == "Torta":
+                    fig = px.pie(conteo, names=col, values='count', title=f'Distribución de {col}')
+                elif grafico_tipo == "Histograma":
+                    fig = px.histogram(conteo, x=col, y='count', title=f'Histograma de {col}')
 
-                    # Mostrar el gráfico
-                    st.plotly_chart(fig)
+                # Mostrar el gráfico
+                st.plotly_chart(fig)
 
             # 5. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas:")
@@ -126,3 +124,4 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
+
