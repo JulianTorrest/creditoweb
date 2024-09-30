@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Función para cargar la hoja de "PREGRADO" o "POSGRADO Y EXTERIOR"
 def cargar_hoja_pregrado_posgrado(df):
@@ -95,7 +96,21 @@ if uploaded_file is not None:
             st.write("Conteo de opciones de respuesta de cada columna:")
             for col, conteo in opciones_respuestas.items():
                 st.write(f"**{col}:**")
+                
+                # Eliminar el encabezado de la tabla (si aparece como respuesta)
+                conteo = conteo[conteo.index != col]  # Eliminar el título de la columna si está en los conteos
+
+                # Mostrar conteo
                 st.write(conteo)
+
+                # Graficar
+                fig, ax = plt.subplots()
+                conteo.plot(kind='bar', ax=ax)
+                ax.set_title(f'Distribución de {col}')
+                ax.set_ylabel('Frecuencia')
+                ax.set_xlabel(col)
+                st.pyplot(fig)  # Mostrar el gráfico en Streamlit
+                
                 st.write("")  # Línea en blanco para mejor separación
 
             # 3. Mostrar estadísticas descriptivas
