@@ -225,7 +225,6 @@ def gestion_comercial():
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
     
-    # Generar resultados aleatorios para diversificar los datos
     total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
     total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
     total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
@@ -243,16 +242,25 @@ def gestion_comercial():
     st.write(f"Total garantías firmadas: {total_garantias_firmadas}")
     st.write(f"Total garantías no firmadas: {total_garantias_no_firmadas}")
 
-    # Crear gráfico
-    labels = ['Interesados', 'No Interesados', 'Sí, pero después', 'Garantías Firmadas', 'Garantías No Firmadas']
-    sizes = [total_interesados, total_no_interesados, total_si_pero_despues, total_garantias_firmadas, total_garantias_no_firmadas]
+    # Crear primer gráfico: Distribución de interesados
+    st.subheader("Distribución de Interesados")
+    labels_interesados = ['Interesados', 'No Interesados', 'Sí, pero después']
+    sizes_interesados = [total_interesados, total_no_interesados, total_si_pero_despues]
 
-    # Crear gráfico circular
     plt.figure(figsize=(10, 6))
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140)
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-    
-    # Mostrar gráfico en Streamlit
+    st.pyplot(plt)
+
+    # Crear segundo gráfico: Garantías firmadas y no firmadas
+    st.subheader("Estado de Garantías")
+    labels_garantias = ['Garantías Firmadas', 'Garantías No Firmadas']
+    sizes_garantias = [total_garantias_firmadas, total_garantias_no_firmadas]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(labels_garantias, sizes_garantias, color=['green', 'red'])
+    plt.ylabel('Número de Garantías')
+    plt.title('Estado de Garantías Firmadas y No Firmadas')
     st.pyplot(plt)
 
     # Mostrar las ofertas filtradas
