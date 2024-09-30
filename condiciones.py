@@ -62,6 +62,10 @@ if uploaded_file is not None:
     else:
         df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)  # Cargar sin cambios
 
+    # Mostrar el DataFrame después de cargarlo
+    st.write("DataFrame después de establecer encabezados y limpiar:")
+    st.write(df)
+
     # Limpiar el DataFrame
     df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
     df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
@@ -77,5 +81,4 @@ if uploaded_file is not None:
         st.write(df.head())  # Mostrar las primeras filas
 else:
     st.write("Por favor, carga un archivo Excel.")
-
 
