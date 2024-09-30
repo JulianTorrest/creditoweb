@@ -204,64 +204,77 @@ def enviar_oferta():
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
 # Página de gestión comercial de ofertas
-def gestion_comercial():
+def gestionar_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
     
-    # Verificar si hay ofertas en proceso
-    if 'ofertas_en_proceso' not in st.session_state or len(st.session_state.ofertas_en_proceso) == 0:
+    if not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
+
+    # Filtros para seleccionar el estado de las ofertas
+    estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
     
-    # Mostrar las ofertas en proceso
-    for i, oferta in enumerate(st.session_state.ofertas_en_proceso):
-        st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
-        
-        interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
-        
-        if interesado == "Sí, pero después":
-            st.write("Generando marca 'Sí, pero después'...")
-            st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
-        elif interesado == "No":
-            st.write("Actualizando registros y finalizando el flujo.")
-            st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
-            st.session_state.ofertas_en_proceso.remove(oferta)
-            st.success("Registros actualizados y flujo finalizado.")
-        elif interesado == "Sí":
-            st.write("Generando marca positiva...")
-            st.write("Realizando seguimiento periódico para retomar contacto.")
+    # Crear un DataFrame para filtrar las ofertas según el estado
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+    
+    if estado_filtrado != "Todos":
+        df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
+    
+    # Informe de seguimiento
+    st.subheader("Informe de Seguimiento")
+    
+    total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
+    total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
+    total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
+    
+    # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
+    total_garantias_firmadas = sum(1 for oferta in st.session_state.ofertas_en_proceso 
+                                    if oferta.get('Interesado') == "Sí" and oferta.get('GarantiaFirmada', False))
+    
+    total_garantias_no_firmadas = total_interesados - total_garantias_firmadas
+
+    # Mostrar informe
+    st.write(f"Total ofertas de beneficiarios interesados: {total_interesados}")
+    st.write(f"Total ofertas de beneficiarios no interesados: {total_no_interesados}")
+    st.write(f"Total ofertas de beneficiarios 'sí, pero después': {total_si_pero_despues}")
+    st.write(f"Total garantías firmadas: {total_garantias_firmadas}")
+    st.write(f"Total garantías no firmadas: {total_garantias_no_firmadas}")
+
+    # Mostrar las ofertas filtradas
+    if not df_ofertas.empty:
+        for i, oferta in enumerate(df_ofertas.to_dict('records')):
+            st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
+            st.write(f"Estado: {oferta['Estado']}")
             
-            garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
+            # Aquí se puede agregar más lógica específica para cada oferta, si es necesario
+
+            # Simulación de respuestas aleatorias para demostración
+            oferta['Interesado'] = random.choice(["Sí", "No", "Sí, pero después"])
+            oferta['GarantiaFirmada'] = random.choice([True, False]) if oferta['Interesado'] == "Sí" else None
             
-            if garantia_firmada:
-                convenio = st.selectbox("¿La IES tiene convenio con ICETEX?", ["Sí", "No"], key=f"convenio_{i}")
+            st.session_state.ofertas_en_proceso[i].update(oferta)
+
+            interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
+            st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
+            
+            if interesado == "Sí, pero después":
+                st.write("Generando marca 'Sí, pero después'...")
+                firma_garantias(oferta)
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
+            elif interesado == "No":
+                st.write("Actualizando registros y finalizando el flujo.")
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
+                st.session_state.ofertas_en_proceso.remove(oferta)
+                st.success("Registros actualizados y flujo finalizado.")
+            elif interesado == "Sí":
+                st.write("Generando marca positiva...")
+                st.write("Realizando seguimiento periódico para retomar contacto.")
+
+                garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
                 
-                if convenio == "Sí":
-                    st.write("Realizando liquidación automática del desembolso...")
-                    st.write("Generando instrucción de giro...")
-                    st.write("Realizando control presupuestal...")
-                    st.write("Comprobación digital por el ordenador del gasto...")
-                    st.session_state.ofertas_en_proceso[i]["Estado"] = "En Proceso"
-                    
-                elif convenio == "No":
-                    st.write("Solicitando información para giro...")
-                    nombre_banco = st.text_input("Nombre del banco", key=f"nombre_banco_{i}")
-                    tipo_cuenta = st.selectbox("Tipo de cuenta", ["Ahorros", "Corriente"], key=f"tipo_cuenta_{i}")
-                    numero_cuenta = st.text_input("Número de cuenta", key=f"numero_cuenta_{i}")
-                    
-                    if st.button("Validar información para giro", key=f"validar_info_{i}"):
-                        st.write("Validando información para giro...")
-                        st.write("Realizando liquidación automática del desembolso...")
-                        st.write("Generando instrucción de giro...")
-                        st.write("Realizando control presupuestal...")
-                        st.write("Comprobación digital por el ordenador del gasto...")
-                        st.session_state.ofertas_en_proceso[i]["Estado"] = "En Proceso"
-                        
-                    st.write("Generando módulo de herramientas de aprobación...")
-                    st.write("Seguimiento de solicitudes y presupuesto.")
-                    
-                    if st.button("Finalizar proceso", key=f"finalizar_proceso_{i}"):
-                        st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
-                        st.success("Proceso finalizado y oferta gestionada.")
+                if garantia_firmada:
+                    st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
+                    st.write("Garantía firmada registrada.")
 
 # Página de gestión del ordenador del gasto
 def gestion_ordenador_gasto():
