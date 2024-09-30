@@ -108,20 +108,46 @@ if uploaded_file is not None:
                 st.write(conteo)
 
                 # 3. Seleccionar el tipo de gráfico
-                grafico_tipo = st.selectbox(f"Selecciona tipo de gráfico para {col}", ["Barra", "Torta", "Histograma"], key=col)
+                grafico_tipo = st.selectbox(f"Selecciona tipo de gráfico para {col}", 
+                                             ["Barras", "Puntos", "Apiladas", "Líneas", "Área", 
+                                              "Mapa de Calor", "Violín", "Caja", "Radar", "Dispersión"], 
+                                             key=col)
 
-                # 4. Generar el gráfico
-                if grafico_tipo == "Barra":
-                    fig = px.bar(conteo, x=col, y='count', labels={col: col, 'count': 'Conteo'})
-                elif grafico_tipo == "Torta":
-                    fig = px.pie(conteo, names=col, values='count', title=f'Distribución de {col}')
-                elif grafico_tipo == "Histograma":
-                    fig = px.histogram(conteo, x=col, y='count', title=f'Histograma de {col}')
+                # 4. Seleccionar color para el gráfico
+                color = st.color_picker(f"Selecciona un color para {col}", "#1f77b4")
+
+                # 5. Título del gráfico
+                titulo_grafico = st.text_input(f"Título del gráfico para {col}", f"Gráfico de {col}")
+
+                # 6. Generar el gráfico
+                if grafico_tipo == "Barras":
+                    fig = px.bar(conteo, x=col, y='count', labels={col: col, 'count': 'Conteo'}, title=titulo_grafico)
+                    fig.update_traces(marker_color=color)
+                elif grafico_tipo == "Puntos":
+                    fig = px.scatter(conteo, x=col, y='count', title=titulo_grafico)
+                    fig.update_traces(marker=dict(color=color))
+                elif grafico_tipo == "Apiladas":
+                    fig = px.bar(conteo, x=col, y='count', title=titulo_grafico, text='count')
+                    fig.update_traces(marker_color=color)
+                elif grafico_tipo == "Líneas":
+                    fig = px.line(conteo, x=col, y='count', title=titulo_grafico)
+                elif grafico_tipo == "Área":
+                    fig = px.area(conteo, x=col, y='count', title=titulo_grafico)
+                elif grafico_tipo == "Mapa de Calor":
+                    fig = px.imshow(conteo.pivot(index=col, columns='count', values='count'), title=titulo_grafico)
+                elif grafico_tipo == "Violín":
+                    fig = px.violin(conteo, y='count', title=titulo_grafico)
+                elif grafico_tipo == "Caja":
+                    fig = px.box(conteo, y='count', title=titulo_grafico)
+                elif grafico_tipo == "Radar":
+                    fig = px.line_polar(conteo, r='count', theta=col, line_close=True, title=titulo_grafico)
+                elif grafico_tipo == "Dispersión":
+                    fig = px.scatter(conteo, x=col, y='count', title=titulo_grafico)
 
                 # Mostrar el gráfico
                 st.plotly_chart(fig)
 
-            # 5. Mostrar estadísticas descriptivas
+            # 7. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas (sin encabezados):")
             estadisticas = calcular_estadisticas(df)
             if not estadisticas.empty:
@@ -133,5 +159,4 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
-
 
