@@ -44,11 +44,16 @@ def limpiar_dataframe(df):
     df.columns = cols
     return df
 
-# Función para calcular estadísticas
+# Función para calcular estadísticas sin incluir encabezados
 def calcular_estadisticas(df):
-    # Asegurarnos de que solo tomamos columnas numéricas para estadísticas
-    estadisticas = df.select_dtypes(include='number').describe()  # Calcular estadísticas de columnas numéricas
-    return estadisticas
+    # Asegurarnos de que solo tomamos columnas categóricas para estadísticas
+    estadisticas = {}
+    
+    for col in df.columns:
+        conteo = df[col].value_counts()
+        estadisticas[col] = conteo
+    
+    return pd.DataFrame(estadisticas)
 
 # Cargar el archivo desde la interfaz de Streamlit
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
@@ -113,12 +118,12 @@ if uploaded_file is not None:
                 st.plotly_chart(fig)
 
             # 5. Mostrar estadísticas descriptivas
-            st.write("Estadísticas descriptivas:")
+            st.write("Estadísticas descriptivas (sin encabezados):")
             estadisticas = calcular_estadisticas(df)
             if not estadisticas.empty:
                 st.write(estadisticas)  # Mostrar las estadísticas
             else:
-                st.warning("No se encontraron columnas numéricas para calcular estadísticas.")
+                st.warning("No se encontraron columnas categóricas para calcular estadísticas.")
 
     except Exception as e:
         st.error(f"Ocurrió un error: {e}")
