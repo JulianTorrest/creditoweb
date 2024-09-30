@@ -18,10 +18,10 @@ def cargar_hoja_posgrado_y_exterior(df):
 
 # Función para manejar nombres de columnas duplicados
 def handle_duplicate_columns(df):
-    # Renombrar columnas duplicadas
     cols = pd.Series(df.columns)
     for dup in cols[cols.duplicated()].unique():
-        cols[cols[cols == dup].index.values.tolist()] = [dup + '_' + str(i) if i != 0 else dup for i in range(sum(cols == dup))]
+        # Crear un índice único para las columnas duplicadas
+        cols[cols[cols == dup].index.values.tolist()] = [f"{dup}_{i+1}" if i != 0 else dup for i in range(sum(cols == dup))]
     df.columns = cols
     return df
 
