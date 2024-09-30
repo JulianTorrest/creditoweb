@@ -204,7 +204,7 @@ def enviar_oferta():
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
 # Página de gestión comercial de ofertas
-def gestionar_comercial():
+def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
     
     if not st.session_state.ofertas_en_proceso:
