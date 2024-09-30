@@ -40,45 +40,49 @@ def handle_duplicate_columns(df):
 uploaded_file = st.file_uploader("Elige un archivo Excel", type=["xlsx"])
 
 if uploaded_file is not None:
-    xls = pd.ExcelFile(uploaded_file)
-    st.write("Hojas disponibles en el archivo:")
-    sheet_names = xls.sheet_names
-    st.write(sheet_names)
+    try:
+        xls = pd.ExcelFile(uploaded_file)
+        st.write("Hojas disponibles en el archivo:")
+        sheet_names = xls.sheet_names
+        st.write(sheet_names)
 
-    sheet_to_work = st.selectbox("Selecciona una hoja para trabajar", sheet_names)
-    raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)  # Leer sin encabezados
+        sheet_to_work = st.selectbox("Selecciona una hoja para trabajar", sheet_names)
+        raw_df = pd.read_excel(xls, sheet_name=sheet_to_work, header=None)  # Leer sin encabezados
 
-    # Mostrar datos crudos para ver si hay datos
-    st.write("Datos crudos de la hoja seleccionada:")
-    st.write(raw_df)
+        # Mostrar datos crudos para ver si hay datos
+        st.write("Datos crudos de la hoja seleccionada:")
+        st.write(raw_df)
 
-    # Cargar datos según la hoja seleccionada
-    if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
-        df = cargar_hoja_pregrado_posgrado(raw_df)
-    elif sheet_to_work in ['RECURSOS ICETEX', 'TERCEROS', 'Hoja1']:
-        df = cargar_hoja_recursos(raw_df)
-    elif sheet_to_work == 'Tabla 1':
-        df = cargar_hoja_tabla_1(raw_df)
-    else:
-        df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)  # Cargar sin cambios
+        # Cargar datos según la hoja seleccionada
+        if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
+            df = cargar_hoja_pregrado_posgrado(raw_df)
+        elif sheet_to_work in ['RECURSOS ICETEX', 'TERCEROS', 'Hoja1']:
+            df = cargar_hoja_recursos(raw_df)
+        elif sheet_to_work == 'Tabla 1':
+            df = cargar_hoja_tabla_1(raw_df)
+        else:
+            df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)  # Cargar sin cambios
 
-    # Mostrar el DataFrame después de cargarlo
-    st.write("DataFrame después de establecer encabezados y limpiar:")
-    st.write(df)
+        # Mostrar el DataFrame después de cargarlo
+        st.write("DataFrame después de establecer encabezados y limpiar:")
+        st.write(df)
 
-    # Limpiar el DataFrame
-    df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
-    df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
+        # Limpiar el DataFrame
+        df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
+        df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
 
-    # Manejar columnas duplicadas
-    df = handle_duplicate_columns(df)
+        # Manejar columnas duplicadas
+        df = handle_duplicate_columns(df)
 
-    # Verificar si el DataFrame está vacío
-    if df.empty:
-        st.warning("El DataFrame está vacío después de limpiar los datos.")
-    else:
-        st.write(f"Datos de la hoja '{sheet_to_work}':")
-        st.write(df.head())  # Mostrar las primeras filas
+        # Comprobar si el DataFrame está vacío y manejar errores
+        if df.empty:
+            st.warning("El DataFrame está vacío después de limpiar los datos.")
+        else:
+            st.write(f"Datos de la hoja '{sheet_to_work}':")
+            st.write(df.head())  # Mostrar las primeras filas
+
+    except Exception as e:
+        st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
 
