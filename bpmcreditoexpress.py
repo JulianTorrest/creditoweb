@@ -223,6 +223,7 @@ def gestion_comercial():
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
     
+    # Generar resultados aleatorios para diversificar los datos
     total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
     total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
     total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
@@ -240,14 +241,24 @@ def gestion_comercial():
     st.write(f"Total garantías firmadas: {total_garantias_firmadas}")
     st.write(f"Total garantías no firmadas: {total_garantias_no_firmadas}")
 
+    # Crear gráfico
+    labels = ['Interesados', 'No Interesados', 'Sí, pero después', 'Garantías Firmadas', 'Garantías No Firmadas']
+    sizes = [total_interesados, total_no_interesados, total_si_pero_despues, total_garantias_firmadas, total_garantias_no_firmadas]
+
+    # Crear gráfico circular
+    plt.figure(figsize=(10, 6))
+    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    
+    # Mostrar gráfico en Streamlit
+    st.pyplot(plt)
+
     # Mostrar las ofertas filtradas
     if not df_ofertas.empty:
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i+1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
             
-            # Aquí se puede agregar más lógica específica para cada oferta, si es necesario
-
             # Simulación de respuestas aleatorias para demostración
             oferta['Interesado'] = random.choice(["Sí", "No", "Sí, pero después"])
             oferta['GarantiaFirmada'] = random.choice([True, False]) if oferta['Interesado'] == "Sí" else None
