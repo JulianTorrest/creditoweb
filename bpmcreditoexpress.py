@@ -300,52 +300,35 @@ def gestion_comercial():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
-    # Verificar si hay beneficiarios en el estado de sesión
     if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
     # Procesar cada beneficiario
-    for beneficiario in st.session_state.beneficiarios:  # Acceder a la lista de beneficiarios
+    for index, beneficiario in enumerate(st.session_state.beneficiarios):  # Añadir un índice para crear claves únicas
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
         # Preguntar si la IES tiene convenio
         tiene_convenio = st.selectbox(
             f"¿La {beneficiario['IES']} tiene convenio?", 
             ["Selecciona", "Sí", "No"], 
-            key=f"convenio_{beneficiario['Nombre']}"
+            key=f"convenio_{index}"  # Usar índice para la clave
         )
         
         if tiene_convenio == "No":
-            info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{beneficiario['Nombre']}")
-            if st.button("Enviar información", key=f"enviar_{beneficiario['Nombre']}"):
-                # Lógica para procesar la información de giro
+            info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{index}")
+            if st.button("Enviar información", key=f"enviar_{index}"):
                 st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
                 
         elif tiene_convenio == "Sí":
-            # Liquidación automática de desembolso
             st.success("Iniciando liquidación automática del desembolso...")
             instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
             st.write(instruccion_giro)
-            
-            # Control presupuestal
             alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
             st.write(alertas_presupuestales)
 
-    # Botón para aprobación digital
     if st.button("Aprobar Digitalmente", key="aprobar"):
         st.success("Aprobación digital registrada por el ordenador del gasto.")
-
-# Asegúrate de que los beneficiarios estén en el estado de sesión antes de llamar a la función
-if "beneficiarios" not in st.session_state:
-    # Inicializar datos de beneficiarios si no están presentes
-    st.session_state.beneficiarios = [
-        {"Nombre": "Juan Pérez", "IES": "Universidad A"},
-        {"Nombre": "María Gómez", "IES": "Universidad B"}
-    ]  # Ejemplo de beneficiarios
-
-# Llamar a la función principal
-gestion_ordenador_gasto()
 
 
 #Pagina de creación de indicadores 
