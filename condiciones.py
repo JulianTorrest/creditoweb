@@ -69,8 +69,6 @@ if uploaded_file is not None:
         # Cargar datos según la hoja seleccionada
         if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
             df = cargar_hoja_pregrado_posgrado(raw_df)
-            # Calcular estadísticas
-            estadisticas = calcular_estadisticas(df)
         elif sheet_to_work in ['RECURSOS ICETEX', 'TERCEROS', 'Hoja1']:
             df = cargar_hoja_recursos(raw_df)
         elif sheet_to_work == 'Tabla 1':
@@ -87,10 +85,22 @@ if uploaded_file is not None:
             st.warning("El DataFrame está vacío después de limpiar los datos.")
         else:
             st.write(df.head())  # Mostrar las primeras filas
+            
+            # 1. Listar las columnas
+            st.write("Columnas disponibles en el DataFrame:")
+            st.write(df.columns.tolist())
 
-        # Mostrar estadísticas si corresponde
-        if sheet_to_work in ['PREGRADO', 'POSGRADO Y EXTERIOR']:
+            # 2. Contar opciones de respuesta de cada columna
+            opciones_respuestas = {col: df[col].value_counts() for col in df.columns}
+            st.write("Conteo de opciones de respuesta de cada columna:")
+            for col, conteo in opciones_respuestas.items():
+                st.write(f"**{col}:**")
+                st.write(conteo)
+                st.write("")  # Línea en blanco para mejor separación
+
+            # 3. Mostrar estadísticas descriptivas
             st.write("Estadísticas descriptivas:")
+            estadisticas = calcular_estadisticas(df)
             if not estadisticas.empty:
                 st.write(estadisticas)  # Mostrar las estadísticas
             else:
@@ -100,5 +110,3 @@ if uploaded_file is not None:
         st.error(f"Ocurrió un error: {e}")
 else:
     st.write("Por favor, carga un archivo Excel.")
-
-
