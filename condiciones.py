@@ -25,8 +25,15 @@ def cargar_hoja_tabla_1(df):
     df = df.reset_index(drop=True)  # Reiniciar los índices
     return df
 
-# Función para manejar nombres de columnas duplicados
-def handle_duplicate_columns(df):
+# Función para limpiar el DataFrame
+def limpiar_dataframe(df):
+    # Eliminar columnas vacías
+    df = df.dropna(axis=1, how='all')
+    
+    # Eliminar filas vacías
+    df = df.dropna(axis=0, how='all')
+    
+    # Manejar nombres de columnas duplicados
     df.columns = df.columns.fillna('')
     cols = pd.Series(df.columns)
     
@@ -63,22 +70,14 @@ if uploaded_file is not None:
         else:
             df = pd.read_excel(xls, sheet_name=sheet_to_work, header=0)  # Cargar sin cambios
 
-        # Mostrar el DataFrame después de cargarlo
-        st.write("DataFrame después de establecer encabezados y limpiar:")
-        st.write(df)
-
         # Limpiar el DataFrame
-        df = df.dropna(axis=1, how='all')  # Eliminar columnas vacías
-        df = df.dropna(axis=0, how='any')   # Eliminar filas con datos nulos
+        df = limpiar_dataframe(df)
 
-        # Manejar columnas duplicadas
-        df = handle_duplicate_columns(df)
-
-        # Comprobar si el DataFrame está vacío y manejar errores
+        # Mostrar el DataFrame después de limpiar
+        st.write("DataFrame después de establecer encabezados y limpiar:")
         if df.empty:
             st.warning("El DataFrame está vacío después de limpiar los datos.")
         else:
-            st.write(f"Datos de la hoja '{sheet_to_work}':")
             st.write(df.head())  # Mostrar las primeras filas
 
     except Exception as e:
