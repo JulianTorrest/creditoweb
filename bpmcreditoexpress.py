@@ -48,8 +48,8 @@ def validar_sarlaft(deudor):
         return False, f"Listas SARLAFT: {deudor['Lista SARLAFT']}"
     return True, ""
 
-def validar_antecedentes(deudor,fecha_antecedentes):
-    if (datetime.now() - deudor['Antecedentes']).days < 90:
+def validar_antecedentes(deudor, fecha_antecedentes):
+    if (datetime.now() - fecha_antecedentes).days < 90:
         return False, "Antecedentes menores a 90 días"
     return True, ""
 
