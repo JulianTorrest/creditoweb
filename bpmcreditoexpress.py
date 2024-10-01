@@ -138,51 +138,35 @@ def captura_datos():
 
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
-    st.title("Validación de Beneficiarios")
+    st.title("Validaciones de Elegibilidad para ICETEX")
 
-    # Procesar las validaciones
-    validados, errores = procesar_validaciones(deudores)
+    # Paso 1: Listas para almacenar beneficiarios
+    beneficiarios_validados = []
+    beneficiarios_con_errores = []
 
-    # Mostrar métricas
-    st.subheader("Resumen de Validación")
+    if not beneficiarios_data:
+        st.warning("No hay datos de beneficiarios disponibles.")
+        return
     
-    total_validados = len(validados)
-    total_errores = len(errores)
-    
-    st.metric("Beneficiarios que pasaron todas las validaciones", total_validados)
-    st.metric("Beneficiarios con errores encontrados", total_errores)
+    for i, beneficiario in enumerate(beneficiarios_data):
+        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
+        
+        errores = realizar_validaciones(beneficiario)
+        if errores:
+            st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
+            for error in errores:
+                st.write(f"- {error}")
+            # Agregar a la lista de beneficiarios con errores
+            beneficiarios_con_errores.append(beneficiario)
+        else:
+            st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
+            st.write(f"Ofrecer crédito educativo.")
+            # Agregar a la lista de beneficiarios validados
+            beneficiarios_validados.append(beneficiario)
 
-    # Detallar errores por tipo
-    if total_errores > 0:
-        st.subheader("Detalles de Errores Encontrados")
-        error_contador = {
-            'Nacionalidad': 0,
-            'Edad': 0,
-            'Estado de crédito': 0,
-            'Lista SARLAFT': 0,
-            'Antecedentes': 0
-        }
-
-        for deudor, error in errores.items():
-            for e in error:
-                error_contador[e] += 1
-
-        st.write(f"Errores por Nacionalidad: {error_contador['Nacionalidad']}")
-        st.write(f"Errores por Edad: {error_contador['Edad']}")
-        st.write(f"Errores por Estado de crédito: {error_contador['Estado de crédito']}")
-        st.write(f"Errores por Lista SARLAFT: {error_contador['Lista SARLAFT']}")
-        st.write(f"Errores por Antecedentes: {error_contador['Antecedentes']}")
-
-    # Mostrar tabla de beneficiarios validados
-    if total_validados > 0:
-        st.subheader("Beneficiarios Validados")
-        st.write(validados)
-
-    # Mostrar tabla de beneficiarios con errores
-    if total_errores > 0:
-        st.subheader("Beneficiarios con Errores")
-        st.write(errores)
-
+    # Guardar las listas en el estado para usarlas en otras páginas
+    st.session_state['beneficiarios_validados'] = beneficiarios_validados
+    st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
 
 # Página para enviar la oferta al beneficiario
