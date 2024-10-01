@@ -218,6 +218,20 @@ def enviar_oferta():
         # Información de que no se enviarán ofertas a beneficiarios con errores
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
+def generar_oferta(nombre):
+    return {
+        "Nombre": nombre,
+        "Nacionalidad": random.choice(["Colombiano", "Otro"]),
+        "Edad": random.randint(18, 65),
+        "Estado Crédito": random.choice(["Ninguno", "Castigado", "En mora y castigado"]),
+        "Lista SARLAFT": random.choice(["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]),
+        "Score Crediticio": random.randint(150, 900),
+        "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
+        "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
+        "Estado": random.choice(["Enviada", "Pendiente", "Rechazada"]),
+        "GarantiaFirmada": random.choice([True, False])
+    }
+
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
