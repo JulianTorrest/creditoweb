@@ -329,9 +329,22 @@ def gestion_comercial():
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
                 
+# Generación aleatoria de información bancaria
+def generar_info_bancaria():
+    return {
+        "NIT": random.randint(100000000, 999999999),
+        "Nombre IES": random.choice(["Universidad A", "Universidad B", "Universidad C"]),
+        "Tipo de Cuenta": random.choice(["Ahorros", "Corriente"]),
+        "Numero de Cuenta": random.randint(10000000, 99999999),
+        "Nombre del Banco": random.choice(["Banco A", "Banco B", "Banco C"]),
+        "Numero de Factura": random.randint(100000, 999999)
+    }
+
+# Función para la gestión del ordenador del gasto
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
+    # Asegúrate de que los beneficiarios estén en el estado
     if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
