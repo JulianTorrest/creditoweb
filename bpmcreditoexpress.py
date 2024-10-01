@@ -144,6 +144,12 @@ def validacion_beneficiarios():
     beneficiarios_validados = []
     beneficiarios_con_errores = []
 
+    # Contadores para las métricas
+    total_beneficiarios = len(beneficiarios_data)
+    beneficiarios_validados_count = 0
+    beneficiarios_con_errores_count = 0
+    errores_por_motivo = {}
+
     if not beneficiarios_data:
         st.warning("No hay datos de beneficiarios disponibles.")
         return
@@ -156,17 +162,34 @@ def validacion_beneficiarios():
             st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
             for error in errores:
                 st.write(f"- {error}")
+                # Registrar el error en el diccionario de métricas
+                if error not in errores_por_motivo:
+                    errores_por_motivo[error] = 1
+                else:
+                    errores_por_motivo[error] += 1
             # Agregar a la lista de beneficiarios con errores
             beneficiarios_con_errores.append(beneficiario)
+            beneficiarios_con_errores_count += 1
         else:
             st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
             st.write(f"Ofrecer crédito educativo.")
             # Agregar a la lista de beneficiarios validados
             beneficiarios_validados.append(beneficiario)
+            beneficiarios_validados_count += 1
 
     # Guardar las listas en el estado para usarlas en otras páginas
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
+    # Mostrar métricas al final de la página
+    st.write("## Métricas de Validación")
+    st.write(f"- Total de beneficiarios: {total_beneficiarios}")
+    st.write(f"- Beneficiarios que pasaron todas las validaciones: {beneficiarios_validados_count}")
+    st.write(f"- Beneficiarios con errores: {beneficiarios_con_errores_count}")
+
+    st.write("### Motivos de los errores")
+    for motivo, cantidad in errores_por_motivo.items():
+        st.write(f"- {motivo}: {cantidad} beneficiarios")
 
 
 # Página para enviar la oferta al beneficiario
