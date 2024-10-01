@@ -344,68 +344,68 @@ def generar_info_bancaria():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
-    # Asegúrate de que los beneficiarios estén en el estado
-    if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
-        st.warning("No hay beneficiarios con garantía firmada para gestionar.")
+    # Asegúrate de que las ofertas en sesión están inicializadas
+    if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
+        st.warning("No hay ofertas en proceso para gestionar.")
+        return
+
+    # Filtrar las ofertas para solo mostrar las que tienen garantía firmada
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+    df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
+
+    if df_ofertas.empty:
+        st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
     # Procesar cada beneficiario
-    for index, beneficiario in enumerate(st.session_state.beneficiarios):
+    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):  # Usar df_ofertas para las ofertas filtradas
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
-
-        # Generar respuesta aleatoria sobre convenio
-        beneficiario['tiene_convenio'] = random.choice(["Sí", "No"])
         
-        if beneficiario['tiene_convenio'] == "Sí":
-            st.success("La IES tiene convenio.")
-            # Liquidación automática del desembolso
-            st.write("Iniciando liquidación automática del desembolso...")
-            # Generación automática de instrucción de giro
-            st.write("Generando instrucción de giro...")
-            # Control presupuestal
-            st.subheader("Control Presupuestal")
-            presupuesto_disponible = random.randint(1000, 5000)  # en miles de millones
-            presupuesto_comprometido = random.randint(0, presupuesto_disponible)  # en miles de millones
-            st.write(f"Presupuesto disponible: {presupuesto_disponible} miles de millones")
-            st.write(f"Presupuesto comprometido: {presupuesto_comprometido} miles de millones")
-            
-            # Botón para aprobar digitalmente
-            if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
-                st.success("Aprobación digital registrada por el ordenador del gasto.")
-                giro_exitoso = random.choice(["Sí", "No"])  # Simulación del resultado del giro
-                st.write(f"Giro Exitoso: {giro_exitoso}")
-                
-                if giro_exitoso == "Sí":
-                    st.success("Giro exitoso. Se envía información para creación de cartera.")
-                    st.write("Notificando al beneficiario...")
-                else:
-                    # Giro no exitoso
-                    st.error("Giro no exitoso.")
-                    subsanable = random.choice(["Sí", "No"])  # Simulación si se puede subsanar
-                    if subsanable == "Sí":
-                        st.warning("Se puede subsanar. Solicitar información para giro nuevamente.")
-                        info_bancaria = generar_info_bancaria()
-                        st.write("Información bancaria de la IES:")
-                        st.write(info_bancaria)
-                        
-                        # Botón para confirmar información para giro
-                        if st.button("Confirmar información para giro", key=f"confirmar_{index}"):
-                            st.write("Validando información IES para giro...")
-                            validacion_correcta = random.choice(["Sí", "No"])  # Respuesta aleatoria
-                            if validacion_correcta == "Sí":
-                                st.success("Información validada correctamente.")
-                                giro_exitoso = random.choice(["Sí", "No"])  # Nueva simulación del giro
-                                st.write(f"Giro Exitoso: {giro_exitoso}")
-                                if giro_exitoso == "Sí":
-                                    st.success("Giro exitoso. Se envía información para creación de cartera.")
-                                    st.write("Notificando al beneficiario...")
-                                else:
-                                    st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
-                            else:
-                                st.error("La información IES no es correcta, por favor revise.")
-                        
+        # Verificar si la IES tiene convenio
+        if 'tiene_convenio' not in beneficiario:  # Asegúrate de que existe la clave
+            beneficiario['tiene_convenio'] = random.choice(["Sí", "No"])
+
+        # Preguntar si la IES tiene convenio
+        if beneficiario['tiene_convenio'] == "No":
+            if st.button(f"Solicitar información para giro a {beneficiario['IES']}", key=f"solicitar_{index}"):
+                info_bancaria = generar_info_bancaria()  # Asumiendo que esta función genera la info bancaria
+                st.write(f"NIT: {info_bancaria['NIT']}")
+                st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+                st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+                st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+                st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+                st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+
+                if st.button(f"Confirmar información para giro de {beneficiario['IES']}", key=f"confirmar_{index}"):
+                    # Aquí se debe validar la información y continuar con el flujo
+                    validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
+                    if validacion_info == "Sí":
+                        st.success("Validación exitosa. Procediendo a liquidación automática...")
+                        # Aquí seguiría el proceso de liquidación automática
                     else:
-                        st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
+                        st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
+        
+        elif beneficiario['tiene_convenio'] == "Sí":
+            st.success("Iniciando liquidación automática del desembolso...")
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
+            st.write(instruccion_giro)
+            alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
+            st.write(alertas_presupuestales)
+
+    if st.button("Aprobar Digitalmente", key="aprobar"):
+        st.success("Aprobación digital registrada por el ordenador del gasto.")
+        giro_exitoso = random.choice(["Sí", "No"])  # Simulación de éxito en el giro
+        st.write(f"Giro Exitoso: {giro_exitoso}")
+
+        if giro_exitoso == "Sí":
+            st.success("Información enviada para creación de cartera y notificación al beneficiario.")
+        else:
+            subsanacion = st.radio("¿Se puede subsanar?", ["Sí", "No"], key="subsanacion")
+            if subsanacion == "Sí":
+                st.write("Solicitando nueva información para giro...")
+                # Lógica para solicitar nueva información
+            else:
+                st.error("Notificando inconsistencia y finalizando el proceso.")
                         
         elif beneficiario['tiene_convenio'] == "No":
             st.warning("La IES no tiene convenio.")
