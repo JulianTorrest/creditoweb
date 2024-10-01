@@ -296,6 +296,8 @@ def gestion_comercial():
 
     # Mostrar las ofertas filtradas
     if not df_ofertas.empty:
+        # Registro de beneficiarios con garantía firmada
+        st.session_state.beneficiarios = []  # Inicializar la lista si no existe
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
@@ -309,11 +311,12 @@ def gestion_comercial():
                 garantia_firmada = st.checkbox("Garantía firmada recibida", value=True, key=f"garantia_firmada_{i}")
                 if garantia_firmada:
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
+                    st.session_state.beneficiarios.append(oferta)  # Agregar a beneficiarios
                     st.write("Gracias, hemos registrado la garantía firmada.")
                 else:
                     st.write("Esperando la confirmación de la garantía firmada.")
             elif oferta['Interesado'] == "Sí, pero después":
-                st.write("¿Garantía firmada? No se requiere pregunta.");  # No se hace seguimiento de garantías
+                st.write("¿Garantía firmada? No se requiere pregunta.")  # No se hace seguimiento de garantías
 
             if oferta['Interesado'] == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
@@ -334,7 +337,7 @@ def gestion_ordenador_gasto():
         return
 
     # Procesar cada beneficiario
-    for index, beneficiario in enumerate(st.session_state.beneficiarios):  # Añadir un índice para crear claves únicas
+    for index, beneficiario in enumerate(st.session_state.beneficiarios):  # Asegúrate de que haya beneficiarios aquí
         st.subheader(f"Gestión para {beneficiario['Nombre']}")
         
         # Preguntar si la IES tiene convenio
@@ -358,7 +361,6 @@ def gestion_ordenador_gasto():
 
     if st.button("Aprobar Digitalmente", key="aprobar"):
         st.success("Aprobación digital registrada por el ordenador del gasto.")
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
