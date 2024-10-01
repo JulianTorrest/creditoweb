@@ -137,59 +137,56 @@ def captura_datos():
         st.dataframe(df_beneficiarios)
 
 # Página de validación de beneficiarios
-def validacion_beneficiarios():
+def validar_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
 
-    # Paso 1: Listas para almacenar beneficiarios
-    beneficiarios_validados = []
-    beneficiarios_con_errores = []
+    # Procesar las validaciones
+    validados, errores = procesar_validaciones(deudores)
 
-    # Contadores para las métricas
-    total_beneficiarios = len(beneficiarios_data)
-    beneficiarios_validados_count = 0
-    beneficiarios_con_errores_count = 0
-    errores_por_motivo = {}
-
-    if not beneficiarios_data:
-        st.warning("No hay datos de beneficiarios disponibles.")
-        return
+    # Mostrar métricas justo después del título
+    st.subheader("Resumen de Validación")
     
-    for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
-        
-        errores = realizar_validaciones(beneficiario)
-        if errores:
-            st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
-            for error in errores:
-                st.write(f"- {error}")
-                # Registrar el error en el diccionario de métricas
-                if error not in errores_por_motivo:
-                    errores_por_motivo[error] = 1
-                else:
-                    errores_por_motivo[error] += 1
-            # Agregar a la lista de beneficiarios con errores
-            beneficiarios_con_errores.append(beneficiario)
-            beneficiarios_con_errores_count += 1
-        else:
-            st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
-            st.write(f"Ofrecer crédito educativo.")
-            # Agregar a la lista de beneficiarios validados
-            beneficiarios_validados.append(beneficiario)
-            beneficiarios_validados_count += 1
+    total_validados = len(validados)
+    total_errores = len(errores)
+    
+    # Métricas de validación
+    col1, col2 = st.columns(2)  # Para mostrar las métricas en columnas
+    with col1:
+        st.metric("Beneficiarios que pasaron todas las validaciones", total_validados)
+    with col2:
+        st.metric("Beneficiarios con errores encontrados", total_errores)
 
-    # Guardar las listas en el estado para usarlas en otras páginas
-    st.session_state['beneficiarios_validados'] = beneficiarios_validados
-    st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+    # Detallar errores por tipo
+    if total_errores > 0:
+        st.subheader("Detalles de Errores Encontrados")
+        error_contador = {
+            'Nacionalidad': 0,
+            'Edad': 0,
+            'Estado de crédito': 0,
+            'Lista SARLAFT': 0,
+            'Antecedentes': 0
+        }
 
-    # Mostrar métricas al final de la página
-    st.write("## Métricas de Validación")
-    st.write(f"- Total de beneficiarios: {total_beneficiarios}")
-    st.write(f"- Beneficiarios que pasaron todas las validaciones: {beneficiarios_validados_count}")
-    st.write(f"- Beneficiarios con errores: {beneficiarios_con_errores_count}")
+        for deudor, error in errores.items():
+            for e in error:
+                error_contador[e] += 1
 
-    st.write("### Motivos de los errores")
-    for motivo, cantidad in errores_por_motivo.items():
-        st.write(f"- {motivo}: {cantidad} beneficiarios")
+        st.write(f"Errores por Nacionalidad: {error_contador['Nacionalidad']}")
+        st.write(f"Errores por Edad: {error_contador['Edad']}")
+        st.write(f"Errores por Estado de crédito: {error_contador['Estado de crédito']}")
+        st.write(f"Errores por Lista SARLAFT: {error_contador['Lista SARLAFT']}")
+        st.write(f"Errores por Antecedentes: {error_contador['Antecedentes']}")
+
+    # Mostrar tabla de beneficiarios validados
+    if total_validados > 0:
+        st.subheader("Beneficiarios Validados")
+        st.write(validados)
+
+    # Mostrar tabla de beneficiarios con errores
+    if total_errores > 0:
+        st.subheader("Beneficiarios con Errores")
+        st.write(errores)
+
 
 
 # Página para enviar la oferta al beneficiario
