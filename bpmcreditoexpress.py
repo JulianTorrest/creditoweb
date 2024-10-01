@@ -141,7 +141,8 @@ def validacion_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
 
     # Procesar las validaciones
-    validados, errores = procesar_validaciones(deudores)
+    df_beneficiarios = pd.DataFrame(beneficiarios_data)  # Asegúrate de usar el DataFrame correcto
+    validados, errores = procesar_validaciones(df_beneficiarios)
 
     # Mostrar métricas justo después del título
     st.subheader("Resumen de Validación")
@@ -186,8 +187,6 @@ def validacion_beneficiarios():
     if total_errores > 0:
         st.subheader("Beneficiarios con Errores")
         st.write(errores)
-
-
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
