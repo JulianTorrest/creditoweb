@@ -222,19 +222,39 @@ def enviar_oferta():
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
-    # Datos fijos proporcionados
-    total_ofertas_enviadas = 426
+    # Generar datos aleatorios de ofertas si no están en session_state
+    if 'ofertas_en_proceso' not in st.session_state:
+        nombres = [f"Nombre_{i}" for i in range(1, 427)]
+        st.session_state.ofertas_en_proceso = [generar_oferta(nombre) for nombre in nombres]
+
+    # Filtros para seleccionar el estado de las ofertas
+    estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
+
+    # Segundo filtro: Estado de Garantías
+    estado_garantia_filtrado = st.selectbox("Selecciona el estado de la garantía", ["Todos", "Garantías Firmadas", "Garantías No Firmadas"])
+
+    # Crear un DataFrame para filtrar las ofertas según el estado y el estado de las garantías
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+
+    if estado_filtrado != "Todos":
+        df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
+
+    if estado_garantia_filtrado != "Todos":
+        if estado_garantia_filtrado == "Garantías Firmadas":
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
+        else:
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == False]
+
+    # Informe de seguimiento
+    st.subheader("Informe de Seguimiento")
+
     total_interesados = 305
     total_no_interesados = 110
     total_si_pero_despues = 11
     total_garantias_firmadas = 275
     total_garantias_no_firmadas = 35
 
-    # Informe de seguimiento
-    st.subheader("Informe de Seguimiento")
-    
-    # Mostrar el informe
-    st.write(f"Total ofertas enviadas: {total_ofertas_enviadas}")
+    # Mostrar informe
     st.write(f"Total ofertas de beneficiarios interesados: {total_interesados}")
     st.write(f"Total ofertas de beneficiarios no interesados: {total_no_interesados}")
     st.write(f"Total ofertas de beneficiarios 'sí, pero después': {total_si_pero_despues}")
@@ -262,30 +282,22 @@ def gestion_comercial():
     plt.title('Estado de Garantías Firmadas y No Firmadas')
     st.pyplot(plt)
 
-    # Filtros para seleccionar el estado de las ofertas
-    estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
-
-    # Datos de ejemplo con las ofertas en proceso (puedes adaptarlo a tu estructura)
-    ofertas_en_proceso = [
-        {'Nombre': 'Oferta 1', 'Estado': 'Sí', 'Interesado': 'Sí', 'GarantiaFirmada': True},
-        {'Nombre': 'Oferta 2', 'Estado': 'No', 'Interesado': 'No', 'GarantiaFirmada': False},
-        {'Nombre': 'Oferta 3', 'Estado': 'Sí, pero después', 'Interesado': 'Sí, pero después', 'GarantiaFirmada': False},
-        # Añadir más ejemplos si es necesario
-    ]
-
-    # Crear un DataFrame para filtrar las ofertas según el estado
-    df_ofertas = pd.DataFrame(ofertas_en_proceso)
-
-    if estado_filtrado != "Todos":
-        df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
-
     # Mostrar las ofertas filtradas
     st.subheader("Ofertas Filtradas")
+
     if not df_ofertas.empty:
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
-            st.write(f"Oferta {i + 1}: {oferta['Nombre']} - Estado: {oferta['Interesado']}")
-    else:
-        st.write("No hay ofertas en este estado.")
+            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
+            st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
+            st.write(f"Edad: {oferta['Edad']}")
+            st.write(f"Estado Crédito: {oferta['Estado Crédito']}")
+            st.write(f"Lista SARLAFT: {oferta['Lista SARLAFT']}")
+            st.write(f"Score Crediticio: {oferta['Score Crediticio']}")
+            st.write(f"Capacidad de Pago (COP): {oferta['Capacidad de Pago (COP)']}")
+            st.write(f"Límite de Endeudamiento (COP): {oferta['Límite de Endeudamiento (COP)']}")
+            st.write(f"Estado: {oferta['Estado']}")
+            st.write(f"Garantía Firmada: {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
+
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
