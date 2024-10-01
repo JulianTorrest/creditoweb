@@ -170,6 +170,7 @@ def validacion_beneficiarios():
 
 
 # Página para enviar la oferta al beneficiario
+# Página para enviar la oferta al beneficiario
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
@@ -228,7 +229,7 @@ def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
     # Verificar si hay ofertas en proceso
-    if not st.session_state.ofertas_en_proceso:
+    if 'ofertas_en_proceso' not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
 
@@ -290,25 +291,30 @@ def gestion_comercial():
             st.write(f"Interesado: {oferta['Interesado']}")
             st.write(f"¿Garantía firmada? {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
 
-            interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
-            st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
-            
-            if interesado == "Sí, pero después":
+            # No se requiere cambiar el interés aquí, ya que se recibe de enviar_oferta
+            # Si necesitas una opción de cambio, descomentar lo siguiente
+            # interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
+            # st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
+
+            if oferta['Interesado'] == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
-            elif interesado == "No":
+            elif oferta['Interesado'] == "No":
                 st.write("Actualizando registros y finalizando el flujo.")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
                 st.session_state.ofertas_en_proceso.remove(oferta)
                 st.success("Registros actualizados y flujo finalizado.")
-            elif interesado == "Sí":
+            elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
                 garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
                 
                 if garantia_firmada:
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
-                    st.write("Garantía firmada registrada.")
+                    st.write("Gracias, hemos registrado la garantía firmada.")
+                else:
+                    st.write("Esperando la confirmación de la garantía firmada.")
+
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
