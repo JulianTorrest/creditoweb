@@ -329,38 +329,37 @@ def gestion_comercial():
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
                 
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
+    # Verificar si hay beneficiarios con garantía firmada
     if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
-    # Procesar cada beneficiario
-    for index, beneficiario in enumerate(st.session_state.beneficiarios):
-        # Imprimir beneficiario para depuración
-        st.write(f"Beneficiario {index + 1}: {beneficiario}")
+    # Filtrar beneficiarios que tienen garantía firmada
+    beneficiarios_con_garantia_firmada = [b for b in st.session_state.beneficiarios if b.get('GarantiaFirmada')]
 
-        # Acceder de forma segura a 'IES'
-        ies_nombre = beneficiario.get('IES', 'IES no disponible')
+    # Agregar la columna 'tiene_convenio' de forma aleatoria
+    for beneficiario in beneficiarios_con_garantia_firmada:
+        beneficiario['tiene_convenio'] = random.choice(["Sí", "No"])
         
-        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Nombre no disponible')}")
-        
-        # Preguntar si la IES tiene convenio
-        tiene_convenio = st.selectbox(
-            f"¿La {ies_nombre} tiene convenio?", 
-            ["Selecciona", "Sí", "No"], 
-            key=f"convenio_{index}"  # Usar índice para la clave
-        )
-        
-        if tiene_convenio == "No":
-            info_giro = st.text_input(f"Información para giro a {ies_nombre}", key=f"info_giro_{index}")
+    # Procesar cada beneficiario
+    for index, beneficiario in enumerate(beneficiarios_con_garantia_firmada):  # Usar solo beneficiarios con garantía firmada
+        st.subheader(f"Gestión para {beneficiario['Nombre']}")
+
+        # Mostrar la decisión de convenio aleatoria
+        st.write(f"¿La {beneficiario['IES']} tiene convenio? {beneficiario['tiene_convenio']}")
+
+        if beneficiario['tiene_convenio'] == "No":
+            info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{index}")
             if st.button("Enviar información", key=f"enviar_{index}"):
                 st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
                 
-        elif tiene_convenio == "Sí":
+        elif beneficiario['tiene_convenio'] == "Sí":
             st.success("Iniciando liquidación automática del desembolso...")
-            instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Nombre no disponible')}."
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
             st.write(instruccion_giro)
             alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
             st.write(alertas_presupuestales)
