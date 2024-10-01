@@ -343,7 +343,7 @@ def generar_info_bancaria():
 # Función para la gestión del ordenador del gasto
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
-    
+
     # Asegúrate de que las ofertas en sesión están inicializadas
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
@@ -406,30 +406,6 @@ def gestion_ordenador_gasto():
                 # Lógica para solicitar nueva información
             else:
                 st.error("Notificando inconsistencia y finalizando el proceso.")
-                        
-        elif beneficiario['tiene_convenio'] == "No":
-            st.warning("La IES no tiene convenio.")
-            # Solicitar información para giro
-            if st.button("Solicitar información para giro", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()
-                st.write("Información bancaria de la IES:")
-                st.write(info_bancaria)
-                
-                # Botón para confirmar información para giro
-                if st.button("Confirmar información para giro", key=f"confirmar_{index}"):
-                    st.write("Validando información IES para giro...")
-                    validacion_correcta = random.choice(["Sí", "No"])  # Respuesta aleatoria
-                    if validacion_correcta == "Sí":
-                        st.success("Información validada correctamente.")
-                        giro_exitoso = random.choice(["Sí", "No"])  # Simulación del giro
-                        st.write(f"Giro Exitoso: {giro_exitoso}")
-                        if giro_exitoso == "Sí":
-                            st.success("Giro exitoso. Se envía información para creación de cartera.")
-                            st.write("Notificando al beneficiario...")
-                        else:
-                            st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
-                    else:
-                        st.error("La información IES no es correcta, por favor revise.")
 
 
 #Pagina de creación de indicadores 
