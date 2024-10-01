@@ -238,19 +238,18 @@ def gestion_comercial():
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     if estado_filtrado != "Todos":
-        df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
+        df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
 
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
 
     # Contar interesados y garantías
-    total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
-    total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
-    total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
+    total_interesados = df_ofertas[df_ofertas['Interesado'] == "Sí"].shape[0]
+    total_no_interesados = df_ofertas[df_ofertas['Interesado'] == "No"].shape[0]
+    total_si_pero_despues = df_ofertas[df_ofertas['Interesado'] == "Sí, pero después"].shape[0]
 
     # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
-    total_garantias_firmadas = sum(1 for oferta in st.session_state.ofertas_en_proceso 
-                                    if oferta.get('Interesado') == "Sí" and oferta.get('GarantiaFirmada', False))
+    total_garantias_firmadas = df_ofertas[(df_ofertas['Interesado'] == "Sí") & (df_ofertas['GarantiaFirmada'] == True)].shape[0]
     total_garantias_no_firmadas = total_interesados - total_garantias_firmadas if total_interesados > 0 else 0
 
     # Mostrar informe
@@ -289,17 +288,11 @@ def gestion_comercial():
             st.write(f"Interesado: {oferta['Interesado']}")
             st.write(f"¿Garantía firmada? {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
 
-            # No se requiere cambiar el interés aquí, ya que se recibe de enviar_oferta
-            # Si necesitas una opción de cambio, descomentar lo siguiente
-            # interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
-            # st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
-
             if oferta['Interesado'] == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
             elif oferta['Interesado'] == "No":
                 st.write("Actualizando registros y finalizando el flujo.")
-                st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
                 st.session_state.ofertas_en_proceso.remove(oferta)
                 st.success("Registros actualizados y flujo finalizado.")
             elif oferta['Interesado'] == "Sí":
