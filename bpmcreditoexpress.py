@@ -168,8 +168,6 @@ def validacion_beneficiarios():
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
-
-# Página para enviar la oferta al beneficiario
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
