@@ -368,16 +368,51 @@ def gestion_ordenador_gasto():
             presupuesto_comprometido = random.randint(0, presupuesto_disponible)  # en miles de millones
             st.write(f"Presupuesto disponible: {presupuesto_disponible} miles de millones")
             st.write(f"Presupuesto comprometido: {presupuesto_comprometido} miles de millones")
+            
             # Botón para aprobar digitalmente
             if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
                 st.success("Aprobación digital registrada por el ordenador del gasto.")
+                giro_exitoso = random.choice(["Sí", "No"])  # Simulación del resultado del giro
+                st.write(f"Giro Exitoso: {giro_exitoso}")
                 
+                if giro_exitoso == "Sí":
+                    st.success("Giro exitoso. Se envía información para creación de cartera.")
+                    st.write("Notificando al beneficiario...")
+                else:
+                    # Giro no exitoso
+                    st.error("Giro no exitoso.")
+                    subsanable = random.choice(["Sí", "No"])  # Simulación si se puede subsanar
+                    if subsanable == "Sí":
+                        st.warning("Se puede subsanar. Solicitar información para giro nuevamente.")
+                        info_bancaria = generar_info_bancaria()
+                        st.write("Información bancaria de la IES:")
+                        st.write(info_bancaria)
+                        
+                        # Botón para confirmar información para giro
+                        if st.button("Confirmar información para giro", key=f"confirmar_{index}"):
+                            st.write("Validando información IES para giro...")
+                            validacion_correcta = random.choice(["Sí", "No"])  # Respuesta aleatoria
+                            if validacion_correcta == "Sí":
+                                st.success("Información validada correctamente.")
+                                giro_exitoso = random.choice(["Sí", "No"])  # Nueva simulación del giro
+                                st.write(f"Giro Exitoso: {giro_exitoso}")
+                                if giro_exitoso == "Sí":
+                                    st.success("Giro exitoso. Se envía información para creación de cartera.")
+                                    st.write("Notificando al beneficiario...")
+                                else:
+                                    st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
+                            else:
+                                st.error("La información IES no es correcta, por favor revise.")
+                        
+                    else:
+                        st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
+                        
         elif beneficiario['tiene_convenio'] == "No":
             st.warning("La IES no tiene convenio.")
             # Solicitar información para giro
             if st.button("Solicitar información para giro", key=f"solicitar_{index}"):
                 info_bancaria = generar_info_bancaria()
-                st.write(f"Información bancaria de la IES:")
+                st.write("Información bancaria de la IES:")
                 st.write(info_bancaria)
                 
                 # Botón para confirmar información para giro
@@ -386,10 +421,13 @@ def gestion_ordenador_gasto():
                     validacion_correcta = random.choice(["Sí", "No"])  # Respuesta aleatoria
                     if validacion_correcta == "Sí":
                         st.success("Información validada correctamente.")
-                        # Liquidación automática del desembolso
-                        st.write("Iniciando liquidación automática del desembolso...")
-                        # Generación automática de instrucción de giro
-                        st.write("Generando instrucción de giro...")
+                        giro_exitoso = random.choice(["Sí", "No"])  # Simulación del giro
+                        st.write(f"Giro Exitoso: {giro_exitoso}")
+                        if giro_exitoso == "Sí":
+                            st.success("Giro exitoso. Se envía información para creación de cartera.")
+                            st.write("Notificando al beneficiario...")
+                        else:
+                            st.error("Giro no exitoso y no se puede subsanar. Notificando inconsistencia.")
                     else:
                         st.error("La información IES no es correcta, por favor revise.")
 
