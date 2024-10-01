@@ -300,7 +300,20 @@ def gestion_comercial():
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
             st.write(f"Interesado: {oferta['Interesado']}")
-            st.write(f"¿Garantía firmada? {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
+
+            # Ajustar la respuesta de garantía firmada
+            if oferta['Interesado'] == "No":
+                st.write("¿Garantía firmada? No")  # No se firma garantía si no está interesado
+            elif oferta['Interesado'] == "Sí":
+                st.write(f"¿Garantía firmada? {'Sí'}")
+                garantia_firmada = st.checkbox("Garantía firmada recibida", value=True, key=f"garantia_firmada_{i}")
+                if garantia_firmada:
+                    st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
+                    st.write("Gracias, hemos registrado la garantía firmada.")
+                else:
+                    st.write("Esperando la confirmación de la garantía firmada.")
+            elif oferta['Interesado'] == "Sí, pero después":
+                st.write("¿Garantía firmada? No se requiere pregunta.");  # No se hace seguimiento de garantías
 
             if oferta['Interesado'] == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
@@ -312,14 +325,7 @@ def gestion_comercial():
             elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
-                garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
                 
-                if garantia_firmada:
-                    st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
-                    st.write("Gracias, hemos registrado la garantía firmada.")
-                else:
-                    st.write("Esperando la confirmación de la garantía firmada.")
-
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
