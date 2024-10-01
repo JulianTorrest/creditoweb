@@ -202,10 +202,15 @@ def enviar_oferta():
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
                 # Agregar beneficiarios validados a la lista de ofertas enviadas y en proceso
-                st.session_state.ofertas_enviadas.append(beneficiario.copy())
+                oferta = beneficiario.copy()
+                oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
+                oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
+                st.session_state.ofertas_enviadas.append(oferta)
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
-                    "Estado": "Enviada"
+                    "Estado": "Enviada",
+                    "Interesado": oferta["Interesado"],
+                    "GarantiaFirmada": oferta["GarantiaFirmada"]
                 })
             st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
         else:
@@ -282,6 +287,8 @@ def gestion_comercial():
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
+            st.write(f"Interesado: {oferta['Interesado']}")
+            st.write(f"¿Garantía firmada? {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
 
             interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
             st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
@@ -297,13 +304,11 @@ def gestion_comercial():
             elif interesado == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
-
                 garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
                 
                 if garantia_firmada:
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
                     st.write("Garantía firmada registrada.")
-
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
