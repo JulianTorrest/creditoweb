@@ -137,7 +137,7 @@ def captura_datos():
         st.dataframe(df_beneficiarios)
 
 # Página de validación de beneficiarios
-def validar_beneficiarios():
+def validacion_beneficiarios():
     st.title("Validación de Beneficiarios")
 
     # Procesar las validaciones
