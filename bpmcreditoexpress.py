@@ -169,14 +169,15 @@ def validacion_beneficiarios():
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
 
-# Página para enviar la oferta al beneficiario
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
+    # Verificar si hay datos de beneficiarios validados y con errores
     if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
-
+    
+    # Inicializar listas en el estado de sesión si no existen
     if 'ofertas_enviadas' not in st.session_state:
         st.session_state.ofertas_enviadas = []
     
@@ -186,22 +187,21 @@ def enviar_oferta():
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
+    # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
     
+    # Mostrar ofertas ya enviadas
     if st.session_state.ofertas_enviadas:
         st.write("Ofertas ya enviadas:")
         for oferta in st.session_state.ofertas_enviadas:
-            # Aquí se verifica si la clave "Nacionalidad" existe
-            try:
-                st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
-            except KeyError:
-                st.write("Nacionalidad: No disponible")
+            st.write(oferta)
 
     if len(beneficiarios_validados) > 0:
+        # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
-                oferta_generada = generar_oferta(beneficiario["Nombre"])  # Generamos la oferta para cada beneficiario
-                st.session_state.ofertas_enviadas.append(oferta_generada)  # Guardamos la oferta generada
+                # Agregar beneficiarios validados a la lista de ofertas enviadas y en proceso
+                st.session_state.ofertas_enviadas.append(beneficiario.copy())
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
                     "Estado": "Enviada"
@@ -210,11 +210,12 @@ def enviar_oferta():
         else:
             st.info("No se han enviado ofertas todavía.")
 
+    # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
     if len(beneficiarios_con_errores) > 0:
+        # Información de que no se enviarán ofertas a beneficiarios con errores
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
-
 
 def generar_oferta(nombre):
     return {
