@@ -331,16 +331,16 @@ def gestion_comercial():
                 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
+    # Generar información bancaria aleatoria para la IES
     return {
         "NIT": random.randint(100000000, 999999999),
-        "Nombre IES": random.choice(["Universidad A", "Universidad B", "Universidad C"]),
-        "Tipo de Cuenta": random.choice(["Ahorros", "Corriente"]),
-        "Numero de Cuenta": random.randint(10000000, 99999999),
-        "Nombre del Banco": random.choice(["Banco A", "Banco B", "Banco C"]),
-        "Numero de Factura": random.randint(100000, 999999)
+        "Nombre": f"IES {random.choice(['A', 'B', 'C', 'D'])}",
+        "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
+        "Numero Cuenta": random.randint(10000000, 99999999),
+        "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
+        "Numero Factura": random.randint(1000, 9999)
     }
 
-# Función para la gestión del ordenador del gasto
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
@@ -357,6 +357,19 @@ def gestion_ordenador_gasto():
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
+    # Tabla de Control Presupuestal
+    st.subheader("Control Presupuestal")
+    presupuesto_disponible = random.randint(1000, 5000)  # en miles de millones
+    presupuesto_comprometido = random.randint(0, presupuesto_disponible)
+
+    st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones")
+    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones")
+
+    if presupuesto_disponible > presupuesto_comprometido:
+        st.success("Presupuesto disponible es favorable.")
+    else:
+        st.error("Presupuesto comprometido supera el disponible.")
+
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):  # Usar df_ofertas para las ofertas filtradas
         st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
@@ -368,7 +381,8 @@ def gestion_ordenador_gasto():
         # Preguntar si la IES tiene convenio
         if beneficiario['tiene_convenio'] == "No":
             if st.button(f"Solicitar información para giro a {beneficiario.get('IES', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()  # Asumiendo que esta función genera la info bancaria
+                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
+                st.write("Información bancaria generada:")
                 st.write(f"NIT: {info_bancaria['NIT']}")
                 st.write(f"Nombre IES: {info_bancaria['Nombre']}")
                 st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
@@ -389,23 +403,23 @@ def gestion_ordenador_gasto():
             st.success("Iniciando liquidación automática del desembolso...")
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
-            alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
-            st.write(alertas_presupuestales)
 
-    if st.button("Aprobar Digitalmente", key="aprobar"):
-        st.success("Aprobación digital registrada por el ordenador del gasto.")
-        giro_exitoso = random.choice(["Sí", "No"])  # Simulación de éxito en el giro
-        st.write(f"Giro Exitoso: {giro_exitoso}")
+            # Aprobar digitalmente
+            if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
+                st.success("Aprobación digital registrada por el ordenador del gasto.")
+                
+                giro_exitoso = random.choice(["Sí", "No"])  # Simulación de éxito en el giro
+                st.write(f"Giro Exitoso: {giro_exitoso}")
 
-        if giro_exitoso == "Sí":
-            st.success("Información enviada para creación de cartera y notificación al beneficiario.")
-        else:
-            subsanacion = st.radio("¿Se puede subsanar?", ["Sí", "No"], key="subsanacion")
-            if subsanacion == "Sí":
-                st.write("Solicitando nueva información para giro...")
-                # Lógica para solicitar nueva información
-            else:
-                st.error("Notificando inconsistencia y finalizando el proceso.")
+                if giro_exitoso == "Sí":
+                    st.success("Información enviada para creación de cartera y notificación al beneficiario.")
+                else:
+                    subsanacion = st.radio("¿Se puede subsanar?", ["Sí", "No"], key=f"subsanacion_{index}")
+                    if subsanacion == "Sí":
+                        st.write("Solicitando nueva información para giro...")
+                        # Lógica para solicitar nueva información
+                    else:
+                        st.error("Notificando inconsistencia y finalizando el proceso.")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
