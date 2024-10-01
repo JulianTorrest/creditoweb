@@ -332,43 +332,54 @@ def gestion_comercial():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
     
-    # Verificar si hay beneficiarios con garantía firmada
     if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
         st.warning("No hay beneficiarios con garantía firmada para gestionar.")
         return
 
-    # Filtrar beneficiarios que tienen garantía firmada
-    beneficiarios_con_garantia_firmada = [b for b in st.session_state.beneficiarios if b.get('GarantiaFirmada')]
+    # Procesar cada beneficiario
+    for index, beneficiario in enumerate(st.session_state.beneficiarios):
+        st.subheader(f"Gestión para {beneficiario['Nombre']}")
 
-    # Agregar la columna 'tiene_convenio' de forma aleatoria
-    for beneficiario in beneficiarios_con_garantia_firmada:
+        # Generar respuesta aleatoria sobre convenio
         beneficiario['tiene_convenio'] = random.choice(["Sí", "No"])
         
-    # Procesar cada beneficiario
-    for index, beneficiario in enumerate(beneficiarios_con_garantia_firmada):  # Usar solo beneficiarios con garantía firmada
-        try:
-            st.subheader(f"Gestión para {beneficiario['Nombre']}")
+        if beneficiario['tiene_convenio'] == "Sí":
+            st.success("La IES tiene convenio.")
+            # Liquidación automática del desembolso
+            st.write("Iniciando liquidación automática del desembolso...")
+            # Generación automática de instrucción de giro
+            st.write("Generando instrucción de giro...")
+            # Control presupuestal
+            st.subheader("Control Presupuestal")
+            presupuesto_disponible = random.randint(1000, 5000)  # en miles de millones
+            presupuesto_comprometido = random.randint(0, presupuesto_disponible)  # en miles de millones
+            st.write(f"Presupuesto disponible: {presupuesto_disponible} miles de millones")
+            st.write(f"Presupuesto comprometido: {presupuesto_comprometido} miles de millones")
+            # Botón para aprobar digitalmente
+            if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
+                st.success("Aprobación digital registrada por el ordenador del gasto.")
+                
+        elif beneficiario['tiene_convenio'] == "No":
+            st.warning("La IES no tiene convenio.")
+            # Solicitar información para giro
+            if st.button("Solicitar información para giro", key=f"solicitar_{index}"):
+                info_bancaria = generar_info_bancaria()
+                st.write(f"Información bancaria de la IES:")
+                st.write(info_bancaria)
+                
+                # Botón para confirmar información para giro
+                if st.button("Confirmar información para giro", key=f"confirmar_{index}"):
+                    st.write("Validando información IES para giro...")
+                    validacion_correcta = random.choice(["Sí", "No"])  # Respuesta aleatoria
+                    if validacion_correcta == "Sí":
+                        st.success("Información validada correctamente.")
+                        # Liquidación automática del desembolso
+                        st.write("Iniciando liquidación automática del desembolso...")
+                        # Generación automática de instrucción de giro
+                        st.write("Generando instrucción de giro...")
+                    else:
+                        st.error("La información IES no es correcta, por favor revise.")
 
-            # Mostrar la decisión de convenio aleatoria
-            st.write(f"¿La {beneficiario['IES']} tiene convenio? {beneficiario['tiene_convenio']}")
-
-            if beneficiario['tiene_convenio'] == "No":
-                info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{index}")
-                if st.button("Enviar información", key=f"enviar_{index}"):
-                    st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
-                    
-            elif beneficiario['tiene_convenio'] == "Sí":
-                st.success("Iniciando liquidación automática del desembolso...")
-                instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
-                st.write(instruccion_giro)
-                alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
-                st.write(alertas_presupuestales)
-
-        except KeyError as e:
-            st.error(f"Error: Falta la clave {e} en el beneficiario {beneficiario}")
-
-    if st.button("Aprobar Digitalmente", key="aprobar"):
-        st.success("Aprobación digital registrada por el ordenador del gasto.")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
