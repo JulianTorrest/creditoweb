@@ -359,7 +359,7 @@ def gestion_ordenador_gasto():
 
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):  # Usar df_ofertas para las ofertas filtradas
-        st.subheader(f"Gestión para {beneficiario['Nombre']}")
+        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
         
         # Verificar si la IES tiene convenio
         if 'tiene_convenio' not in beneficiario:  # Asegúrate de que existe la clave
@@ -367,7 +367,7 @@ def gestion_ordenador_gasto():
 
         # Preguntar si la IES tiene convenio
         if beneficiario['tiene_convenio'] == "No":
-            if st.button(f"Solicitar información para giro a {beneficiario['IES']}", key=f"solicitar_{index}"):
+            if st.button(f"Solicitar información para giro a {beneficiario.get('IES', 'IES Desconocida')}", key=f"solicitar_{index}"):
                 info_bancaria = generar_info_bancaria()  # Asumiendo que esta función genera la info bancaria
                 st.write(f"NIT: {info_bancaria['NIT']}")
                 st.write(f"Nombre IES: {info_bancaria['Nombre']}")
@@ -376,7 +376,7 @@ def gestion_ordenador_gasto():
                 st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
                 st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
-                if st.button(f"Confirmar información para giro de {beneficiario['IES']}", key=f"confirmar_{index}"):
+                if st.button(f"Confirmar información para giro de {beneficiario.get('IES', 'IES Desconocida')}", key=f"confirmar_{index}"):
                     # Aquí se debe validar la información y continuar con el flujo
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
@@ -387,7 +387,7 @@ def gestion_ordenador_gasto():
         
         elif beneficiario['tiene_convenio'] == "Sí":
             st.success("Iniciando liquidación automática del desembolso...")
-            instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
             alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
             st.write(alertas_presupuestales)
@@ -406,7 +406,6 @@ def gestion_ordenador_gasto():
                 # Lógica para solicitar nueva información
             else:
                 st.error("Notificando inconsistencia y finalizando el proceso.")
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
