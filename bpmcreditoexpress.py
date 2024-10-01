@@ -173,10 +173,12 @@ def validacion_beneficiarios():
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
+    # Verificar si hay datos de beneficiarios validados y con errores
     if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
-
+    
+    # Inicializar listas en el estado de sesión si no existen
     if 'ofertas_enviadas' not in st.session_state:
         st.session_state.ofertas_enviadas = []
     
@@ -186,22 +188,21 @@ def enviar_oferta():
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
+    # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
     
+    # Mostrar ofertas ya enviadas
     if st.session_state.ofertas_enviadas:
         st.write("Ofertas ya enviadas:")
         for oferta in st.session_state.ofertas_enviadas:
-            # Aquí se verifica si la clave "Nacionalidad" existe
-            try:
-                st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
-            except KeyError:
-                st.write("Nacionalidad: No disponible")
+            st.write(oferta)
 
     if len(beneficiarios_validados) > 0:
+        # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
-                oferta_generada = generar_oferta(beneficiario["Nombre"])  # Generamos la oferta para cada beneficiario
-                st.session_state.ofertas_enviadas.append(oferta_generada)  # Guardamos la oferta generada
+                # Agregar beneficiarios validados a la lista de ofertas enviadas y en proceso
+                st.session_state.ofertas_enviadas.append(beneficiario.copy())
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
                     "Estado": "Enviada"
@@ -210,61 +211,43 @@ def enviar_oferta():
         else:
             st.info("No se han enviado ofertas todavía.")
 
+    # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
     if len(beneficiarios_con_errores) > 0:
+        # Información de que no se enviarán ofertas a beneficiarios con errores
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
-
-
-def generar_oferta(nombre):
-    return {
-        "Nombre": nombre,
-        "Nacionalidad": random.choice(["Colombiano", "Otro"]),
-        "Edad": random.randint(18, 65),
-        "Estado Crédito": random.choice(["Ninguno", "Castigado", "En mora y castigado"]),
-        "Lista SARLAFT": random.choice(["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]),
-        "Score Crediticio": random.randint(150, 900),
-        "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
-        "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
-        "Estado": random.choice(["Enviada", "Pendiente", "Rechazada"]),
-        "GarantiaFirmada": random.choice([True, False])
-    }
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
-    # Generar datos aleatorios de ofertas si no están en session_state
-    if 'ofertas_en_proceso' not in st.session_state:
-        nombres = [f"Nombre_{i}" for i in range(1, 427)]
-        st.session_state.ofertas_en_proceso = [generar_oferta(nombre) for nombre in nombres]
+    # Verificar si hay ofertas en proceso
+    if not st.session_state.ofertas_en_proceso:
+        st.warning("No hay ofertas en proceso para gestionar.")
+        return
 
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
 
-    # Segundo filtro: Estado de Garantías
-    estado_garantia_filtrado = st.selectbox("Selecciona el estado de la garantía", ["Todos", "Garantías Firmadas", "Garantías No Firmadas"])
-
-    # Crear un DataFrame para filtrar las ofertas según el estado y el estado de las garantías
+    # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
 
-    if estado_garantia_filtrado != "Todos":
-        if estado_garantia_filtrado == "Garantías Firmadas":
-            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
-        else:
-            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == False]
-
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
 
-    total_interesados = 305
-    total_no_interesados = 110
-    total_si_pero_despues = 11
-    total_garantias_firmadas = 275
-    total_garantias_no_firmadas = 35
+    # Contar interesados y garantías
+    total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
+    total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
+    total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
+
+    # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
+    total_garantias_firmadas = sum(1 for oferta in st.session_state.ofertas_en_proceso 
+                                    if oferta.get('Interesado') == "Sí" and oferta.get('GarantiaFirmada', False))
+    total_garantias_no_firmadas = total_interesados - total_garantias_firmadas if total_interesados > 0 else 0
 
     # Mostrar informe
     st.write(f"Total ofertas de beneficiarios interesados: {total_interesados}")
@@ -279,7 +262,7 @@ def gestion_comercial():
     sizes_interesados = [total_interesados, total_no_interesados, total_si_pero_despues]
 
     plt.figure(figsize=(10, 6))
-    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140, colors=['green', 'red', 'orange'])
+    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140)
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     st.pyplot(plt)
 
@@ -295,20 +278,31 @@ def gestion_comercial():
     st.pyplot(plt)
 
     # Mostrar las ofertas filtradas
-    st.subheader("Ofertas Filtradas")
-
     if not df_ofertas.empty:
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
-            st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
-            st.write(f"Edad: {oferta['Edad']}")
-            st.write(f"Estado Crédito: {oferta['Estado Crédito']}")
-            st.write(f"Lista SARLAFT: {oferta['Lista SARLAFT']}")
-            st.write(f"Score Crediticio: {oferta['Score Crediticio']}")
-            st.write(f"Capacidad de Pago (COP): {oferta['Capacidad de Pago (COP)']}")
-            st.write(f"Límite de Endeudamiento (COP): {oferta['Límite de Endeudamiento (COP)']}")
             st.write(f"Estado: {oferta['Estado']}")
-            st.write(f"Garantía Firmada: {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
+
+            interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
+            st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
+            
+            if interesado == "Sí, pero después":
+                st.write("Generando marca 'Sí, pero después'...")
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
+            elif interesado == "No":
+                st.write("Actualizando registros y finalizando el flujo.")
+                st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
+                st.session_state.ofertas_en_proceso.remove(oferta)
+                st.success("Registros actualizados y flujo finalizado.")
+            elif interesado == "Sí":
+                st.write("Generando marca positiva...")
+                st.write("Realizando seguimiento periódico para retomar contacto.")
+
+                garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
+                
+                if garantia_firmada:
+                    st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
+                    st.write("Garantía firmada registrada.")
 
 
 def gestion_ordenador_gasto():
@@ -344,6 +338,28 @@ def gestion_ordenador_gasto():
     if st.button("Aprobar Digitalmente", key="aprobar"):
         st.success("Aprobación digital registrada por el ordenador del gasto.")
 
+
+#Pagina de creación de indicadores 
+def Indicadores_Proceso():
+    st.title("Dashboard")
+
+    if st.button("Generar Estadísticas"):
+        validaciones_resultado = procesar_validaciones(beneficiarios_data)
+
+        st.subheader("Validación 1")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 1']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 1']['No Aprobados']}")
+        st.write("Motivos de No Aprobación:")
+        st.write(validaciones_resultado['Validación 1']['Motivo No Aprobación'])
+
+        st.subheader("Validación 2")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 2']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 2']['No Aprobados']}")
+
+        st.subheader("Validación 3")
+        st.write(f"Aprobados: {validaciones_resultado['Validación 3']['Aprobados']}")
+        st.write(f"No Aprobados: {validaciones_resultado['Validación 3']['No Aprobados']}")
+
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
     "Selecciona una página",
@@ -363,3 +379,5 @@ elif menu == "Gestión Ordenador del Gasto":
     gestion_ordenador_gasto()
 elif menu == "Indicadores Proceso":
     Indicadores_Proceso()
+
+
