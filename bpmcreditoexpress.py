@@ -168,52 +168,181 @@ def validacion_beneficiarios():
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
-# Página de gestión comercial
-def gestion_ordenador_gasto():
-    st.title("Gestión de Ofertas y Gasto")
-    
-    if 'beneficiarios_validados' not in st.session_state:
-        st.warning("No hay beneficiarios validados para mostrar.")
+
+# Página para enviar la oferta al beneficiario
+def enviar_oferta():
+    st.title("Enviar Oferta a los Beneficiarios")
+
+    if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
+        st.warning("No se ha realizado la validación de beneficiarios.")
         return
 
+    if 'ofertas_enviadas' not in st.session_state:
+        st.session_state.ofertas_enviadas = []
+    
+    if 'ofertas_en_proceso' not in st.session_state:
+        st.session_state.ofertas_en_proceso = []
+
     beneficiarios_validados = st.session_state['beneficiarios_validados']
-    total_ofertas = len(beneficiarios_validados)
+    beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
+
+    st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
     
-    st.write(f"Total ofertas enviadas: {total_ofertas}")
+    if st.session_state.ofertas_enviadas:
+        st.write("Ofertas ya enviadas:")
+        for oferta in st.session_state.ofertas_enviadas:
+            # Aquí se verifica si la clave "Nacionalidad" existe
+            try:
+                st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
+            except KeyError:
+                st.write("Nacionalidad: No disponible")
 
-    # Establecer un filtro para mostrar solo garantías firmadas o no firmadas
-    estado_garantia = st.selectbox("Selecciona el estado de garantía", ["Todas", "Firmadas", "No Firmadas"])
+    if len(beneficiarios_validados) > 0:
+        if st.button("Enviar oferta a todos los beneficiarios validados"):
+            for beneficiario in beneficiarios_validados:
+                oferta_generada = generar_oferta(beneficiario["Nombre"])  # Generamos la oferta para cada beneficiario
+                st.session_state.ofertas_enviadas.append(oferta_generada)  # Guardamos la oferta generada
+                st.session_state.ofertas_en_proceso.append({
+                    "Nombre": beneficiario["Nombre"],
+                    "Estado": "Enviada"
+                })
+            st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+        else:
+            st.info("No se han enviado ofertas todavía.")
+
+    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
-    # Filtrar según el estado de la garantía
-    if estado_garantia == "Firmadas":
-        # Filtrar y mostrar solo las ofertas firmadas
-        st.write("Ofertas firmadas:")
-        # Aquí deberías tener la lógica para mostrar las ofertas firmadas
-    elif estado_garantia == "No Firmadas":
-        # Filtrar y mostrar solo las ofertas no firmadas
-        st.write("Ofertas no firmadas:")
-        # Aquí deberías tener la lógica para mostrar las ofertas no firmadas
+    if len(beneficiarios_con_errores) > 0:
+        st.info("No se enviarán ofertas a los beneficiarios con errores.")
 
-#Pagina de creación de indicadores 
-def Indicadores_Proceso():
-    st.title("Dashboard")
 
-    if st.button("Generar Estadísticas"):
-        validaciones_resultado = procesar_validaciones(beneficiarios_data)
+def generar_oferta(nombre):
+    return {
+        "Nombre": nombre,
+        "Nacionalidad": random.choice(["Colombiano", "Otro"]),
+        "Edad": random.randint(18, 65),
+        "Estado Crédito": random.choice(["Ninguno", "Castigado", "En mora y castigado"]),
+        "Lista SARLAFT": random.choice(["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]),
+        "Score Crediticio": random.randint(150, 900),
+        "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
+        "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
+        "Estado": random.choice(["Enviada", "Pendiente", "Rechazada"]),
+        "GarantiaFirmada": random.choice([True, False])
+    }
 
-        st.subheader("Validación 1")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 1']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 1']['No Aprobados']}")
-        st.write("Motivos de No Aprobación:")
-        st.write(validaciones_resultado['Validación 1']['Motivo No Aprobación'])
+# Página de gestión comercial de ofertas
+def gestion_comercial():
+    st.title("Gestión Comercial de Ofertas Enviadas")
 
-        st.subheader("Validación 2")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 2']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 2']['No Aprobados']}")
+    # Generar datos aleatorios de ofertas si no están en session_state
+    if 'ofertas_en_proceso' not in st.session_state:
+        nombres = [f"Nombre_{i}" for i in range(1, 427)]
+        st.session_state.ofertas_en_proceso = [generar_oferta(nombre) for nombre in nombres]
 
-        st.subheader("Validación 3")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 3']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 3']['No Aprobados']}")
+    # Filtros para seleccionar el estado de las ofertas
+    estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
+
+    # Segundo filtro: Estado de Garantías
+    estado_garantia_filtrado = st.selectbox("Selecciona el estado de la garantía", ["Todos", "Garantías Firmadas", "Garantías No Firmadas"])
+
+    # Crear un DataFrame para filtrar las ofertas según el estado y el estado de las garantías
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+
+    if estado_filtrado != "Todos":
+        df_ofertas = df_ofertas[df_ofertas['Estado'] == estado_filtrado]
+
+    if estado_garantia_filtrado != "Todos":
+        if estado_garantia_filtrado == "Garantías Firmadas":
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
+        else:
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == False]
+
+    # Informe de seguimiento
+    st.subheader("Informe de Seguimiento")
+
+    total_interesados = 305
+    total_no_interesados = 110
+    total_si_pero_despues = 11
+    total_garantias_firmadas = 275
+    total_garantias_no_firmadas = 35
+
+    # Mostrar informe
+    st.write(f"Total ofertas de beneficiarios interesados: {total_interesados}")
+    st.write(f"Total ofertas de beneficiarios no interesados: {total_no_interesados}")
+    st.write(f"Total ofertas de beneficiarios 'sí, pero después': {total_si_pero_despues}")
+    st.write(f"Total garantías firmadas: {total_garantias_firmadas}")
+    st.write(f"Total garantías no firmadas: {total_garantias_no_firmadas}")
+
+    # Crear primer gráfico: Distribución de interesados
+    st.subheader("Distribución de Interesados")
+    labels_interesados = ['Interesados', 'No Interesados', 'Sí, pero después']
+    sizes_interesados = [total_interesados, total_no_interesados, total_si_pero_despues]
+
+    plt.figure(figsize=(10, 6))
+    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140, colors=['green', 'red', 'orange'])
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    st.pyplot(plt)
+
+    # Crear segundo gráfico: Garantías firmadas y no firmadas
+    st.subheader("Estado de Garantías")
+    labels_garantias = ['Garantías Firmadas', 'Garantías No Firmadas']
+    sizes_garantias = [total_garantias_firmadas, total_garantias_no_firmadas]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(labels_garantias, sizes_garantias, color=['green', 'red'])
+    plt.ylabel('Número de Garantías')
+    plt.title('Estado de Garantías Firmadas y No Firmadas')
+    st.pyplot(plt)
+
+    # Mostrar las ofertas filtradas
+    st.subheader("Ofertas Filtradas")
+
+    if not df_ofertas.empty:
+        for i, oferta in enumerate(df_ofertas.to_dict('records')):
+            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
+            st.write(f"Nacionalidad: {oferta['Nacionalidad']}")
+            st.write(f"Edad: {oferta['Edad']}")
+            st.write(f"Estado Crédito: {oferta['Estado Crédito']}")
+            st.write(f"Lista SARLAFT: {oferta['Lista SARLAFT']}")
+            st.write(f"Score Crediticio: {oferta['Score Crediticio']}")
+            st.write(f"Capacidad de Pago (COP): {oferta['Capacidad de Pago (COP)']}")
+            st.write(f"Límite de Endeudamiento (COP): {oferta['Límite de Endeudamiento (COP)']}")
+            st.write(f"Estado: {oferta['Estado']}")
+            st.write(f"Garantía Firmada: {'Sí' if oferta['GarantiaFirmada'] else 'No'}")
+
+
+def gestion_ordenador_gasto():
+    st.title("Gestión Ordenador del Gasto")
+    
+    if "beneficiarios" not in st.session_state or not st.session_state.beneficiarios:
+        st.warning("No hay beneficiarios con garantía firmada para gestionar.")
+        return
+
+    # Procesar cada beneficiario
+    for index, beneficiario in enumerate(st.session_state.beneficiarios):  # Añadir un índice para crear claves únicas
+        st.subheader(f"Gestión para {beneficiario['Nombre']}")
+        
+        # Preguntar si la IES tiene convenio
+        tiene_convenio = st.selectbox(
+            f"¿La {beneficiario['IES']} tiene convenio?", 
+            ["Selecciona", "Sí", "No"], 
+            key=f"convenio_{index}"  # Usar índice para la clave
+        )
+        
+        if tiene_convenio == "No":
+            info_giro = st.text_input(f"Información para giro a {beneficiario['IES']}", key=f"info_giro_{index}")
+            if st.button("Enviar información", key=f"enviar_{index}"):
+                st.success("Información enviada para giro. Esperando confirmación del beneficiario.")
+                
+        elif tiene_convenio == "Sí":
+            st.success("Iniciando liquidación automática del desembolso...")
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario['Nombre']}."
+            st.write(instruccion_giro)
+            alertas_presupuestales = "Alertas generadas sobre el cumplimiento del presupuesto."
+            st.write(alertas_presupuestales)
+
+    if st.button("Aprobar Digitalmente", key="aprobar"):
+        st.success("Aprobación digital registrada por el ordenador del gasto.")
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
