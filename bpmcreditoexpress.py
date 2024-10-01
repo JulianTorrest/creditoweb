@@ -239,12 +239,12 @@ def gestion_comercial():
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
 
-    # Contar interesados y garantías
+    # Contar interesados y garantías firmadas
     total_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí")
     total_no_interesados = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "No")
     total_si_pero_despues = sum(1 for oferta in st.session_state.ofertas_en_proceso if oferta.get('Interesado') == "Sí, pero después")
 
-    # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
+    # Filtrar los interesados que tienen garantías firmadas
     total_garantias_firmadas = sum(1 for oferta in st.session_state.ofertas_en_proceso 
                                     if oferta.get('Interesado') == "Sí" and oferta.get('GarantiaFirmada', False))
     total_garantias_no_firmadas = total_interesados - total_garantias_firmadas if total_interesados > 0 else 0
@@ -262,7 +262,7 @@ def gestion_comercial():
     sizes_interesados = [total_interesados, total_no_interesados, total_si_pero_despues]
 
     plt.figure(figsize=(10, 6))
-    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140)
+    plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140, colors=['green', 'red', 'orange'])
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     st.pyplot(plt)
 
@@ -283,6 +283,7 @@ def gestion_comercial():
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Estado: {oferta['Estado']}")
 
+            # Actualizar si está interesado
             interesado = st.selectbox("¿Está interesado el potencial beneficiario?", ["Sí", "No", "Sí, pero después"], key=f"interesado_{i}")
             st.session_state.ofertas_en_proceso[i]['Interesado'] = interesado
             
@@ -292,11 +293,8 @@ def gestion_comercial():
             elif interesado == "No":
                 st.write("Actualizando registros y finalizando el flujo.")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Finalizada"
-                st.session_state.ofertas_en_proceso.remove(oferta)
-                st.success("Registros actualizados y flujo finalizado.")
             elif interesado == "Sí":
                 st.write("Generando marca positiva...")
-                st.write("Realizando seguimiento periódico para retomar contacto.")
 
                 garantia_firmada = st.checkbox("Garantía firmada recibida", key=f"garantia_firmada_{i}")
                 
