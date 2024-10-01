@@ -234,11 +234,25 @@ def gestion_comercial():
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
 
+    # Inicializar la variable para el estado de garantías
+    estado_garantia_filtrado = None
+
+    # Mostrar filtro de Estado de Garantías solo si se selecciona "Sí"
+    if estado_filtrado == "Sí":
+        estado_garantia_filtrado = st.selectbox("Estado de Garantías", ["Todas", "Garantías Firmadas", "Garantías No Firmadas"])
+
     # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
+
+    # Filtrar por estado de garantías si se seleccionó "Sí"
+    if estado_filtrado == "Sí" and estado_garantia_filtrado != "Todas":
+        if estado_garantia_filtrado == "Garantías Firmadas":
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
+        elif estado_garantia_filtrado == "Garantías No Firmadas":
+            df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == False]
 
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
@@ -305,7 +319,6 @@ def gestion_comercial():
                     st.write("Gracias, hemos registrado la garantía firmada.")
                 else:
                     st.write("Esperando la confirmación de la garantía firmada.")
-
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
