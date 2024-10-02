@@ -187,11 +187,11 @@ def enviar_oferta():
     if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
-    
+
     # Inicializar listas en el estado de sesión si no existen
     if 'ofertas_enviadas' not in st.session_state:
         st.session_state.ofertas_enviadas = []
-    
+
     if 'ofertas_en_proceso' not in st.session_state:
         st.session_state.ofertas_en_proceso = []
 
@@ -200,7 +200,7 @@ def enviar_oferta():
 
     # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
-    
+
     # Mostrar ofertas ya enviadas
     if st.session_state.ofertas_enviadas:
         st.write("Ofertas ya enviadas:")
@@ -211,11 +211,9 @@ def enviar_oferta():
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
-                # Agregar beneficiarios validados a la lista de ofertas enviadas y en proceso
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
-                # Definir el valor de la oferta, por ejemplo, usando la capacidad de pago
                 oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])  # Asignar un valor entre 3,000,000 y la capacidad de pago
                 st.session_state.ofertas_enviadas.append(oferta)
                 st.session_state.ofertas_en_proceso.append({
@@ -223,7 +221,7 @@ def enviar_oferta():
                     "Estado": "Enviada",
                     "Interesado": oferta["Interesado"],
                     "GarantiaFirmada": oferta["GarantiaFirmada"],
-                    "Valor": oferta["Valor"],  # Asegúrate de incluir el valor aquí también
+                    "Valor": oferta["Valor"],
                 })
             st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
         else:
@@ -233,8 +231,37 @@ def enviar_oferta():
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
     
     if len(beneficiarios_con_errores) > 0:
-        # Información de que no se enviarán ofertas a beneficiarios con errores
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
+        
+        # Crear contadores para las validaciones fallidas
+        validacion1_fallos = 0
+        validacion2_fallos = 0
+        validacion3_fallos = 0
+
+        for beneficiario in beneficiarios_con_errores:
+            errores = realizar_validaciones(beneficiario)
+            if "El score crediticio debe ser de mínimo 610 puntos." in errores:
+                validacion1_fallos += 1
+            if "Capacidad de pago insuficiente." in errores:
+                validacion2_fallos += 1
+            if "Antecedentes menores a 90 días" in errores:
+                validacion3_fallos += 1
+
+        # Generar datos para el gráfico tipo embudo
+        total_beneficiarios = len(beneficiarios_data)
+        fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
+
+        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes']
+
+        # Crear gráfico tipo embudo
+        fig, ax = plt.subplots()
+        ax.barh(etapas, fallos_validaciones, color='skyblue')
+        ax.set_xlabel('Número de Fallos')
+        ax.set_title('Embudo de Validaciones Fallidas')
+
+        # Mostrar el gráfico en Streamlit
+        st.pyplot(fig)
+
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
