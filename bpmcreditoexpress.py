@@ -373,22 +373,52 @@ def gestion_ordenador_gasto():
     if 'tiene_convenio' not in df_ofertas.columns:
         # Asignar valores aleatorios para la columna 'tiene_convenio'
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
-
+        
         # Guardar el DataFrame actualizado en la sesión
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
-    # Tabla de Control Presupuestal
-    st.subheader("Control Presupuestal")
-    presupuesto_disponible = 10000  # Presupuesto fijo
-    presupuesto_comprometido = 1500  # Presupuesto comprometido fijo
+    # Presupuesto fijo
+    presupuesto_disponible = 10000  # millones de pesos
+    presupuesto_comprometido = 1500  # millones de pesos
 
-    st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones")
-    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones")
+    # Mostrar el presupuesto
+    st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
+    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
-    if presupuesto_disponible > presupuesto_comprometido:
-        st.success("Presupuesto disponible es favorable.")
-    else:
-        st.error("Presupuesto comprometido supera el disponible.")
+    # Tabla de indicadores
+    cantidad_ofertas = df_ofertas.shape[0]
+    ofertas_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
+    ofertas_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
+    
+    cantidad_convenio = ofertas_convenio.shape[0]
+    cantidad_sin_convenio = ofertas_sin_convenio.shape[0]
+    
+    total_solicitado = df_ofertas['Valor'].sum()
+    total_convenio = ofertas_convenio['Valor'].sum()
+    total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+    
+    # Crear la tabla de indicadores
+    indicadores = pd.DataFrame({
+        "Indicador": [
+            "Cantidad de Ofertas con Garantías Firmadas",
+            "Cantidad de Ofertas de IES con Convenio",
+            "Cantidad de Ofertas de IES sin Convenio",
+            "Cantidad Total Solicitada por IES",
+            "Total Solicitado por IES con Convenio",
+            "Total Solicitado por IES sin Convenio"
+        ],
+        "Valor": [
+            cantidad_ofertas,
+            cantidad_convenio,
+            cantidad_sin_convenio,
+            total_solicitado,
+            total_convenio,
+            total_sin_convenio
+        ]
+    })
+    
+    st.subheader("Tabla de Indicadores")
+    st.dataframe(indicadores)
 
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
@@ -419,21 +449,25 @@ def gestion_ordenador_gasto():
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
 
-            # Aprobar digitalmente
-            if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
-                st.success("Aprobación digital registrada por el ordenador del gasto.")
+    # Botón para aprobar digitalmente por IES
+    if st.button("Aprobar Digitalmente IES con Convenio"):
+        total_aprobado_convenio = ofertas_convenio['Valor'].sum()
+        if presupuesto_disponible >= total_aprobado_convenio:
+            presupuesto_disponible -= total_aprobado_convenio
+            st.success("Aprobación digital para IES con convenio registrada.")
+        else:
+            st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
 
-                giro_exitoso = random.choice(["Sí", "No"])  # Simulación de éxito en el giro
-                st.write(f"Giro Exitoso: {giro_exitoso}")
+    if st.button("Aprobar Digitalmente IES sin Convenio"):
+        total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+        if presupuesto_disponible >= total_aprobado_sin_convenio:
+            presupuesto_disponible -= total_aprobado_sin_convenio
+            st.success("Aprobación digital para IES sin convenio registrada.")
+        else:
+            st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
 
-                if giro_exitoso == "Sí":
-                    st.success("Información enviada para creación de cartera y notificación al beneficiario.")
-                else:
-                    subsanacion = st.radio("¿Se puede subsanar?", ["Sí", "No"], key=f"subsanacion_{index}")
-                    if subsanacion == "Sí":
-                        st.write("Solicitando nueva información para giro...")
-                    else:
-                        st.error("Notificando inconsistencia y finalizando el proceso.")
+    # Mostrar el presupuesto restante
+    st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
 
 
 #Pagina de creación de indicadores 
