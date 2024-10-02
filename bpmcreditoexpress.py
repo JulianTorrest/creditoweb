@@ -563,7 +563,7 @@ menu = st.sidebar.selectbox(
 )
 
 # Ejecutar la página seleccionada
-if menu == "Consulta de Postulantes":
+if menu == "Captura de Datos":
     captura_datos()
 elif menu == "Validación de Beneficiarios":
     validacion_beneficiarios()
