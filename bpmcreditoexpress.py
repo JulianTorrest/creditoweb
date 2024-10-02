@@ -352,6 +352,12 @@ def gestion_ordenador_gasto():
 
     # Filtrar las ofertas para solo mostrar las que tienen garantía firmada
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+    
+    # Verificar si 'GarantiaFirmada' está en el DataFrame
+    if 'GarantiaFirmada' not in df_ofertas.columns:
+        st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
+        return
+
     df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
 
     if df_ofertas.empty:
