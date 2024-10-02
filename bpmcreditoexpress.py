@@ -61,18 +61,32 @@ def realizar_validaciones(deudor):
         errores.append("Capacidad de pago insuficiente.")
     return errores
 
+def validar_nacionalidad(deudor):
+    if deudor['Nacionalidad'] != 'Colombiano':
+        return False, "Nacionalidad no es colombiana"
+    return True, ""
+
 # Procesar validaciones y estadísticas
 def procesar_validaciones(beneficiarios):
     validaciones = {
+        "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
         "Validación 3": {"Aprobados": 0, "No Aprobados": 0},
     }
 
     for deudor in beneficiarios.to_dict(orient='records'):
+        # Validación Nacionalidad
+        valido_nacionalidad, motivo_nacionalidad = validar_nacionalidad(deudor)
+        if valido_nacionalidad:
+            validaciones["Validación Nacionalidad"]["Aprobados"] += 1
+        else:
+            validaciones["Validación Nacionalidad"]["No Aprobados"] += 1
+            validaciones["Validación Nacionalidad"]["Motivo No Aprobación"].append(motivo_nacionalidad)
+
         # Validación 1
         valido1, motivo1 = validar_deudor(deudor)
-        if valido1:
+        if valido1 and valido_nacionalidad:  # Solo pasa si es colombiano
             validaciones["Validación 1"]["Aprobados"] += 1
         else:
             validaciones["Validación 1"]["No Aprobados"] += 1
@@ -98,8 +112,6 @@ def procesar_validaciones(beneficiarios):
         if errores:
             validaciones["Validación 1"]["No Aprobados"] += 1
             validaciones["Validación 1"]["Motivo No Aprobación"].extend(errores)
-
-    return validaciones
 
 # Funciones de la aplicación
 def firma_garantias(oferta):
