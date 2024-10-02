@@ -350,7 +350,8 @@ def generar_info_bancaria():
         "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
         "Numero Cuenta": random.randint(10000000, 99999999),
         "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
-        "Numero Factura": random.randint(1000, 9999)
+        "Numero Factura": random.randint(1000, 9999),
+        "Valor": random.randint(100000, 35000000)  # Asegúrate de agregar el valor aquí
     }
 
 def gestion_ordenador_gasto():
@@ -376,6 +377,11 @@ def gestion_ordenador_gasto():
         
         # Guardar el DataFrame actualizado en la sesión
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
+
+    # Verificar si la columna 'Valor' existe
+    if 'Valor' not in df_ofertas.columns:
+        st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
+        return
 
     # Presupuesto fijo
     presupuesto_disponible = 10000  # millones de pesos
@@ -468,7 +474,6 @@ def gestion_ordenador_gasto():
 
     # Mostrar el presupuesto restante
     st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
