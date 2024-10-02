@@ -450,6 +450,11 @@ def gestion_ordenador_gasto():
     plt.title("Indicadores de Valores")
     plt.xticks(rotation=45)
     plt.ylabel("Valor (millones de pesos)")
+
+    # Formatear el eje Y para mostrar valores en formato nominal
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
+
     st.pyplot(plt)
 
     # Procesar cada beneficiario
@@ -504,8 +509,6 @@ def gestion_ordenador_gasto():
 
     # Mostrar el presupuesto restante
     st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
-
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
