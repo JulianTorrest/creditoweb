@@ -165,7 +165,7 @@ def validar_nacionalidad(deudor):
     return True, ""
 
 # Página de validación de beneficiarios
-def procesar_validaciones(beneficiarios):
+def validacion_beneficiarios(beneficiarios):
     validaciones = {
         "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
