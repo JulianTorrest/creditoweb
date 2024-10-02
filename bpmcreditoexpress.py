@@ -355,7 +355,7 @@ def gestion_ordenador_gasto():
 
     # Filtrar las ofertas para solo mostrar las que tienen garantía firmada
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
-    
+
     # Verificar si 'GarantiaFirmada' está en el DataFrame
     if 'GarantiaFirmada' not in df_ofertas.columns:
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
@@ -392,14 +392,14 @@ def gestion_ordenador_gasto():
     cantidad_ofertas = df_ofertas.shape[0]
     ofertas_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
     ofertas_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
-    
+
     cantidad_convenio = ofertas_convenio.shape[0]
     cantidad_sin_convenio = ofertas_sin_convenio.shape[0]
-    
+
     total_solicitado = df_ofertas['Valor'].sum()
     total_convenio = ofertas_convenio['Valor'].sum()
     total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
-    
+
     # Crear la tabla de indicadores
     indicadores = pd.DataFrame({
         "Indicador": [
@@ -444,6 +444,7 @@ def gestion_ordenador_gasto():
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
                         st.success("Validación exitosa. Procediendo a liquidación automática...")
+
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
         
@@ -452,7 +453,7 @@ def gestion_ordenador_gasto():
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
 
-    # Botón para aprobar digitalmente por IES
+    # Botón para aprobar digitalmente por grupos
     if st.button("Aprobar Digitalmente IES con Convenio"):
         total_aprobado_convenio = ofertas_convenio['Valor'].sum()
         if presupuesto_disponible >= total_aprobado_convenio:
