@@ -342,6 +342,7 @@ def generar_info_bancaria():
         "Valor": random.randint(100000, 35000000)  # Asegúrate de agregar el valor aquí
     }
 
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
