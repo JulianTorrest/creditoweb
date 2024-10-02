@@ -3,7 +3,7 @@ import pandas as pd
 import random
 from datetime import datetime
 import matplotlib.pyplot as plt
-
+import matplotlib.ticker as ticker
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
