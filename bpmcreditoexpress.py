@@ -478,6 +478,9 @@ def gestion_ordenador_gasto():
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
                         st.success("Validación exitosa. Procediendo a liquidación automática...")
+                        if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')}", key=f"aprobar_sin_convenio_{index}"):
+                        st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
+
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
         
@@ -485,6 +488,10 @@ def gestion_ordenador_gasto():
             st.success("Iniciando liquidación automática del desembolso...")
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
+            
+            if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
+            st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
+
 
     # Botones para aprobar digitalmente por grupos
     col1, col2 = st.columns(2)
