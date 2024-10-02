@@ -100,7 +100,7 @@ def firma_garantias(oferta):
 
 # Página de captura de datos
 def captura_datos():
-    st.title("Formulario de Búsqueda de Captura de Datos para ICETEX")
+    st.title("Consulta Postulantes")
     
     nombre = st.text_input("Nombre completo")
     tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
