@@ -388,6 +388,15 @@ def gestion_ordenador_gasto():
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
+    # Tabla de control presupuestal
+    control_presupuestal = pd.DataFrame({
+        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
+        "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, 10000 - presupuesto_disponible - presupuesto_comprometido]
+    })
+    
+    st.subheader("Control Presupuestal")
+    st.dataframe(control_presupuestal)
+
     # Tabla de indicadores
     cantidad_ofertas = df_ofertas.shape[0]
     ofertas_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
@@ -463,7 +472,7 @@ def gestion_ordenador_gasto():
 
         # Preguntar si la IES tiene convenio
         if beneficiario['tiene_convenio'] == "No":
-            if st.button(f"Solicitar información para giro a {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
+            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
                 info_bancaria = generar_info_bancaria()  # Generar la info bancaria
                 st.write("Información bancaria generada:")
                 st.write(f"NIT: {info_bancaria['NIT']}")
@@ -474,13 +483,14 @@ def gestion_ordenador_gasto():
                 st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
                 if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                    # Aquí se debe validar la información y continuar con el flujo
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
-                        st.success("Validación exitosa. Procediendo a liquidación automática...")
-                        if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')}", key=f"aprobar_sin_convenio_{index}"):
-                            st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
-
+                        st.success("Validación exitosa. Procediendo a giro...")
+                        # Agregar confirmación del giro
+                        if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
+                            st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
+                        else:
+                            st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
         
@@ -492,7 +502,6 @@ def gestion_ordenador_gasto():
             if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                 st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
 
-
     # Botones para aprobar digitalmente por grupos
     col1, col2 = st.columns(2)
 
@@ -501,21 +510,19 @@ def gestion_ordenador_gasto():
             total_aprobado_convenio = ofertas_convenio['Valor'].sum()
             if presupuesto_disponible >= total_aprobado_convenio:
                 presupuesto_disponible -= total_aprobado_convenio
-                st.success("Aprobación digital para IES con convenio registrada.")
+                st.success(f"Se ha aprobado el giro total de {total_aprobado_convenio} millones a IES con convenio.")
             else:
-                st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
+                st.warning("Presupuesto insuficiente para aprobar el giro a IES con convenio.")
 
     with col2:
         if st.button("Aprobar Digitalmente IES sin Convenio"):
             total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
             if presupuesto_disponible >= total_aprobado_sin_convenio:
                 presupuesto_disponible -= total_aprobado_sin_convenio
-                st.success("Aprobación digital para IES sin convenio registrada.")
+                st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones a IES sin convenio.")
             else:
-                st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
+                st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
 
-    # Mostrar el presupuesto restante
-    st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
