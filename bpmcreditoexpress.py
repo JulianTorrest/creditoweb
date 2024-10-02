@@ -479,7 +479,7 @@ def gestion_ordenador_gasto():
                     if validacion_info == "Sí":
                         st.success("Validación exitosa. Procediendo a liquidación automática...")
                         if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')}", key=f"aprobar_sin_convenio_{index}"):
-                        st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
+                            st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
 
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
@@ -490,7 +490,7 @@ def gestion_ordenador_gasto():
             st.write(instruccion_giro)
             
             if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-            st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
+                st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
 
 
     # Botones para aprobar digitalmente por grupos
