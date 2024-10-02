@@ -53,6 +53,14 @@ def validar_antecedentes(deudor, fecha_antecedentes):
         return False, "Antecedentes menores a 90 días"
     return True, ""
 
+def realizar_validaciones(deudor):
+    errores = []
+    if deudor["Score Crediticio"] < 610:
+        errores.append("El score crediticio debe ser de mínimo 610 puntos.")
+    if deudor["Capacidad de Pago (COP)"] < 3000000:
+        errores.append("Capacidad de pago insuficiente.")
+    return errores
+
 # Procesar validaciones y estadísticas
 def procesar_validaciones(beneficiarios):
     validaciones = {
@@ -78,23 +86,22 @@ def procesar_validaciones(beneficiarios):
             validaciones["Validación 2"]["No Aprobados"] += 1
 
         # Validación 3
-        valido3, motivo3 = validar_antecedentes(deudor)
+        fecha_antecedentes = datetime.now() - pd.DateOffset(days=random.randint(1, 100))  # Ejemplo de fecha
+        valido3, motivo3 = validar_antecedentes(deudor, fecha_antecedentes)
         if valido3:
             validaciones["Validación 3"]["Aprobados"] += 1
         else:
             validaciones["Validación 3"]["No Aprobados"] += 1
 
-    return validaciones
-    
-# Funciones de la aplicación
-def realizar_validaciones(beneficiario):
-    errores = []
-    if beneficiario["Score Crediticio"] < 200:
-        errores.append("Score crediticio muy bajo.")
-    if beneficiario["Capacidad de Pago (COP)"] < 3000000:
-        errores.append("Capacidad de pago insuficiente.")
-    return errores
+        # Realizar validaciones adicionales
+        errores = realizar_validaciones(deudor)
+        if errores:
+            validaciones["Validación 1"]["No Aprobados"] += 1
+            validaciones["Validación 1"]["Motivo No Aprobación"].extend(errores)
 
+    return validaciones
+
+# Funciones de la aplicación
 def firma_garantias(oferta):
     st.write(f"Firmando garantías para {oferta['Nombre']}...")
 
@@ -115,7 +122,6 @@ def captura_datos():
     deudor = st.text_input("Nombre del deudor")  # Ejemplo de captura de datos
     fecha_antecedentes = st.date_input("Fecha de antecedentes", value=datetime.today())
 
-    
     if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
         
@@ -135,6 +141,11 @@ def captura_datos():
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Límite de Endeudamiento (COP)"].between(limite_endeudamiento[0], limite_endeudamiento[1])]
         
         st.dataframe(df_beneficiarios)
+
+        # Procesar validaciones
+        validaciones = procesar_validaciones(df_beneficiarios)
+        st.write("Resultados de Validación:")
+        st.json(validaciones)
 
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
