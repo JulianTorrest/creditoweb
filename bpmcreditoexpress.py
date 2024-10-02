@@ -158,38 +158,63 @@ def captura_datos():
         validaciones = procesar_validaciones(df_beneficiarios)
         st.write("Resultados de Validación:")
         st.json(validaciones)
+        
+def validar_nacionalidad(deudor):
+    if deudor['Nacionalidad'] != 'Colombiano':
+        return False, "Nacionalidad no es colombiana"
+    return True, ""
 
 # Página de validación de beneficiarios
-def validacion_beneficiarios():
-    st.title("Validaciones de Elegibilidad para ICETEX")
+def procesar_validaciones(beneficiarios):
+    validaciones = {
+        "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
+        "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
+        "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
+        "Validación 3": {"Aprobados": 0, "No Aprobados": 0},
+    }
 
-    # Paso 1: Listas para almacenar beneficiarios
     beneficiarios_validados = []
     beneficiarios_con_errores = []
 
-    if not beneficiarios_data:
-        st.warning("No hay datos de beneficiarios disponibles.")
-        return
-    
-    for i, beneficiario in enumerate(beneficiarios_data):
-        st.subheader(f"Beneficiario {i+1}: {beneficiario['Nombre']}")
-        
-        errores = realizar_validaciones(beneficiario)
-        if errores:
-            st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
-            for error in errores:
-                st.write(f"- {error}")
-            # Agregar a la lista de beneficiarios con errores
-            beneficiarios_con_errores.append(beneficiario)
-        else:
-            st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
-            st.write(f"Ofrecer crédito educativo.")
-            # Agregar a la lista de beneficiarios validados
-            beneficiarios_validados.append(beneficiario)
+    for deudor in beneficiarios.to_dict(orient='records'):
+        errores_beneficiario = []
 
-    # Guardar las listas en el estado para usarlas en otras páginas
+        # Validación Nacionalidad
+        valido_nacionalidad, motivo_nacionalidad = validar_nacionalidad(deudor)
+        if not valido_nacionalidad:
+            errores_beneficiario.append(motivo_nacionalidad)
+
+        # Validación 1
+        valido1, motivo1 = validar_deudor(deudor)
+        if not valido1:
+            errores_beneficiario.append(motivo1)
+
+        # Validación 2
+        valido2, motivo2 = validar_sarlaft(deudor)
+        if not valido2:
+            errores_beneficiario.append(motivo2)
+
+        # Validación 3
+        fecha_antecedentes = datetime.now() - pd.DateOffset(days=random.randint(1, 100))  # Ejemplo de fecha
+        valido3, motivo3 = validar_antecedentes(deudor, fecha_antecedentes)
+        if not valido3:
+            errores_beneficiario.append(motivo3)
+
+        # Realizar validaciones adicionales
+        errores_adicionales = realizar_validaciones(deudor)
+        if errores_adicionales:
+            errores_beneficiario.extend(errores_adicionales)
+
+        # Clasificar beneficiarios
+        if not errores_beneficiario:
+            beneficiarios_validados.append(deudor)
+        else:
+            beneficiarios_con_errores.append({"Beneficiario": deudor, "Errores": errores_beneficiario})
+
+    # Guardar las listas en el estado de la sesión para usarlas en otras páginas
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
