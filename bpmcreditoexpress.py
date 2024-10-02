@@ -401,27 +401,56 @@ def gestion_ordenador_gasto():
     total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
 
     # Crear la tabla de indicadores
-    indicadores = pd.DataFrame({
+    indicadores_cantidad = pd.DataFrame({
         "Indicador": [
             "Cantidad de Ofertas con Garantías Firmadas",
             "Cantidad de Ofertas de IES con Convenio",
             "Cantidad de Ofertas de IES sin Convenio",
-            "Cantidad Total Solicitada por IES",
-            "Total Solicitado por IES con Convenio",
-            "Total Solicitado por IES sin Convenio"
         ],
         "Valor": [
             cantidad_ofertas,
             cantidad_convenio,
             cantidad_sin_convenio,
+        ]
+    })
+
+    indicadores_valor = pd.DataFrame({
+        "Indicador": [
+            "Total Solicitado por IES",
+            "Total Solicitado por IES con Convenio",
+            "Total Solicitado por IES sin Convenio"
+        ],
+        "Valor": [
             total_solicitado,
             total_convenio,
             total_sin_convenio
         ]
     })
-    
-    st.subheader("Tabla de Indicadores")
-    st.dataframe(indicadores)
+
+    st.subheader("Tabla de Indicadores - Cantidades")
+    st.dataframe(indicadores_cantidad)
+
+    st.subheader("Tabla de Indicadores - Valores")
+    st.dataframe(indicadores_valor)
+
+    # Graficar las tablas de indicadores
+    st.subheader("Gráficos de Indicadores")
+
+    # Gráfico de Cantidades
+    plt.figure(figsize=(8, 4))
+    plt.bar(indicadores_cantidad['Indicador'], indicadores_cantidad['Valor'], color=['blue', 'orange', 'green'])
+    plt.title("Indicadores de Cantidades")
+    plt.xticks(rotation=45)
+    plt.ylabel("Cantidad")
+    st.pyplot(plt)
+
+    # Gráfico de Valores
+    plt.figure(figsize=(8, 4))
+    plt.bar(indicadores_valor['Indicador'], indicadores_valor['Valor'], color=['blue', 'orange', 'green'])
+    plt.title("Indicadores de Valores")
+    plt.xticks(rotation=45)
+    plt.ylabel("Valor (millones de pesos)")
+    st.pyplot(plt)
 
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
@@ -444,7 +473,6 @@ def gestion_ordenador_gasto():
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
                         st.success("Validación exitosa. Procediendo a liquidación automática...")
-
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
         
@@ -453,22 +481,26 @@ def gestion_ordenador_gasto():
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
 
-    # Botón para aprobar digitalmente por grupos
-    if st.button("Aprobar Digitalmente IES con Convenio"):
-        total_aprobado_convenio = ofertas_convenio['Valor'].sum()
-        if presupuesto_disponible >= total_aprobado_convenio:
-            presupuesto_disponible -= total_aprobado_convenio
-            st.success("Aprobación digital para IES con convenio registrada.")
-        else:
-            st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
+    # Botones para aprobar digitalmente por grupos
+    col1, col2 = st.columns(2)
 
-    if st.button("Aprobar Digitalmente IES sin Convenio"):
-        total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
-        if presupuesto_disponible >= total_aprobado_sin_convenio:
-            presupuesto_disponible -= total_aprobado_sin_convenio
-            st.success("Aprobación digital para IES sin convenio registrada.")
-        else:
-            st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
+    with col1:
+        if st.button("Aprobar Digitalmente IES con Convenio"):
+            total_aprobado_convenio = ofertas_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_convenio:
+                presupuesto_disponible -= total_aprobado_convenio
+                st.success("Aprobación digital para IES con convenio registrada.")
+            else:
+                st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
+
+    with col2:
+        if st.button("Aprobar Digitalmente IES sin Convenio"):
+            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_sin_convenio:
+                presupuesto_disponible -= total_aprobado_sin_convenio
+                st.success("Aprobación digital para IES sin convenio registrada.")
+            else:
+                st.error("**No es posible hacer la operación por no tener fondos suficientes.**")
 
     # Mostrar el presupuesto restante
     st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
