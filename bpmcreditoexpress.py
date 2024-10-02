@@ -204,12 +204,15 @@ def enviar_oferta():
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
+                # Definir el valor de la oferta, por ejemplo, usando la capacidad de pago
+                oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])  # Asignar un valor entre 3,000,000 y la capacidad de pago
                 st.session_state.ofertas_enviadas.append(oferta)
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
                     "Estado": "Enviada",
                     "Interesado": oferta["Interesado"],
-                    "GarantiaFirmada": oferta["GarantiaFirmada"]
+                    "GarantiaFirmada": oferta["GarantiaFirmada"],
+                    "Valor": oferta["Valor"],  # Asegúrate de incluir el valor aquí también
                 })
             st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
         else:
