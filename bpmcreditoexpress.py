@@ -341,6 +341,16 @@ def generar_info_bancaria():
         "Numero Factura": random.randint(1000, 9999)
     }
 
+def generar_info_bancaria():
+    return {
+        "NIT": random.randint(100000000, 999999999),
+        "Nombre": f"IES {random.choice(['A', 'B', 'C', 'D'])}",
+        "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
+        "Numero Cuenta": random.randint(10000000, 99999999),
+        "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
+        "Numero Factura": random.randint(1000, 9999)
+    }
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
@@ -357,11 +367,11 @@ def gestion_ordenador_gasto():
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
-    # Tabla de Control Presupuestal
-    st.subheader("Control Presupuestal")
-    presupuesto_disponible = random.randint(1000, 5000)  # en miles de millones
-    presupuesto_comprometido = random.randint(0, presupuesto_disponible)
+    # Presupuestos fijos
+    presupuesto_disponible = 10000  # en millones
+    presupuesto_comprometido = 1500  # en millones
 
+    st.subheader("Control Presupuestal")
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones")
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones")
 
@@ -370,18 +380,33 @@ def gestion_ordenador_gasto():
     else:
         st.error("Presupuesto comprometido supera el disponible.")
 
+    # Tabla de indicadores
+    st.subheader("Indicadores de Ofertas")
+    num_ofertas_garantia = df_ofertas.shape[0]
+    num_ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"].shape[0]
+    num_ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"].shape[0]
+    cantidad_total_solicitada = df_ofertas['ValorOferta'].sum()  # Asumimos que hay una columna 'ValorOferta'
+    cantidad_por_ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]['ValorOferta'].sum()
+    cantidad_por_ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]['ValorOferta'].sum()
+
+    st.write(f"Cantidad de ofertas con garantías firmadas: {num_ofertas_garantia}")
+    st.write(f"Cantidad de ofertas de IES con convenio: {num_ies_convenio}")
+    st.write(f"Cantidad de ofertas de IES sin convenio: {num_ies_sin_convenio}")
+    st.write(f"Cantidad total solicitada por IES: {cantidad_total_solicitada} millones")
+    st.write(f"Cantidad total solicitada por IES con convenio: {cantidad_por_ies_convenio} millones")
+    st.write(f"Cantidad total solicitada por IES sin convenio: {cantidad_por_ies_sin_convenio} millones")
+
     # Procesar cada beneficiario
-    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):  # Usar df_ofertas para las ofertas filtradas
+    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
         st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
-        
+
         # Verificar si la IES tiene convenio
-        if 'tiene_convenio' not in beneficiario:  # Asegúrate de que existe la clave
+        if 'tiene_convenio' not in beneficiario:
             beneficiario['tiene_convenio'] = random.choice(["Sí", "No"])
 
-        # Preguntar si la IES tiene convenio
         if beneficiario['tiene_convenio'] == "No":
             if st.button(f"Solicitar información para giro a {beneficiario.get('IES', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
+                info_bancaria = generar_info_bancaria()
                 st.write("Información bancaria generada:")
                 st.write(f"NIT: {info_bancaria['NIT']}")
                 st.write(f"Nombre IES: {info_bancaria['Nombre']}")
@@ -391,11 +416,9 @@ def gestion_ordenador_gasto():
                 st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
                 if st.button(f"Confirmar información para giro de {beneficiario.get('IES', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                    # Aquí se debe validar la información y continuar con el flujo
-                    validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
+                    validacion_info = random.choice(["Sí", "No"])
                     if validacion_info == "Sí":
                         st.success("Validación exitosa. Procediendo a liquidación automática...")
-                        # Aquí seguiría el proceso de liquidación automática
                     else:
                         st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
         
@@ -406,20 +429,15 @@ def gestion_ordenador_gasto():
 
             # Aprobar digitalmente
             if st.button("Aprobar Digitalmente", key=f"aprobar_{index}"):
-                st.success("Aprobación digital registrada por el ordenador del gasto.")
+                valor_oferta = beneficiario['ValorOferta']  # Asumimos que hay una columna 'ValorOferta'
                 
-                giro_exitoso = random.choice(["Sí", "No"])  # Simulación de éxito en el giro
-                st.write(f"Giro Exitoso: {giro_exitoso}")
-
-                if giro_exitoso == "Sí":
+                if presupuesto_disponible >= valor_oferta:
+                    presupuesto_disponible -= valor_oferta
+                    st.success("Aprobación digital registrada por el ordenador del gasto.")
+                    st.write(f"Giro Exitoso: {random.choice(['Sí', 'No'])}")
                     st.success("Información enviada para creación de cartera y notificación al beneficiario.")
                 else:
-                    subsanacion = st.radio("¿Se puede subsanar?", ["Sí", "No"], key=f"subsanacion_{index}")
-                    if subsanacion == "Sí":
-                        st.write("Solicitando nueva información para giro...")
-                        # Lógica para solicitar nueva información
-                    else:
-                        st.error("Notificando inconsistencia y finalizando el proceso.")
+                    st.error("No es posible hacer la operación por no tener fondos suficientes.")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
