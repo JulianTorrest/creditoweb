@@ -109,6 +109,18 @@ def firma_garantias(oferta):
 def captura_datos():
     st.title("Consulta Postulantes")
     
+    # Filtros de Año y Periodo
+    st.subheader("Filtros de búsqueda")
+    
+    # Filtro de Año
+    year = st.selectbox("Selecciona el año", options=[2022, 2023, 2024])
+    
+    # Filtro de Periodo (Semestre)
+    periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
+    
+    # Formulario actual de captura de datos
+    st.subheader("Datos del Postulante")
+    
     nombre = st.text_input("Nombre completo")
     tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
     numero_documento = st.text_input("Número de Documento")
