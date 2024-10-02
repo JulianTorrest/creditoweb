@@ -506,6 +506,7 @@ def gestion_ordenador_gasto():
     st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
 
 
+
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
     st.title("Dashboard")
