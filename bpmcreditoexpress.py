@@ -246,7 +246,7 @@ def gestion_comercial():
         return
 
     # Filtros para seleccionar el estado de las ofertas
-    estado_filtrado = st.selectbox("Selecciona el estado de la oferta", ["Todos", "Sí", "No", "Sí, pero después"])
+    estado_filtrado = st.selectbox("Respuesta a oferta de pre-aprobación enviada", ["Todos", "Sí", "No", "Sí, pero después"])
 
     # Inicializar la variable para el estado de garantías
     estado_garantia_filtrado = None
