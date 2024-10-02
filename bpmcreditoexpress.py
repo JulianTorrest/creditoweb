@@ -251,7 +251,7 @@ def enviar_oferta():
         total_beneficiarios = len(beneficiarios_data)
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
 
-        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes']
+        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
 
         # Crear gráfico tipo embudo
         fig, ax = plt.subplots()
