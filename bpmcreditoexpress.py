@@ -342,7 +342,6 @@ def generar_info_bancaria():
         "Valor": random.randint(100000, 35000000)  # Asegúrate de agregar el valor aquí
     }
 
-
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
@@ -463,6 +462,7 @@ def gestion_ordenador_gasto():
 
     # Mostrar el presupuesto restante
     st.write(f"Presupuesto Restante: {presupuesto_disponible} millones de pesos")
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
