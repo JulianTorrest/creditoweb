@@ -306,7 +306,6 @@ def enviar_oferta():
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
 
-
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
@@ -315,6 +314,13 @@ def gestion_comercial():
     if 'ofertas_en_proceso' not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
+
+    # Seleccionar año
+    anio_actual = datetime.datetime.now().year
+    anio_seleccionado = st.selectbox("Selecciona el año", list(range(2021, anio_actual + 1)))
+
+    # Seleccionar periodo (semestre)
+    periodo_seleccionado = st.selectbox("Selecciona el periodo", ["1er Semestre", "2do Semestre"])
 
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Respuesta a oferta de pre-aprobación enviada", ["Todos", "Sí", "No", "Sí, pero después"])
@@ -328,6 +334,16 @@ def gestion_comercial():
 
     # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+
+    # Filtrar por año
+    df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])  # Asegurarse de que la columna 'Fecha' esté en formato datetime
+    df_ofertas = df_ofertas[df_ofertas['Fecha'].dt.year == anio_seleccionado]
+
+    # Filtrar por semestre
+    if periodo_seleccionado == "1er Semestre":
+        df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 1) & (df_ofertas['Fecha'].dt.month <= 6)]
+    else:  # 2do Semestre
+        df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 7) & (df_ofertas['Fecha'].dt.month <= 12)]
 
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
@@ -413,6 +429,7 @@ def gestion_comercial():
             elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
+
                 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
