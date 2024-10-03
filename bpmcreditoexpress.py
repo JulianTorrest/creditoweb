@@ -237,6 +237,14 @@ def enviar_oferta():
             st.write(oferta)
 
     if len(beneficiarios_validados) > 0:
+        # Agregar filtro por año
+        anio_actual = datetime.datetime.now().year
+        anos = list(range(2021, anio_actual + 1))
+        año_seleccionado = st.selectbox("Seleccione un año:", anos)
+
+        # Agregar filtro por periodo
+        periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
+
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
             for beneficiario in beneficiarios_validados:
@@ -244,6 +252,11 @@ def enviar_oferta():
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
                 oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])  # Asignar un valor entre 3,000,000 y la capacidad de pago
+                
+                # Agregar año y periodo a la oferta
+                oferta["Año"] = año_seleccionado
+                oferta["Periodo"] = periodo_seleccionado
+                
                 st.session_state.ofertas_enviadas.append(oferta)
                 st.session_state.ofertas_en_proceso.append({
                     "Nombre": beneficiario["Nombre"],
@@ -251,6 +264,8 @@ def enviar_oferta():
                     "Interesado": oferta["Interesado"],
                     "GarantiaFirmada": oferta["GarantiaFirmada"],
                     "Valor": oferta["Valor"],
+                    "Año": año_seleccionado,
+                    "Periodo": periodo_seleccionado
                 })
             st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
         else:
@@ -277,7 +292,7 @@ def enviar_oferta():
                 validacion3_fallos += 1
 
         # Generar datos para el gráfico tipo embudo
-        total_beneficiarios = len(beneficiarios_data)
+        total_beneficiarios = len(beneficiarios_validados) + len(beneficiarios_con_errores)
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
 
         etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
