@@ -238,15 +238,20 @@ def enviar_oferta():
         fecha_inicio = f"{min(anios)}-07-01"
         fecha_fin = f"{max(anios)}-12-31"
 
-    # Convertir 'fecha_validacion' a tipo datetime si no está en ese formato
-    beneficiarios_validados['fecha_validacion'] = pd.to_datetime(beneficiarios_validados['fecha_validacion'])
+    # Verificar si 'fecha_validacion' existe en el DataFrame
+    if 'fecha_validacion' in beneficiarios_validados.columns:
+        # Convertir 'fecha_validacion' a tipo datetime
+        beneficiarios_validados['fecha_validacion'] = pd.to_datetime(beneficiarios_validados['fecha_validacion'], errors='coerce')
 
-    # Filtrando los beneficiarios según los criterios seleccionados
-    beneficiarios_filtrados = beneficiarios_validados[
-        (beneficiarios_validados['fecha_validacion'] >= fecha_inicio) & 
-        (beneficiarios_validados['fecha_validacion'] <= fecha_fin) &
-        (beneficiarios_validados['anio'].isin(anios))
-    ]
+        # Filtrando los beneficiarios según los criterios seleccionados
+        beneficiarios_filtrados = beneficiarios_validados[
+            (beneficiarios_validados['fecha_validacion'] >= fecha_inicio) & 
+            (beneficiarios_validados['fecha_validacion'] <= fecha_fin) &
+            (beneficiarios_validados['anio'].isin(anios))
+        ]
+    else:
+        st.error("La columna 'fecha_validacion' no existe en los beneficiarios validados.")
+        return
 
     # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_filtrados)} beneficiarios pasaron todas las validaciones")
@@ -310,6 +315,7 @@ def enviar_oferta():
         ax.set_title('Embudo de Validaciones Fallidas')
 
         # Mostrar el gráfico en Streamlit
+        st.pyplot(fig)o en Streamlit
         st.pyplot(fig)
 
 # Página de gestión comercial de ofertas
