@@ -178,17 +178,6 @@ def captura_datos():
         else:
             st.write("Beneficiarios encontrados:")
             st.dataframe(df_beneficiarios)
-
-            # Validaciones
-            validaciones = procesar_validaciones(df_beneficiarios)
-            st.write("Resultados de las validaciones:")
-            st.json(validaciones)
-
-            # Firmar garantías
-            for index, oferta in df_beneficiarios.iterrows():
-                if st.button(f"Firmar garantías para {oferta['Nombre']}"):
-                    firma_garantias(oferta)
-
         
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
