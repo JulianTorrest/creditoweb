@@ -131,16 +131,79 @@ def firma_garantias(oferta):
     st.write(f"Firmando garantías para {oferta['Nombre']}...")
 
 # Página de captura de datos
+def generar_datos_ficticios(n):
+    nombres = [f"Nombre_{i}" for i in range(n)]
+    nacionalidades = ["Colombiano", "Otro"]
+    estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
+    listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
+    
+    datos = []
+    for nombre in nombres:
+        fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
+        año = fecha_random.year
+        mes = fecha_random.month
+        periodo = "1er Semestre" if mes <= 6 else "2do Semestre"
+        
+        datos.append({
+            "Nombre": nombre,
+            "Nacionalidad": random.choice(nacionalidades),
+            "Edad": random.randint(18, 65),
+            "Estado Crédito": random.choice(estados_credito),
+            "Lista SARLAFT": random.choice(listas_sarlaft),
+            "Score Crediticio": random.randint(150, 900),
+            "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
+            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
+            "Fecha": fecha_random.strftime("%Y-%m-%d"),
+            "Año": año,
+            "Mes": mes,
+            "Periodo": periodo
+        })
+    return datos
+
+# Inicializar datos
+beneficiarios_data = generar_datos_ficticios(500)
+if "ofertas_enviadas" not in st.session_state:
+    st.session_state.ofertas_enviadas = []
+if "ofertas_en_proceso" not in st.session_state:
+    st.session_state.ofertas_en_proceso = []
+
+# Procesar y mostrar gráficos
+def mostrar_graficos(df_beneficiarios):
+    # Gráfico 1: Conteo de beneficiarios por nacionalidad
+    fig, ax = plt.subplots()
+    df_beneficiarios['Nacionalidad'].value_counts().plot(kind='bar', ax=ax, color='skyblue')
+    ax.set_title('Número de Beneficiarios por Nacionalidad')
+    ax.set_ylabel('Cantidad')
+    ax.set_xlabel('Nacionalidad')
+    st.pyplot(fig)
+
+    # Gráfico 2: Distribución del estado de crédito
+    fig, ax = plt.subplots()
+    df_beneficiarios['Estado Crédito'].value_counts().plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90, colors=['gold', 'lightcoral', 'lightskyblue'])
+    ax.set_title('Distribución del Estado de Crédito')
+    st.pyplot(fig)
+
+    # Gráfico 3: Relación entre Score Crediticio y Capacidad de Pago
+    fig, ax = plt.subplots()
+    ax.scatter(df_beneficiarios['Score Crediticio'], df_beneficiarios['Capacidad de Pago (COP)'], alpha=0.5)
+    ax.set_title('Relación entre Score Crediticio y Capacidad de Pago')
+    ax.set_xlabel('Score Crediticio')
+    ax.set_ylabel('Capacidad de Pago (COP)')
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    st.pyplot(fig)
+
+# Funciones de la aplicación
+def firma_garantias(oferta):
+    st.write(f"Firmando garantías para {oferta['Nombre']}...")
+
+# Página de captura de datos
 def captura_datos():
     st.title("Consulta Postulantes")
 
     # Filtros de Año y Periodo
     st.subheader("Filtros de búsqueda")
 
-    # Filtro de Año
     year = st.selectbox("Selecciona el año", options=[2022, 2023, 2024])
-
-    # Filtro de Periodo (Semestre)
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
 
     # Formulario actual de captura de datos
@@ -156,7 +219,7 @@ def captura_datos():
     score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
     capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
-    deudor = st.text_input("Nombre del deudor")  # Ejemplo de captura de datos
+    deudor = st.text_input("Nombre del deudor")
     fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
 
     if st.button("Mostrar datos de beneficiarios"):
@@ -178,6 +241,10 @@ def captura_datos():
         else:
             st.write("Beneficiarios encontrados:")
             st.dataframe(df_beneficiarios)
+
+            # Mostrar gráficos
+            mostrar_graficos(df_beneficiarios)
+
         
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
