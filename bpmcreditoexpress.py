@@ -315,7 +315,6 @@ def enviar_oferta():
         ax.set_title('Embudo de Validaciones Fallidas')
 
         # Mostrar el gráfico en Streamlit
-        st.pyplot(fig)o en Streamlit
         st.pyplot(fig)
 
 # Página de gestión comercial de ofertas
