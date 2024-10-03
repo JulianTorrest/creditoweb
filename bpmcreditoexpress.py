@@ -317,7 +317,7 @@ def gestion_comercial():
         return
 
     # Seleccionar año
-    anio_actual = datetime.datetime.now().year
+    anio_actual = datetime.now().year
     anio_seleccionado = st.selectbox("Selecciona el año", list(range(2021, anio_actual + 1)))
 
     # Seleccionar periodo (semestre)
