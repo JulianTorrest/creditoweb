@@ -3,6 +3,7 @@ import pandas as pd
 import random
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import datetime
 from datetime import datetime  # Importación directa de datetime
 
 # Crear una función para generar datos ficticios
