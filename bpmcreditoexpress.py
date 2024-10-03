@@ -337,8 +337,14 @@ def gestion_comercial():
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     # Filtrar por año
-    df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])  # Asegurarse de que la columna 'Fecha' esté en formato datetime
-    df_ofertas = df_ofertas[df_ofertas['Fecha'].dt.year == anio_seleccionado]
+    # Verificar la existencia de la columna 'Fecha'
+    if 'Fecha' in df_ofertas.columns:
+    # Asegurarse de que la columna 'Fecha' esté en formato datetime
+        df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
+    else:
+        st.error("La columna 'Fecha' no se encuentra en los datos.")
+    return
+
 
     # Filtrar por semestre
     if periodo_seleccionado == "1er Semestre":
