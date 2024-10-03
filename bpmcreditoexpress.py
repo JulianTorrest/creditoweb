@@ -17,6 +17,12 @@ def generar_datos_ficticios(n):
     for nombre in nombres:
         # Generar una fecha aleatoria en los últimos 10 años
         fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
+        # Extraer año y mes
+        año = fecha_random.year
+        mes = fecha_random.month
+        # Determinar periodo
+        periodo = "1er Semestre" if mes <= 6 else "2do Semestre"
+        
         datos.append({
             "Nombre": nombre,
             "Nacionalidad": random.choice(nacionalidades),
@@ -26,11 +32,13 @@ def generar_datos_ficticios(n):
             "Score Crediticio": random.randint(150, 900),
             "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
             "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
-            "Fecha": fecha_random.strftime("%Y-%m-%d")  # Convertir la fecha a formato de cadena
+            "Fecha": fecha_random.strftime("%Y-%m-%d"),  # Convertir la fecha a formato de cadena
+            "Año": año,
+            "Mes": mes,
+            "Periodo": periodo
         })
     return datos
-
-
+    
 # Inicializar datos
 beneficiarios_data = generar_datos_ficticios(500)
 if "ofertas_enviadas" not in st.session_state:
