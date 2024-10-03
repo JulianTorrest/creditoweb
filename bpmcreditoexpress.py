@@ -168,7 +168,7 @@ def captura_datos():
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
         if lista_sarlaft:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
-        if año:
+        if year:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
