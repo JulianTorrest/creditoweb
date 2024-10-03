@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import random
-from datetime import datetime
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from datetime import datetime  # Importación directa de datetime
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
@@ -238,7 +238,7 @@ def enviar_oferta():
 
     if len(beneficiarios_validados) > 0:
         # Agregar filtro por año
-        anio_actual = datetime.datetime.now().year
+        anio_actual = datetime.now().year  # Asegúrate de usar datetime correctamente
         anos = list(range(2021, anio_actual + 1))
         año_seleccionado = st.selectbox("Seleccione un año:", anos)
 
@@ -305,6 +305,7 @@ def enviar_oferta():
 
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
+
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
