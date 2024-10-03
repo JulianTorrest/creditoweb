@@ -23,7 +23,8 @@ def generar_datos_ficticios(n):
             "Lista SARLAFT": random.choice(listas_sarlaft),
             "Score Crediticio": random.randint(150, 900),
             "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
-            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000)
+            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
+            "Fecha": fecha_random.strftime("%Y-%m-%d")  # Convertir la fecha a formato de cadena
         })
     return datos
 
