@@ -222,8 +222,34 @@ def enviar_oferta():
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
+    # Filtros para seleccionar los años y el periodo
+    anios = st.multiselect("Selecciona los Años", options=[2021, 2022, 2023, 2024], default=[2021, 2022, 2023, 2024])
+    periodo = st.selectbox("Selecciona el Periodo", options=["1 Semestre", "2 Semestre"])
+
+    if not anios:
+        st.warning("Por favor, selecciona al menos un año.")
+        return
+
+    # Filtrar los beneficiarios validados por los años seleccionados y el periodo
+    if periodo == "1 Semestre":
+        fecha_inicio = f"{min(anios)}-01-01"
+        fecha_fin = f"{max(anios)}-06-30"
+    else:
+        fecha_inicio = f"{min(anios)}-07-01"
+        fecha_fin = f"{max(anios)}-12-31"
+
+    # Convertir 'fecha_validacion' a tipo datetime si no está en ese formato
+    beneficiarios_validados['fecha_validacion'] = pd.to_datetime(beneficiarios_validados['fecha_validacion'])
+
+    # Filtrando los beneficiarios según los criterios seleccionados
+    beneficiarios_filtrados = beneficiarios_validados[
+        (beneficiarios_validados['fecha_validacion'] >= fecha_inicio) & 
+        (beneficiarios_validados['fecha_validacion'] <= fecha_fin) &
+        (beneficiarios_validados['anio'].isin(anios))
+    ]
+
     # Mostrar cuántos beneficiarios pasaron las validaciones
-    st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
+    st.subheader(f"{len(beneficiarios_filtrados)} beneficiarios pasaron todas las validaciones")
 
     # Mostrar ofertas ya enviadas
     if st.session_state.ofertas_enviadas:
@@ -231,10 +257,10 @@ def enviar_oferta():
         for oferta in st.session_state.ofertas_enviadas:
             st.write(oferta)
 
-    if len(beneficiarios_validados) > 0:
+    if len(beneficiarios_filtrados) > 0:
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
-            for beneficiario in beneficiarios_validados:
+            for beneficiario in beneficiarios_filtrados:
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
@@ -285,7 +311,6 @@ def enviar_oferta():
 
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
-
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
