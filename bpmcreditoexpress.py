@@ -133,19 +133,19 @@ def firma_garantias(oferta):
 # Página de captura de datos
 def captura_datos():
     st.title("Consulta Postulantes")
-    
+
     # Filtros de Año y Periodo
     st.subheader("Filtros de búsqueda")
-    
+
     # Filtro de Año
     year = st.selectbox("Selecciona el año", options=[2022, 2023, 2024])
-    
+
     # Filtro de Periodo (Semestre)
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
-    
+
     # Formulario actual de captura de datos
     st.subheader("Datos del Postulante")
-    
+
     nombre = st.text_input("Nombre completo")
     tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
     numero_documento = st.text_input("Número de Documento")
@@ -161,28 +161,34 @@ def captura_datos():
 
     if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
-        
+
         if nacionalidad:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
         if estado_credito:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
         if lista_sarlaft:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
-        if edad:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Edad"].between(edad[0], edad[1])]
-        if score_credito:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Score Crediticio"].between(score_credito[0], score_credito[1])]
-        if capacidad_pago:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Capacidad de Pago (COP)"].between(capacidad_pago[0], capacidad_pago[1])]
-        if limite_endeudamiento:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Límite de Endeudamiento (COP)"].between(limite_endeudamiento[0], limite_endeudamiento[1])]
-        
-        st.dataframe(df_beneficiarios)
+        if año:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
+        if periodo:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
 
-        # Procesar validaciones
-        validaciones = procesar_validaciones(df_beneficiarios)
-        st.write("Resultados de Validación:")
-        st.json(validaciones)
+        if df_beneficiarios.empty:
+            st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
+        else:
+            st.write("Beneficiarios encontrados:")
+            st.dataframe(df_beneficiarios)
+
+            # Validaciones
+            validaciones = procesar_validaciones(df_beneficiarios)
+            st.write("Resultados de las validaciones:")
+            st.json(validaciones)
+
+            # Firmar garantías
+            for index, oferta in df_beneficiarios.iterrows():
+                if st.button(f"Firmar garantías para {oferta['Nombre']}"):
+                    firma_garantias(oferta)
+
         
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
