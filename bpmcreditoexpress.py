@@ -207,11 +207,6 @@ def validacion_beneficiarios():
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
-
-# Página para enviar la oferta al beneficiario
-def enviar_oferta():
-    st.title("Enviar Oferta a los Beneficiarios")
-
     # Verificar si hay datos de beneficiarios validados y con errores
     if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
