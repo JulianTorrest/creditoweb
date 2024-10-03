@@ -4,7 +4,7 @@ import random
 import datetime
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from datetime import datetime  # Importación directa de datetime
+from datetime import datetime,timedelta  # Importación directa de datetime
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
