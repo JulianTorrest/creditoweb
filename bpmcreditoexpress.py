@@ -207,6 +207,11 @@ def validacion_beneficiarios():
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
+
+# Página para enviar la oferta al beneficiario
+def enviar_oferta():
+    st.title("Enviar Oferta a los Beneficiarios")
+
     # Verificar si hay datos de beneficiarios validados y con errores
     if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
@@ -222,39 +227,8 @@ def enviar_oferta():
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
-    # Filtros para seleccionar los años y el periodo
-    anios = st.multiselect("Selecciona los Años", options=[2021, 2022, 2023, 2024], default=[2021, 2022, 2023, 2024])
-    periodo = st.selectbox("Selecciona el Periodo", options=["1 Semestre", "2 Semestre"])
-
-    if not anios:
-        st.warning("Por favor, selecciona al menos un año.")
-        return
-
-    # Filtrar los beneficiarios validados por los años seleccionados y el periodo
-    if periodo == "1 Semestre":
-        fecha_inicio = f"{min(anios)}-01-01"
-        fecha_fin = f"{max(anios)}-06-30"
-    else:
-        fecha_inicio = f"{min(anios)}-07-01"
-        fecha_fin = f"{max(anios)}-12-31"
-
-    # Verificar si 'fecha_validacion' existe en el DataFrame
-    if 'fecha_validacion' in beneficiarios_validados.columns:
-        # Convertir 'fecha_validacion' a tipo datetime
-        beneficiarios_validados['fecha_validacion'] = pd.to_datetime(beneficiarios_validados['fecha_validacion'], errors='coerce')
-
-        # Filtrando los beneficiarios según los criterios seleccionados
-        beneficiarios_filtrados = beneficiarios_validados[
-            (beneficiarios_validados['fecha_validacion'] >= fecha_inicio) & 
-            (beneficiarios_validados['fecha_validacion'] <= fecha_fin) &
-            (beneficiarios_validados['anio'].isin(anios))
-        ]
-    else:
-        st.error("La columna 'fecha_validacion' no existe en los beneficiarios validados.")
-        return
-
     # Mostrar cuántos beneficiarios pasaron las validaciones
-    st.subheader(f"{len(beneficiarios_filtrados)} beneficiarios pasaron todas las validaciones")
+    st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
 
     # Mostrar ofertas ya enviadas
     if st.session_state.ofertas_enviadas:
@@ -262,10 +236,10 @@ def enviar_oferta():
         for oferta in st.session_state.ofertas_enviadas:
             st.write(oferta)
 
-    if len(beneficiarios_filtrados) > 0:
+    if len(beneficiarios_validados) > 0:
         # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
         if st.button("Enviar oferta a todos los beneficiarios validados"):
-            for beneficiario in beneficiarios_filtrados:
+            for beneficiario in beneficiarios_validados:
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
