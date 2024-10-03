@@ -15,6 +15,8 @@ def generar_datos_ficticios(n):
     
     datos = []
     for nombre in nombres:
+        # Generar una fecha aleatoria en los últimos 10 años
+        fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
         datos.append({
             "Nombre": nombre,
             "Nacionalidad": random.choice(nacionalidades),
@@ -27,6 +29,7 @@ def generar_datos_ficticios(n):
             "Fecha": fecha_random.strftime("%Y-%m-%d")  # Convertir la fecha a formato de cadena
         })
     return datos
+
 
 # Inicializar datos
 beneficiarios_data = generar_datos_ficticios(500)
