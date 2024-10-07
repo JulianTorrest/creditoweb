@@ -500,42 +500,37 @@ def realizar_validaciones(beneficiario):
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
-    # Verificar si hay datos de beneficiarios validados y con errores
-    if 'beneficiarios_validados' not in st.session_state or 'beneficiarios_con_errores' not in st.session_state:
+    if 'beneficiarios_validados' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
 
-    # Inicializar listas en el estado de sesión si no existen
     if 'ofertas_enviadas' not in st.session_state:
-        st.session_state.ofertas_enviadas = []
+        st.session_state['ofertas_enviadas'] = []
 
     beneficiarios_validados = st.session_state['beneficiarios_validados']
-    beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
-    # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
 
-    # Agregar filtro por año
+    # Filtros de año y periodo
     anio_actual = datetime.now().year
     anos = list(range(2021, anio_actual + 1))
     año_seleccionado = st.selectbox("Seleccione un año:", anos)
-
-    # Agregar filtro por periodo
     periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
 
-    # Botón para enviar ofertas a todos los beneficiarios que pasaron las validaciones
     if st.button("Enviar oferta a todos los beneficiarios validados"):
-        st.session_state.ofertas_enviadas = []
         for beneficiario in beneficiarios_validados:
             oferta = beneficiario.copy()
             oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
             oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
-            oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])  # Asignar un valor entre 3,000,000 y la capacidad de pago
+            oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
+            oferta["Año"] = año_seleccionado
+            oferta["Periodo"] = periodo_seleccionado
             st.session_state.ofertas_enviadas.append(oferta)
 
         st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
     else:
         st.info("No se han enviado ofertas todavía.")
+
 
     # Crear un DataFrame con los beneficiarios aprobados
     df_aprobados = pd.DataFrame(beneficiarios_validados)
