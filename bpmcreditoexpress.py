@@ -80,10 +80,9 @@ def validar_antecedentes(deudor, fecha_antecedentes):
 def realizar_validaciones(deudor):
     errores = []
     
-    # Verificar si el Estado de Crédito está presente
+    # Verificar y asignar Estado de Crédito
     if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
-        errores.append("Datos incompletos para validación: Estado Crédito faltante.")
-        return errores  # Salir temprano si hay datos incompletos
+        deudor['Estado Crédito'] = 'Ninguno'  # Asegúrate de asignarlo aquí también
 
     # Validar score crediticio
     if deudor["Score Crediticio"] < 610:
@@ -110,6 +109,10 @@ def procesar_validaciones(beneficiarios):
     }
 
     for deudor in beneficiarios.to_dict(orient='records'):
+        # Verificar y asignar Estado de Crédito
+        if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
+            deudor['Estado Crédito'] = 'Ninguno'  # Asegúrate de asignarlo aquí también
+
         # Validación Nacionalidad
         valido_nacionalidad, motivo_nacionalidad = validar_nacionalidad(deudor)
         if valido_nacionalidad:
