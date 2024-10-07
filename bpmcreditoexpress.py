@@ -789,8 +789,8 @@ def gestion_comercial():
 
         st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf")
 
-        else:
-            st.warning("No hay ofertas que coincidan con los criterios de filtro.")
+    else:
+        st.warning("No hay ofertas que coincidan con los criterios de filtro.")
 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
