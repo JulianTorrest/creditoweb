@@ -536,12 +536,6 @@ def enviar_oferta():
     else:
         st.info("No se han enviado ofertas todavía.")
 
-    # Mostrar ofertas ya enviadas
-    if st.session_state.ofertas_enviadas:
-        st.write("Ofertas ya enviadas:")
-        for oferta in st.session_state.ofertas_enviadas:
-            st.write(oferta)
-
     # Botón para descargar ofertas aprobadas
     if st.button("Descargar Excel con ofertas aprobadas"):
         # Crear un DataFrame con los beneficiarios aprobados
@@ -587,11 +581,8 @@ def enviar_oferta():
 
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
-    
-    # Mostrar cuántos beneficiarios tienen errores
-    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
 
-    # Crear gráficos adicionales
+    # Mostrar gráficos adicionales
 
     # Gráfico 1: Cantidad de beneficiarios aprobados por semestre/año
     st.subheader("Cantidad de beneficiarios aprobados por semestre/año")
@@ -628,29 +619,6 @@ def enviar_oferta():
     ax2.set_title('Cantidad de Beneficiarios con Errores por Tipo')
     st.pyplot(fig2)
 
-    # Mostrar beneficiarios con errores
-    if len(beneficiarios_con_errores) > 0:
-        st.info("No se enviarán ofertas a los beneficiarios con errores.")
-        
-        # Crear contadores para las validaciones fallidas
-        validacion1_fallos = errores_count["Score Crediticio"]
-        validacion2_fallos = errores_count["Capacidad de Pago"]
-        validacion3_fallos = errores_count["Estado Crédito"]
-
-        # Generar datos para el gráfico tipo embudo
-        total_beneficiarios = len(beneficiarios_validados) + len(beneficiarios_con_errores)
-        fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
-
-        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Estado de Crédito']
-
-        # Crear gráfico tipo embudo
-        fig3, ax3 = plt.subplots()
-        ax3.barh(etapas, fallos_validaciones, color='lightcoral')
-        ax3.set_xlabel('Número de Fallos')
-        ax3.set_title('Embudo de Validaciones Fallidas')
-
-        # Mostrar el gráfico en Streamlit
-        st.pyplot(fig3)
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
