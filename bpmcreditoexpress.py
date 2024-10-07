@@ -653,12 +653,11 @@ def gestion_comercial():
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     # Filtrar por año
-    # Verificar la existencia de la columna 'Fecha'
     if 'Fecha' in df_ofertas.columns:
-    # Asegurarse de que la columna 'Fecha' esté en formato datetime
+        # Asegurarse de que la columna 'Fecha' esté en formato datetime
         df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
-    
-    # Filtrar por semestre
+
+        # Filtrar por semestre
         if periodo_seleccionado == "1er Semestre":
             df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 1) & (df_ofertas['Fecha'].dt.month <= 6)]
         else:  # 2do Semestre
@@ -755,6 +754,33 @@ def gestion_comercial():
             elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
+
+        # Botones para descargar en Excel y PDF
+        if st.button("Descargar en Excel"):
+            excel_bytes = df_ofertas.to_excel(index=False)
+            st.download_button("Descargar Excel", data=excel_bytes, file_name="ofertas.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        if st.button("Descargar en PDF"):
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", size=12)
+
+            # Agregar contenido al PDF
+            for i, oferta in enumerate(df_ofertas.to_dict('records')):
+                pdf.cell(200, 10, txt=f"Oferta {i + 1}: {oferta['Nombre']}", ln=True)
+                pdf.cell(200, 10, txt=f"Interesado: {oferta['Interesado']}", ln=True)
+                pdf.cell(200, 10, txt=f"Estado: {estado}", ln=True)
+                pdf.cell(200, 10, ln=True)  # Nueva línea
+
+            # Guardar el PDF en un buffer
+            pdf_output = io.BytesIO()
+            pdf.output(pdf_output, 'F')
+            pdf_output.seek(0)
+
+            st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
+    else:
+        st.warning("No hay ofertas que coincidan con los criterios de filtro.")
+
                 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
