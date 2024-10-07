@@ -50,9 +50,9 @@ if "ofertas_en_proceso" not in st.session_state:
 # Función para validar un deudor
 def validar_deudor(deudor):
     # Asignar valor por defecto si el Estado de Crédito está vacío
-    if not deudor.get('Estado Crédito'):
-        deudor['Estado Crédito'] = 'Ninguno'
-    
+    if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
+        deudor['Estado Crédito'] = 'Ninguno'  # Asignar 'Ninguno' si falta
+
     # Validar nacionalidad
     if deudor['Nacionalidad'] != 'Colombiano':
         return False, "No es colombiano"
@@ -95,7 +95,6 @@ def realizar_validaciones(deudor):
     
     return errores
 
-
 def validar_nacionalidad(deudor):
     if deudor['Nacionalidad'] != 'Colombiano':
         return False, "Nacionalidad no es colombiana"
@@ -107,7 +106,7 @@ def procesar_validaciones(beneficiarios):
         "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
-        "Validación 3": {"Aprobados": 0, "No Aprobados": 0},
+        "Validación 3": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
     }
 
     for deudor in beneficiarios.to_dict(orient='records'):
@@ -149,6 +148,8 @@ def procesar_validaciones(beneficiarios):
         if errores:
             validaciones["Validación 1"]["No Aprobados"] += 1
             validaciones["Validación 1"]["Motivo No Aprobación"].extend(errores)
+    
+    return validaciones
 
 
 # Funciones de la aplicación
