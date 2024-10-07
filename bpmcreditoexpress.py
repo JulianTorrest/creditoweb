@@ -108,7 +108,7 @@ def procesar_validaciones(beneficiarios):
 
         # Validación 1
         valido1, motivo1 = validar_deudor(deudor)
-        if valido1 and valido_nacionalidad:  # Solo pasa si es colombiano
+        if valido1 and valido_nacionalidad:
             validaciones["Validación 1"]["Aprobados"] += 1
         else:
             validaciones["Validación 1"]["No Aprobados"] += 1
@@ -122,18 +122,21 @@ def procesar_validaciones(beneficiarios):
             validaciones["Validación 2"]["No Aprobados"] += 1
 
         # Validación 3
-        fecha_antecedentes = datetime.now() - pd.DateOffset(days=random.randint(1, 100))  # Ejemplo de fecha
+        fecha_antecedentes = datetime.now() - pd.DateOffset(days=random.randint(1, 100))
         valido3, motivo3 = validar_antecedentes(deudor, fecha_antecedentes)
         if valido3:
             validaciones["Validación 3"]["Aprobados"] += 1
         else:
             validaciones["Validación 3"]["No Aprobados"] += 1
+            # Añadir motivo a la lista de motivos de no aprobación
+            validaciones["Validación 3"]["Motivo No Aprobación"].append(motivo3)
 
         # Realizar validaciones adicionales
         errores = realizar_validaciones(deudor)
         if errores:
             validaciones["Validación 1"]["No Aprobados"] += 1
             validaciones["Validación 1"]["Motivo No Aprobación"].extend(errores)
+
 
 # Funciones de la aplicación
 def firma_garantias(oferta):
