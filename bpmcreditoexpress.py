@@ -7,6 +7,7 @@ import matplotlib.ticker as ticker
 from datetime import datetime,timedelta  # Importación directa de datetime
 import seaborn as sns
 from fpdf import FPDF
+import io
 
 
 # Crear una función para generar datos ficticios
