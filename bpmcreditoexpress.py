@@ -750,8 +750,7 @@ def gestion_comercial():
                 st.write("Generando marca 'Sí, pero después'...")
                 st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
             elif oferta['Interesado'] == "No":
-                st.write("Actualizando registros y finalizando el flujo.")
-                st.session_state.ofertas_en_proceso.remove(oferta)
+                st.write("Beneficiario No se encuentra interesado.")
                 st.success("Registros actualizados y flujo finalizado.")
             elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
