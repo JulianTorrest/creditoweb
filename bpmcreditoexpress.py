@@ -5,6 +5,7 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from datetime import datetime,timedelta  # Importación directa de datetime
+import seaborn as sns
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
@@ -189,8 +190,189 @@ def mostrar_graficos(df_beneficiarios):
     ax.set_title('Relación entre Score Crediticio y Capacidad de Pago')
     ax.set_xlabel('Score Crediticio')
     ax.set_ylabel('Capacidad de Pago (COP)')
+    # Configurar para mostrar valores en el eje Y como enteros
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    # Asegurar que el eje X solo muestre valores enteros
+    ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    # Mostrar el gráfico
+    st.pyplot(fig)
+
+    # Gráfico 4: Distribución de las Edades
+    fig, ax = plt.subplots()
+    ax.hist(df_beneficiarios['Edad'], bins=10, color='lightblue', edgecolor='black')
+    ax.set_title('Distribución de las Edades')
+    ax.set_xlabel('Edad')
+    ax.set_ylabel('Frecuencia')
+    st.pyplot(fig)
+
+    # Gráfico 5: Relación entre Capacidad de Pago y Límite de Endeudamiento
+    fig, ax = plt.subplots()
+    ax.scatter(df_beneficiarios['Capacidad de Pago (COP)'], df_beneficiarios['Límite de Endeudamiento (COP)'], alpha=0.5, color='purple')
+    ax.set_title('Relación entre Capacidad de Pago y Límite de Endeudamiento')
+    ax.set_xlabel('Capacidad de Pago (COP)')
+    ax.set_ylabel('Límite de Endeudamiento (COP)')
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(fig)
+
+    # Gráfico 6: Beneficiarios por Periodo (Semestre)
+    fig, ax = plt.subplots()
+    df_beneficiarios['Periodo'].value_counts().plot(kind='bar', ax=ax, color='orange')
+    ax.set_title('Número de Beneficiarios por Periodo')
+    ax.set_ylabel('Cantidad')
+    ax.set_xlabel('Periodo')
+    st.pyplot(fig)
+
+    # Gráfico 7: Distribución del Estado de Crédito
+    fig, ax = plt.subplots()
+    df_beneficiarios['Estado Crédito'].value_counts().plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90, colors=['lightcoral', 'lightgreen', 'skyblue'])
+    ax.set_title('Distribución del Estado de Crédito')
+    ax.axis('equal')  # Para asegurar que el gráfico sea circular
+    st.pyplot(fig)
+
+    # Gráfico 8: Beneficiarios por Lista SARLAFT
+    fig, ax = plt.subplots()
+    df_beneficiarios['Lista SARLAFT'].value_counts().plot(kind='bar', ax=ax, color='plum')
+    ax.set_title('Número de Beneficiarios por Lista SARLAFT')
+    ax.set_ylabel('Cantidad')
+    ax.set_xlabel('Lista SARLAFT')
+    st.pyplot(fig)
+
+    # Gráfico 9: Relación entre Edad y Score Crediticio
+    fig, ax = plt.subplots()
+    ax.scatter(df_beneficiarios['Edad'], df_beneficiarios['Score Crediticio'], alpha=0.5, color='darkblue')
+    ax.set_title('Relación entre Edad y Score Crediticio')
+    ax.set_xlabel('Edad')
+    ax.set_ylabel('Score Crediticio')
     ax.xaxis.set_major_locator(ticker.MaxNLocator(integer=True))
     st.pyplot(fig)
+
+    # Gráfico 10: Distribución del Score Crediticio por Estado de Crédito
+    fig, ax = plt.subplots()
+    df_beneficiarios.boxplot(column='Score Crediticio', by='Estado Crédito', ax=ax, grid=False, notch=True)
+    ax.set_title('Distribución del Score Crediticio por Estado de Crédito')
+    ax.set_ylabel('Score Crediticio')
+    plt.suptitle('')  # Para eliminar el título automático del boxplot
+    st.pyplot(fig)
+
+    # Gráfico 11: Score Crediticio y Capacidad de Pago Promedio por Nacionalidad
+    fig, ax = plt.subplots()
+    df_grouped = df_beneficiarios.groupby('Nacionalidad').mean()
+    df_grouped[['Score Crediticio', 'Capacidad de Pago (COP)']].plot(kind='bar', stacked=True, ax=ax, color=['lightblue', 'lightgreen'])
+    ax.set_title('Score Crediticio y Capacidad de Pago Promedio por Nacionalidad')
+    ax.set_ylabel('Promedio')
+    st.pyplot(fig)
+
+    # Gráfico 12: Matriz de Correlación
+    fig, ax = plt.subplots()
+    sns.heatmap(df_beneficiarios.corr(), annot=True, cmap='coolwarm', ax=ax)
+    ax.set_title('Matriz de Correlación entre Variables')
+    st.pyplot(fig)
+
+    # Gráfico 13: Evolución de la Capacidad de Pago Promedio por Año
+    fig, ax = plt.subplots()
+    df_beneficiarios.groupby('Año')['Capacidad de Pago (COP)'].mean().plot(kind='line', ax=ax, marker='o', color='green')
+    ax.set_title('Evolución de la Capacidad de Pago Promedio por Año')
+    ax.set_ylabel('Capacidad de Pago (COP)')
+    ax.set_xlabel('Año')
+    st.pyplot(fig)
+
+    # Gráfico 14: Estado de Crédito por Grupo de Edad
+    df_beneficiarios['Grupo Edad'] = pd.cut(df_beneficiarios['Edad'], bins=[18, 30, 40, 50, 65], labels=["18-30", "31-40", "41-50", "51-65"])
+
+    fig, ax = plt.subplots()
+    df_grouped = df_beneficiarios.groupby(['Grupo Edad', 'Estado Crédito']).size().unstack().fillna(0)
+    df_grouped.plot(kind='bar', stacked=True, ax=ax, color=['skyblue', 'orange', 'lightgreen'])
+    ax.set_title('Distribución del Estado de Crédito por Grupo de Edad')
+    ax.set_ylabel('Cantidad')
+    st.pyplot(fig)
+
+    # Gráfico 15: Comparación del Score Crediticio Promedio entre Semestres
+    fig, ax = plt.subplots()
+    df_beneficiarios.groupby('Periodo')['Score Crediticio'].mean().plot(kind='line', ax=ax, marker='o', color='blue')
+    ax.set_title('Comparación del Score Crediticio Promedio entre Semestres')
+    ax.set_ylabel('Score Crediticio Promedio')
+    ax.set_xlabel('Periodo')
+    st.pyplot(fig)
+
+    # Gráfico 16: Límite de Endeudamiento Promedio por Estado de Crédito
+    fig, ax = plt.subplots()
+    df_beneficiarios.groupby('Estado Crédito')['Límite de Endeudamiento (COP)'].mean().plot(kind='bar', ax=ax, color='lightblue')
+    ax.set_title('Límite de Endeudamiento Promedio por Estado de Crédito')
+    ax.set_ylabel('Límite de Endeudamiento (COP)')
+    ax.set_xlabel('Estado Crédito')
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(fig)
+
+    # Gráfico 17: Relación entre Límite de Endeudamiento y Capacidad de Pago
+    fig, ax = plt.subplots()
+    ax.scatter(df_beneficiarios['Límite de Endeudamiento (COP)'], df_beneficiarios['Capacidad de Pago (COP)'], alpha=0.5, color='purple')
+    ax.set_title('Relación entre Límite de Endeudamiento y Capacidad de Pago')
+    ax.set_xlabel('Límite de Endeudamiento (COP)')
+    ax.set_ylabel('Capacidad de Pago (COP)')
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(fig)
+
+    # Gráfico 18: Distribución del Score Crediticio
+    fig, ax = plt.subplots()
+    ax.hist(df_beneficiarios['Score Crediticio'], bins=30, color='teal', edgecolor='black')
+    ax.set_title('Distribución del Score Crediticio')
+    ax.set_xlabel('Score Crediticio')
+    ax.set_ylabel('Frecuencia')
+    st.pyplot(fig)
+
+    # Gráfico 19: Evolución del Score Crediticio Promedio por Año
+    fig, ax = plt.subplots()
+    df_beneficiarios.groupby('Año')['Score Crediticio'].mean().plot(kind='line', ax=ax, marker='o', color='navy')
+    ax.set_title('Evolución del Score Crediticio Promedio por Año')
+    ax.set_ylabel('Score Crediticio Promedio')
+    ax.set_xlabel('Año')
+    st.pyplot(fig)
+
+    # Gráfico 20: Edad Promedio por Lista SARLAFT
+    fig, ax = plt.subplots()
+    df_beneficiarios.groupby('Lista SARLAFT')['Edad'].mean().plot(kind='bar', ax=ax, color='orange')
+    ax.set_title('Edad Promedio por Lista SARLAFT')
+    ax.set_ylabel('Edad Promedio')
+    st.pyplot(fig)
+
+    # Gráfico 21: Capacidad de Pago por Lista SARLAFT (Boxplot)
+    fig, ax = plt.subplots()
+    sns.boxplot(x='Lista SARLAFT', y='Capacidad de Pago (COP)', data=df_beneficiarios, ax=ax, palette='coolwarm')
+    ax.set_title('Distribución de la Capacidad de Pago por Lista SARLAFT')
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(fig)
+
+    # Gráfico 22: Estado de Crédito por Periodo
+    fig, ax = plt.subplots()
+    df_grouped = df_beneficiarios.groupby(['Periodo', 'Estado Crédito']).size().unstack().fillna(0)
+    df_grouped.plot(kind='bar', stacked=True, ax=ax, color=['gold', 'lightcoral', 'lightskyblue'])
+    ax.set_title('Distribución del Estado de Crédito por Periodo')
+    ax.set_ylabel('Cantidad')
+    st.pyplot(fig)
+
+    # Gráfico 23: Relación entre Score Crediticio y Límite de Endeudamiento
+    fig, ax = plt.subplots()
+    ax.scatter(df_beneficiarios['Score Crediticio'], df_beneficiarios['Límite de Endeudamiento (COP)'], alpha=0.5, color='darkred')
+    ax.set_title('Relación entre Score Crediticio y Límite de Endeudamiento')
+    ax.set_xlabel('Score Crediticio')
+    ax.set_ylabel('Límite de Endeudamiento (COP)')
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(fig)
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
 # Funciones de la aplicación
 def firma_garantias(oferta):
