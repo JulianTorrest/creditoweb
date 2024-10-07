@@ -47,15 +47,23 @@ if "ofertas_enviadas" not in st.session_state:
 if "ofertas_en_proceso" not in st.session_state:
     st.session_state.ofertas_en_proceso = []
 
-# Funciones de validación
+# Función para validar un deudor
 def validar_deudor(deudor):
+    # Asignar valor por defecto si el Estado de Crédito está vacío
+    if not deudor.get('Estado Crédito'):
+        # Si faltan datos del Estado de Crédito, puedes asignar 'Aprobado' o 'Pendiente' como predeterminado
+        deudor['Estado Crédito'] = 'Aprobado' if deudor['Edad'] < 65 else 'Pendiente'
+    
+    # Validar nacionalidad y edad
     if deudor['Nacionalidad'] == 'Colombiano' and deudor['Edad'] < 65:
+        # Validar Estado de Crédito
         if deudor['Estado Crédito'] == 'Castigado':
             return False, "Estado Crédito es Castigado"
         if deudor['Estado Crédito'] == 'En mora y castigado':
             return False, "Estado en Mora/Castigado"
-        return True, ""
-    return False, "No es colombiano o mayor de 65 años"
+        return True, ""  # Si pasa todas las validaciones
+    else:
+        return False, "No es colombiano o mayor de 65 años"
 
 def validar_sarlaft(deudor):
     if deudor['Lista SARLAFT'] in ['Vinculantes', 'Restrictivas', 'Informativas']:
