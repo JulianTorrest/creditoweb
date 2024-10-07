@@ -525,6 +525,7 @@ def enviar_oferta():
 
     # Botón para enviar ofertas a todos los beneficiarios que pasaron las validaciones
     if st.button("Enviar oferta a todos los beneficiarios validados"):
+        st.session_state.ofertas_enviadas = []
         for beneficiario in beneficiarios_validados:
             oferta = beneficiario.copy()
             oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
