@@ -779,18 +779,18 @@ def gestion_comercial():
                 pdf.cell(200, 10, ln=True)  # Nueva línea
 
         # Guardar el PDF en un archivo temporal
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-            pdf.output(temp_pdf.name, 'F')
-            temp_pdf.seek(0)  # Asegurarse de que el puntero esté al principio del archivo
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+                pdf.output(temp_pdf.name, 'F')
+                temp_pdf.seek(0)  # Asegurarse de que el puntero esté al principio del archivo
 
             # Leer el contenido del archivo temporal
             with open(temp_pdf.name, 'rb') as f:
                 pdf_output = f.read()
 
-        st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf
+        st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf")
 
-    else:
-        st.warning("No hay ofertas que coincidan con los criterios de filtro.")
+        else:
+            st.warning("No hay ofertas que coincidan con los criterios de filtro.")
 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
