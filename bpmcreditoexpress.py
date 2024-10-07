@@ -632,7 +632,7 @@ def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
     # Verificar si hay ofertas enviadas
-    if 'ofertas_enviadas' not in st.session_state or not st.session_state.ofertas_enviadas:
+    if 'ofertas_enviadas' not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas enviadas para gestionar.")
         return
 
