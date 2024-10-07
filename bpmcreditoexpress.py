@@ -560,7 +560,7 @@ def enviar_oferta():
     errores_count = {
         "Score Crediticio": 0,
         "Capacidad de Pago": 0,
-        "Estado de Crédito": 0
+        "Estado Crédito": 0
     }
     
     for beneficiario in beneficiarios_con_errores:
@@ -570,7 +570,7 @@ def enviar_oferta():
         if "Capacidad de pago insuficiente." in errores:
             errores_count["Capacidad de Pago"] += 1
         if "Estado de Crédito no aprobado." in errores:
-            errores_count["Estado de Crédito"] += 1
+            errores_count["Estado Crédito"] += 1
 
     fig2, ax2 = plt.subplots()
     ax2.bar(errores_count.keys(), errores_count.values(), color='skyblue')
