@@ -500,6 +500,7 @@ def realizar_validaciones(beneficiario):
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
+    # Verificar y establecer las variables de estado necesarias
     if 'beneficiarios_validados' not in st.session_state:
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
@@ -507,7 +508,11 @@ def enviar_oferta():
     if 'ofertas_enviadas' not in st.session_state:
         st.session_state['ofertas_enviadas'] = []
 
+    if 'beneficiarios_con_errores' not in st.session_state:
+        st.session_state['beneficiarios_con_errores'] = []  # Inicializa la lista si no existe
+
     beneficiarios_validados = st.session_state['beneficiarios_validados']
+    beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
 
@@ -525,41 +530,36 @@ def enviar_oferta():
             oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
             oferta["Año"] = año_seleccionado
             oferta["Periodo"] = periodo_seleccionado
-            st.session_state.ofertas_enviadas.append(oferta)
+            st.session_state['ofertas_enviadas'].append(oferta)
 
         st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
-    else:
-        st.info("No se han enviado ofertas todavía.")
-
 
     # Crear un DataFrame con los beneficiarios aprobados
     df_aprobados = pd.DataFrame(beneficiarios_validados)
-
-    # Agregar las columnas de año y periodo seleccionados
     df_aprobados['Año'] = año_seleccionado
     df_aprobados['Periodo'] = periodo_seleccionado
 
     # Botón para descargar ofertas aprobadas
     if st.button("Descargar Excel con ofertas aprobadas"):
         # Crear el archivo Excel
-        excel_file = df_aprobados.to_excel("ofertas_aprobadas.xlsx", index=False)
-
-        # Proporcionar un botón de descarga
-        st.download_button(
-            label="Descargar Excel",
-            data=df_aprobados.to_csv(index=False).encode('utf-8'),
-            file_name="ofertas_aprobadas.csv",
-            mime="text/csv"
-        )
-        st.success("Archivo Excel listo para descargar.")
+        try:
+            st.download_button(
+                label="Descargar Excel",
+                data=df_aprobados.to_csv(index=False).encode('utf-8'),
+                file_name="ofertas_aprobadas.csv",
+                mime="text/csv"
+            )
+            st.success("Archivo Excel listo para descargar.")
+        except Exception as e:
+            st.error(f"Ocurrió un error al descargar el archivo: {e}")
 
     # Mostrar cuántos beneficiarios tienen errores
-    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
+    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")  # Aquí está la verificación
 
     if len(beneficiarios_con_errores) > 0:
         st.info("No se enviarán ofertas a los beneficiarios con errores.")
-        
-        # Crear contadores para las validaciones fallidas
+
+        # Generación de datos para el gráfico tipo embudo
         validacion1_fallos = 0
         validacion2_fallos = 0
         validacion3_fallos = 0
@@ -573,7 +573,7 @@ def enviar_oferta():
             if "Antecedentes menores a 90 días" in errores:
                 validacion3_fallos += 1
 
-        # Generar datos para el gráfico tipo embudo
+        # Generar datos para el gráfico
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
         etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
 
@@ -585,6 +585,7 @@ def enviar_oferta():
 
         # Mostrar el gráfico en Streamlit
         st.pyplot(fig)
+
 
     # Mostrar gráficos adicionales
 
