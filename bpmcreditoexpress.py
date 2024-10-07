@@ -661,16 +661,15 @@ def gestion_comercial():
     if 'Fecha' in df_ofertas.columns:
     # Asegurarse de que la columna 'Fecha' esté en formato datetime
         df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
+    
+    # Filtrar por semestre
+        if periodo_seleccionado == "1er Semestre":
+            df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 1) & (df_ofertas['Fecha'].dt.month <= 6)]
+        else:  # 2do Semestre
+            df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 7) & (df_ofertas['Fecha'].dt.month <= 12)]
     else:
         st.error("La columna 'Fecha' no se encuentra en los datos.")
-    return
-
-
-    # Filtrar por semestre
-    if periodo_seleccionado == "1er Semestre":
-        df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 1) & (df_ofertas['Fecha'].dt.month <= 6)]
-    else:  # 2do Semestre
-        df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 7) & (df_ofertas['Fecha'].dt.month <= 12)]
+        return  # Agregar return para salir de la función en caso de error
 
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
