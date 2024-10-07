@@ -475,7 +475,7 @@ def realizar_validaciones(beneficiario):
     errores = []
     
     # Verificar que existan las claves necesarias en los datos del beneficiario
-    required_keys = ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']
+    required_keys = ['Estado Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']
     for key in required_keys:
         if key not in beneficiario:
             errores.append(f"Falta el campo: {key}.")
@@ -487,7 +487,7 @@ def realizar_validaciones(beneficiario):
         return errores
     
     # Condiciones de validación
-    if beneficiario.get('Estado de Crédito') in ['Castigado', 'En Mora y Castigado']:
+    if beneficiario.get('Estado Crédito') in ['Castigado', 'En Mora y Castigado']:
         errores.append("Estado de Crédito no aprobado.")
     if beneficiario.get('Score Crediticio', 0) < 610:
         errores.append("El score crediticio debe ser de mínimo 610 puntos.")
