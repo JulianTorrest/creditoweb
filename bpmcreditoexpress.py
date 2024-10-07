@@ -496,7 +496,6 @@ def realizar_validaciones(beneficiario):
     
     return errores
 
-
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
@@ -524,6 +523,25 @@ def enviar_oferta():
     # Agregar filtro por periodo
     periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
 
+    # Botón para enviar ofertas a todos los beneficiarios que pasaron las validaciones
+    if st.button("Enviar oferta a todos los beneficiarios validados"):
+        for beneficiario in beneficiarios_validados:
+            oferta = beneficiario.copy()
+            oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
+            oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
+            oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])  # Asignar un valor entre 3,000,000 y la capacidad de pago
+            st.session_state.ofertas_enviadas.append(oferta)
+
+        st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+    else:
+        st.info("No se han enviado ofertas todavía.")
+
+    # Mostrar ofertas ya enviadas
+    if st.session_state.ofertas_enviadas:
+        st.write("Ofertas ya enviadas:")
+        for oferta in st.session_state.ofertas_enviadas:
+            st.write(oferta)
+
     # Botón para descargar ofertas aprobadas
     if st.button("Descargar Excel con ofertas aprobadas"):
         # Crear un DataFrame con los beneficiarios aprobados
@@ -535,8 +553,40 @@ def enviar_oferta():
 
         # Descargar el archivo en formato Excel
         df_aprobados.to_excel("ofertas_aprobadas.xlsx", index=False)
-
         st.success("Archivo Excel descargado con éxito.")
+
+    # Mostrar cuántos beneficiarios tienen errores
+    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
+
+    if len(beneficiarios_con_errores) > 0:
+        st.info("No se enviarán ofertas a los beneficiarios con errores.")
+        
+        # Crear contadores para las validaciones fallidas
+        validacion1_fallos = 0
+        validacion2_fallos = 0
+        validacion3_fallos = 0
+
+        for beneficiario in beneficiarios_con_errores:
+            errores = realizar_validaciones(beneficiario)
+            if "El score crediticio debe ser de mínimo 610 puntos." in errores:
+                validacion1_fallos += 1
+            if "Capacidad de pago insuficiente." in errores:
+                validacion2_fallos += 1
+            if "Antecedentes menores a 90 días" in errores:
+                validacion3_fallos += 1
+
+        # Generar datos para el gráfico tipo embudo
+        fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
+        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
+
+        # Crear gráfico tipo embudo
+        fig, ax = plt.subplots()
+        ax.barh(etapas, fallos_validaciones, color='skyblue')
+        ax.set_xlabel('Número de Fallos')
+        ax.set_title('Embudo de Validaciones Fallidas')
+
+        # Mostrar el gráfico en Streamlit
+        st.pyplot(fig)
     
     # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
