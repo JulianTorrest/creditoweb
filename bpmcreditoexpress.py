@@ -585,7 +585,7 @@ def enviar_oferta():
         # Crear contadores para las validaciones fallidas
         validacion1_fallos = errores_count["Score Crediticio"]
         validacion2_fallos = errores_count["Capacidad de Pago"]
-        validacion3_fallos = errores_count["Estado de Crédito"]
+        validacion3_fallos = errores_count["Estado Crédito"]
 
         # Generar datos para el gráfico tipo embudo
         total_beneficiarios = len(beneficiarios_validados) + len(beneficiarios_con_errores)
