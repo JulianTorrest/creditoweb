@@ -255,10 +255,13 @@ def mostrar_graficos(df_beneficiarios):
     plt.suptitle('')  # Para eliminar el título automático del boxplot
     st.pyplot(fig)
  
-    # Gráfico 11: Matriz de Correlación
+    # Filtrar solo las columnas numéricas
+    df_numerico = df_beneficiarios.select_dtypes(include=['number'])
+
+    # Crear el heatmap de correlación
     fig, ax = plt.subplots()
-    sns.heatmap(df_beneficiarios.corr(), annot=True, cmap='coolwarm', ax=ax)
-    ax.set_title('Matriz de Correlación entre Variables')
+    sns.heatmap(df_numerico.corr(), annot=True, cmap='coolwarm', ax=ax)
+    ax.set_title('Matriz de Correlación')
     st.pyplot(fig)
 
     # Gráfico 12: Evolución de la Capacidad de Pago Promedio por Año
