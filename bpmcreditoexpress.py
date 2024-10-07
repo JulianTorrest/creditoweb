@@ -723,12 +723,12 @@ def gestion_comercial():
         st.session_state.beneficiarios = []  # Inicializar la lista si no existe
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
-            st.write(f"Estado: {oferta['Estado']}")
             st.write(f"Interesado: {oferta['Interesado']}")
 
             # Ajustar la respuesta de garantía firmada
             if oferta['Interesado'] == "No":
                 st.write("¿Garantía firmada? No")  # No se firma garantía si no está interesado
+                estado = "Garantía No Firmada"
             elif oferta['Interesado'] == "Sí":
                 st.write(f"¿Garantía firmada? {'Sí'}")
                 garantia_firmada = st.checkbox("Garantía firmada recibida", value=True, key=f"garantia_firmada_{i}")
@@ -736,10 +736,15 @@ def gestion_comercial():
                     st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
                     st.session_state.beneficiarios.append(oferta)  # Agregar a beneficiarios
                     st.write("Gracias, hemos registrado la garantía firmada.")
+                    estado = "Garantía Firmada"
                 else:
                     st.write("Esperando la confirmación de la garantía firmada.")
+                    estado = "Esperando Confirmación"
             elif oferta['Interesado'] == "Sí, pero después":
                 st.write("¿Garantía firmada? No se requiere pregunta.")  # No se hace seguimiento de garantías
+                estado = "No se requiere seguimiento"
+
+            st.write(f"Estado: {estado}")  # Mostrar el estado derivado
 
             if oferta['Interesado'] == "Sí, pero después":
                 st.write("Generando marca 'Sí, pero después'...")
@@ -751,7 +756,6 @@ def gestion_comercial():
             elif oferta['Interesado'] == "Sí":
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
-
                 
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
