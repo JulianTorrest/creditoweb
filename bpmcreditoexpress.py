@@ -445,9 +445,12 @@ def validacion_beneficiarios():
 # Función para realizar las validaciones
 def realizar_validaciones(beneficiario):
     errores = []
-    if not all(k in beneficiario for k in ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']):
+    
+    # Verificar que existan las claves necesarias en los datos del beneficiario
+    if not all(k in beneficiario and beneficiario[k] is not None for k in ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']):
         errores.append("Datos incompletos para validación.")
         return errores
+    
     # Condiciones de validación
     if beneficiario.get('Estado de Crédito') in ['Castigado', 'En Mora y Castigado']:
         errores.append("Estado de Crédito no aprobado.")
@@ -455,8 +458,8 @@ def realizar_validaciones(beneficiario):
         errores.append("El score crediticio debe ser de mínimo 610 puntos.")
     if beneficiario.get('Capacidad de Pago (COP)', 0) < 3000000:
         errores.append("Capacidad de pago insuficiente.")
+    
     return errores
-
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
