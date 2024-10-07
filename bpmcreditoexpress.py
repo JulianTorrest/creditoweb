@@ -536,18 +536,26 @@ def enviar_oferta():
     else:
         st.info("No se han enviado ofertas todavía.")
 
+    # Crear un DataFrame con los beneficiarios aprobados
+    df_aprobados = pd.DataFrame(beneficiarios_validados)
+
+    # Agregar las columnas de año y periodo seleccionados
+    df_aprobados['Año'] = año_seleccionado
+    df_aprobados['Periodo'] = periodo_seleccionado
+
     # Botón para descargar ofertas aprobadas
     if st.button("Descargar Excel con ofertas aprobadas"):
-        # Crear un DataFrame con los beneficiarios aprobados
-        df_aprobados = pd.DataFrame(beneficiarios_validados)
+        # Crear el archivo Excel
+        excel_file = df_aprobados.to_excel("ofertas_aprobadas.xlsx", index=False)
 
-        # Agregar las columnas de año y periodo seleccionados
-        df_aprobados['Año'] = año_seleccionado
-        df_aprobados['Periodo'] = periodo_seleccionado
-
-        # Descargar el archivo en formato Excel
-        df_aprobados.to_excel("ofertas_aprobadas.xlsx", index=False)
-        st.success("Archivo Excel descargado con éxito.")
+        # Proporcionar un botón de descarga
+        st.download_button(
+            label="Descargar Excel",
+            data=df_aprobados.to_csv(index=False).encode('utf-8'),
+            file_name="ofertas_aprobadas.csv",
+            mime="text/csv"
+        )
+        st.success("Archivo Excel listo para descargar.")
 
     # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
@@ -586,7 +594,6 @@ def enviar_oferta():
 
     # Gráfico 1: Cantidad de beneficiarios aprobados por semestre/año
     st.subheader("Cantidad de beneficiarios aprobados por semestre/año")
-    df_aprobados = pd.DataFrame(beneficiarios_validados)
     if not df_aprobados.empty:
         aprobados_por_periodo = df_aprobados.groupby(['Año', 'Periodo']).size().unstack(fill_value=0)
         fig1, ax1 = plt.subplots()
@@ -618,7 +625,6 @@ def enviar_oferta():
     ax2.set_ylabel('Número de Beneficiarios')
     ax2.set_title('Cantidad de Beneficiarios con Errores por Tipo')
     st.pyplot(fig2)
-
 
 # Página de gestión comercial de ofertas
 def gestion_comercial():
