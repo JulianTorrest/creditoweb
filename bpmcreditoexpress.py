@@ -254,22 +254,14 @@ def mostrar_graficos(df_beneficiarios):
     ax.set_ylabel('Score Crediticio')
     plt.suptitle('')  # Para eliminar el título automático del boxplot
     st.pyplot(fig)
-
-    # Gráfico 11: Score Crediticio y Capacidad de Pago Promedio por Nacionalidad
-    fig, ax = plt.subplots()
-    df_grouped = df_beneficiarios.groupby('Nacionalidad').mean()
-    df_grouped[['Score Crediticio', 'Capacidad de Pago (COP)']].plot(kind='bar', stacked=True, ax=ax, color=['lightblue', 'lightgreen'])
-    ax.set_title('Score Crediticio y Capacidad de Pago Promedio por Nacionalidad')
-    ax.set_ylabel('Promedio')
-    st.pyplot(fig)
-
-    # Gráfico 12: Matriz de Correlación
+ 
+    # Gráfico 11: Matriz de Correlación
     fig, ax = plt.subplots()
     sns.heatmap(df_beneficiarios.corr(), annot=True, cmap='coolwarm', ax=ax)
     ax.set_title('Matriz de Correlación entre Variables')
     st.pyplot(fig)
 
-    # Gráfico 13: Evolución de la Capacidad de Pago Promedio por Año
+    # Gráfico 12: Evolución de la Capacidad de Pago Promedio por Año
     fig, ax = plt.subplots()
     df_beneficiarios.groupby('Año')['Capacidad de Pago (COP)'].mean().plot(kind='line', ax=ax, marker='o', color='green')
     ax.set_title('Evolución de la Capacidad de Pago Promedio por Año')
@@ -277,7 +269,7 @@ def mostrar_graficos(df_beneficiarios):
     ax.set_xlabel('Año')
     st.pyplot(fig)
 
-    # Gráfico 14: Estado de Crédito por Grupo de Edad
+    # Gráfico 13: Estado de Crédito por Grupo de Edad
     df_beneficiarios['Grupo Edad'] = pd.cut(df_beneficiarios['Edad'], bins=[18, 30, 40, 50, 65], labels=["18-30", "31-40", "41-50", "51-65"])
 
     fig, ax = plt.subplots()
