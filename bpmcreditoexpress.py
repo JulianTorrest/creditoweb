@@ -471,9 +471,14 @@ def realizar_validaciones(beneficiario):
     # Verificar que existan las claves necesarias en los datos del beneficiario
     required_keys = ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']
     for key in required_keys:
-        if key not in beneficiario or beneficiario[key] is None:
-            errores.append("Datos incompletos para validación.")
-            return errores
+        if key not in beneficiario:
+            errores.append(f"Falta el campo: {key}.")
+        elif beneficiario[key] is None or beneficiario[key] == "":
+            errores.append(f"El campo '{key}' no puede estar vacío.")
+    
+    # Si hay errores en los campos requeridos, salir de la función
+    if errores:
+        return errores
     
     # Condiciones de validación
     if beneficiario.get('Estado de Crédito') in ['Castigado', 'En Mora y Castigado']:
@@ -484,6 +489,7 @@ def realizar_validaciones(beneficiario):
         errores.append("Capacidad de pago insuficiente.")
     
     return errores
+
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
