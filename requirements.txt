@@ -9,4 +9,3 @@ matplotlib
 openpyxl
 kaleido
 fpdf
-io
