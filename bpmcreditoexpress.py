@@ -442,12 +442,6 @@ def validacion_beneficiarios():
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
-import pandas as pd
-import streamlit as st
-import random
-from datetime import datetime
-import openpyxl
-
 # Función para enviar la oferta a los beneficiarios
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
@@ -481,7 +475,7 @@ def enviar_oferta():
 
         for beneficiario in beneficiarios_validados:
             # Filtrar beneficiarios cuyo estado de crédito no sea "Castigado" o "En Mora y Castigado"
-            if beneficiario.get("Estado de Credito") not in ["Castigado", "En Mora y Castigado"]:
+            if beneficiario.get("Estado de Credito") == "Ninguno":
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
@@ -494,7 +488,7 @@ def enviar_oferta():
                 # Guardar la oferta en el estado de sesión
                 st.session_state.ofertas_enviadas.append(oferta)
                 ofertas_enviadas.append(oferta)
-        
+
         # Crear un DataFrame con las ofertas enviadas
         df_ofertas = pd.DataFrame(ofertas_enviadas)
 
@@ -520,21 +514,37 @@ def enviar_oferta():
         validacion1_fallos = 0
         validacion2_fallos = 0
         validacion3_fallos = 0
+        validacion_estado_credito_fallos = 0  # Nuevo contador para Estado de Crédito
 
         for beneficiario in beneficiarios_con_errores:
             errores = realizar_validaciones(beneficiario)
+
+            # Contar fallos de validación
             if "El score crediticio debe ser de mínimo 610 puntos." in errores:
                 validacion1_fallos += 1
             if "Capacidad de pago insuficiente." in errores:
                 validacion2_fallos += 1
             if "Antecedentes menores a 90 días" in errores:
                 validacion3_fallos += 1
+            # Contar fallos por estado de crédito
+            if beneficiario.get("Estado de Credito") in ["Castigado", "En Mora y Castigado"]:
+                validacion_estado_credito_fallos += 1
 
         # Generar datos para el gráfico tipo embudo
         total_beneficiarios = len(beneficiarios_validados) + len(beneficiarios_con_errores)
-        fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
+        fallos_validaciones = [
+            validacion1_fallos, 
+            validacion2_fallos, 
+            validacion3_fallos, 
+            validacion_estado_credito_fallos  # Agregar la nueva etapa al gráfico
+        ]
 
-        etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
+        etapas = [
+            'Validación Score Crediticio', 
+            'Validación Capacidad de Pago', 
+            'Validación Antecedentes Crediticios',
+            'Validación Estado de Crédito'  # Nueva etapa para Estado de Crédito
+        ]
 
         # Crear gráfico tipo embudo
         fig, ax = plt.subplots()
