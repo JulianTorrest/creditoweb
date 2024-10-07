@@ -442,12 +442,13 @@ def validacion_beneficiarios():
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
 
-# Página para enviar la oferta al beneficiario
-def enviar_oferta():
-    st.title("Enviar Oferta a los Beneficiarios")
+import pandas as pd
+import streamlit as st
+import random
+from datetime import datetime
+import openpyxl
 
-
-# Página para enviar la oferta al beneficiario
+# Función para enviar la oferta a los beneficiarios
 def enviar_oferta():
     st.title("Enviar Oferta a los Beneficiarios")
 
@@ -460,33 +461,27 @@ def enviar_oferta():
     if 'ofertas_enviadas' not in st.session_state:
         st.session_state.ofertas_enviadas = []
 
-    if 'ofertas_en_proceso' not in st.session_state:
-        st.session_state.ofertas_en_proceso = []
-
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
     # Mostrar cuántos beneficiarios pasaron las validaciones
     st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
 
-    # Mostrar ofertas ya enviadas
-    if st.session_state.ofertas_enviadas:
-        st.write("Ofertas ya enviadas:")
-        for oferta in st.session_state.ofertas_enviadas:
-            st.write(oferta)
+    # Agregar filtro por año
+    anio_actual = datetime.now().year
+    anos = list(range(2021, anio_actual + 1))
+    año_seleccionado = st.selectbox("Seleccione un año:", anos)
 
-    if len(beneficiarios_validados) > 0:
-        # Agregar filtro por año
-        anio_actual = datetime.now().year  # Asegúrate de usar datetime correctamente
-        anos = list(range(2021, anio_actual + 1))
-        año_seleccionado = st.selectbox("Seleccione un año:", anos)
+    # Agregar filtro por periodo
+    periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
 
-        # Agregar filtro por periodo
-        periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
+    # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
+    if st.button("Enviar oferta a todos los beneficiarios validados"):
+        ofertas_enviadas = []
 
-        # Botón para enviar la oferta a todos los beneficiarios que pasaron las validaciones
-        if st.button("Enviar oferta a todos los beneficiarios validados"):
-            for beneficiario in beneficiarios_validados:
+        for beneficiario in beneficiarios_validados:
+            # Filtrar beneficiarios cuyo estado de crédito no sea "Castigado" o "En Mora y Castigado"
+            if beneficiario.get("Estado de Credito") not in ["Castigado", "En Mora y Castigado"]:
                 oferta = beneficiario.copy()
                 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
                 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
@@ -496,19 +491,24 @@ def enviar_oferta():
                 oferta["Año"] = año_seleccionado
                 oferta["Periodo"] = periodo_seleccionado
                 
+                # Guardar la oferta en el estado de sesión
                 st.session_state.ofertas_enviadas.append(oferta)
-                st.session_state.ofertas_en_proceso.append({
-                    "Nombre": beneficiario["Nombre"],
-                    "Estado": "Enviada",
-                    "Interesado": oferta["Interesado"],
-                    "GarantiaFirmada": oferta["GarantiaFirmada"],
-                    "Valor": oferta["Valor"],
-                    "Año": año_seleccionado,
-                    "Periodo": periodo_seleccionado
-                })
-            st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
-        else:
-            st.info("No se han enviado ofertas todavía.")
+                ofertas_enviadas.append(oferta)
+        
+        # Crear un DataFrame con las ofertas enviadas
+        df_ofertas = pd.DataFrame(ofertas_enviadas)
+
+        # Guardar el DataFrame como archivo Excel
+        output_excel = "ofertas_enviadas.xlsx"
+        df_ofertas.to_excel(output_excel, index=False)
+
+        # Ofrecer la descarga del archivo Excel
+        with open(output_excel, "rb") as f:
+            st.download_button(label="Descargar archivo de ofertas en Excel", data=f, file_name=output_excel, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+        st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+    else:
+        st.info("No se han enviado ofertas todavía.")
 
     # Mostrar cuántos beneficiarios tienen errores
     st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")
