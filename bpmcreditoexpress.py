@@ -356,19 +356,6 @@ def mostrar_graficos(df_beneficiarios):
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     st.pyplot(fig)
 
-
-
-
-
-
-
-
-
-
-
-
-    
-
 # Funciones de la aplicación
 def firma_garantias(oferta):
     st.write(f"Firmando garantías para {oferta['Nombre']}...")
