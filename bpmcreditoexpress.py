@@ -77,11 +77,22 @@ def validar_antecedentes(deudor, fecha_antecedentes):
 
 def realizar_validaciones(deudor):
     errores = []
+    
+    # Verificar si el Estado de Crédito está presente
+    if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
+        errores.append("Datos incompletos para validación: Estado Crédito faltante.")
+        return errores  # Salir temprano si hay datos incompletos
+
+    # Validar score crediticio
     if deudor["Score Crediticio"] < 610:
         errores.append("El score crediticio debe ser de mínimo 610 puntos.")
+    
+    # Validar capacidad de pago
     if deudor["Capacidad de Pago (COP)"] < 3000000:
         errores.append("Capacidad de pago insuficiente.")
+    
     return errores
+
 
 def validar_nacionalidad(deudor):
     if deudor['Nacionalidad'] != 'Colombiano':
