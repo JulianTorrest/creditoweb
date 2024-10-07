@@ -631,9 +631,9 @@ def enviar_oferta():
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
-    # Verificar si hay ofertas en proceso
-    if 'ofertas_en_proceso' not in st.session_state or not st.session_state.ofertas_en_proceso:
-        st.warning("No hay ofertas en proceso para gestionar.")
+    # Verificar si hay ofertas enviadas
+    if 'ofertas_enviadas' not in st.session_state or not st.session_state.ofertas_enviadas:
+        st.warning("No hay ofertas enviadas para gestionar.")
         return
 
     # Seleccionar año
