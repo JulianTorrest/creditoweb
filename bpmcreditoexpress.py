@@ -458,9 +458,11 @@ def realizar_validaciones(beneficiario):
     errores = []
     
     # Verificar que existan las claves necesarias en los datos del beneficiario
-    if not all(k in beneficiario and beneficiario[k] is not None for k in ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']):
-        errores.append("Datos incompletos para validación.")
-        return errores
+    required_keys = ['Estado de Crédito', 'Score Crediticio', 'Capacidad de Pago (COP)']
+    for key in required_keys:
+        if key not in beneficiario or beneficiario[key] is None:
+            errores.append("Datos incompletos para validación.")
+            return errores
     
     # Condiciones de validación
     if beneficiario.get('Estado de Crédito') in ['Castigado', 'En Mora y Castigado']:
