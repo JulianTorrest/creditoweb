@@ -505,8 +505,8 @@ def enviar_oferta():
         st.warning("No se ha realizado la validación de beneficiarios.")
         return
 
-    if 'ofertas_enviadas' not in st.session_state:
-        st.session_state['ofertas_enviadas'] = []
+    if 'ofertas_en_proceso' not in st.session_state:
+        st.session_state['ofertas_en_proceso'] = []
 
     if 'beneficiarios_con_errores' not in st.session_state:
         st.session_state['beneficiarios_con_errores'] = []  # Inicializa la lista si no existe
@@ -530,7 +530,7 @@ def enviar_oferta():
             oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
             oferta["Año"] = año_seleccionado
             oferta["Periodo"] = periodo_seleccionado
-            st.session_state['ofertas_enviadas'].append(oferta)
+            st.session_state['ofertas_en_proceso'].append(oferta)
 
         st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
 
@@ -628,7 +628,7 @@ def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
 
     # Verificar si hay ofertas enviadas
-    if 'ofertas_enviadas' not in st.session_state or not st.session_state.ofertas_en_proceso:
+    if 'ofertas_en_proceso' not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas enviadas para gestionar.")
         return
 
