@@ -8,6 +8,7 @@ from datetime import datetime,timedelta  # Importación directa de datetime
 import seaborn as sns
 from fpdf import FPDF
 import io
+import tempfile
 
 
 # Crear una función para generar datos ficticios
