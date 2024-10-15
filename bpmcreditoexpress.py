@@ -840,13 +840,12 @@ def gestion_ordenador_gasto():
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
     porcentaje_progreso = max(0, min((presupuesto_disponible / 10000) * 100, 100))
-    
+
     # Mostrar presupuesto
-    # Calcular el porcentaje de progreso asegurándote de que sea un número entero en el rango de 0 a 100
     if presupuesto_disponible > 0:
         porcentaje_progreso = (presupuesto_disponible / 10000) * 100
     else:
-        porcentaje_progreso = 0  # Si no hay presupuesto disponible, establecer en 0
+        porcentaje_progreso = 0
 
     # Asegúrate de que porcentaje_progreso esté en el rango correcto
     porcentaje_progreso = max(0, min(100, int(porcentaje_progreso)))
@@ -906,56 +905,60 @@ def gestion_ordenador_gasto():
 
     # Consultar todos los casos
     if st.button("Consultar todos los Casos"):
+        st.subheader("Tabla de Todos los Casos")
+        st.dataframe(df_ofertas)
+
         for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
-            st.write(beneficiario)
+            st.write(f"¿Garantía Firmada?: {beneficiario['GarantiaFirmada']}")
+            st.write(f"Tiene Convenio: {beneficiario['tiene_convenio']}")
+            
+            # Botones para aprobar o no aprobar desembolsos
+            if st.button(f"Aprobar Desembolso para IES {beneficiario.get('Nombre')}", key=f"aprobar_{index}"):
+                st.session_state.aprobado = beneficiario['Valor']
+                st.write(f"Valor Total Solicitado: {beneficiario['Valor']} millones de pesos")
+                if st.button(f"Aprobar desembolso a la IES {beneficiario.get('Nombre')}", key=f"aprobacion_{index}"):
+                    st.success("Iniciando liquidación automática del desembolso...")
+                    st.write(f"Instrucción de giro generada para {beneficiario.get('Nombre')} con un valor de {beneficiario['Valor']} millones de pesos.")
+                elif st.button(f"No Aprobar desembolso a la IES {beneficiario.get('Nombre')}", key=f"no_aprobacion_{index}"):
+                    st.write("Regresando a la lista de acciones.")
 
-            if beneficiario['tiene_convenio'] == "No":
-                if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                    info_bancaria = generar_info_bancaria()
-                    if info_bancaria:
-                        st.write(f"NIT: {info_bancaria['NIT']}")
-                        st.write(f"Nombre IES: {info_bancaria['Nombre']}")
-                        st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
-                        st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
-                        st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
-                        st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
-
-                        if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                            validacion_info = random.choice(["Sí", "No"])
-                            if validacion_info == "Sí":
-                                st.success("Validación exitosa. Procediendo a giro...")
-                                if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
-                                    st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
-                            else:
-                                st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
-            else:
-                st.success("Iniciando liquidación automática del desembolso...")
-                instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre')}."
-                st.write(instruccion_giro)
-                if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                    st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
-
-    # Filtro para aprobar desembolsos
-    selected_ies = st.multiselect("Selecciona las IES para aprobar desembolsos:", df_ofertas['Nombre'].unique())
-
-    if st.button("Aprobar Desembolso por IES"):
-        if selected_ies:
-            total_aprobado = df_ofertas[df_ofertas['Nombre'].isin(selected_ies)]['Valor'].sum()
-            if presupuesto_disponible >= total_aprobado:
-                presupuesto_disponible -= total_aprobado
-                st.success(f"Se ha aprobado el giro total de {total_aprobado} millones de pesos para las IES seleccionadas.")
-            else:
-                st.error("No hay suficiente presupuesto para aprobar el giro.")
+        # Botón para descargar todos los casos en Excel
+        if st.button("Descargar todos los casos en Excel"):
+            # Lógica para descargar el DataFrame a un archivo Excel
+            df_ofertas.to_excel("todos_los_casos.xlsx", index=False)
+            st.success("Archivo descargado: todos_los_casos.xlsx")
 
     # Botón para solicitar información financiera para IES sin información
     if st.button("Solicitar Información Financiera para IES sin Información"):
         for index, beneficiario in enumerate(ofertas_sin_convenio.to_dict('records')):
             st.write(f"Solicitando información financiera para IES: {beneficiario.get('Nombre')}...")
-            # Lógica para solicitar información financiera aquí
+            info_bancaria = generar_info_bancaria()
+            st.write(f"NIT: {info_bancaria['NIT']}")
+            st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+            st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+            st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+            st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+            st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+            st.write(f"Valor: {info_bancaria['Valor']} millones de pesos")
+            if st.button("Cuenta Bancaria Registrada", key=f"registrada_{index}"):
+                st.success("Iniciando liquidación automática del desembolso...")
+                st.write(f"Instrucción de giro generada para {info_bancaria['Nombre']}.")
 
-    # Mostrar nuevamente el progreso
-    st.progress(max(0, min(100, (presupuesto_disponible / 10000) * 100)))
+                # Botón para aprobar liquidación del desembolso
+                if st.button("Aprobar Liquidación del Desembolso", key=f"aprobar_liquidacion_{index}"):
+                    st.success("Datos financieros de la IES aprobados:")
+                    st.write(info_bancaria)
+                    st.write(f"Valor Total Solicitado: {info_bancaria['Valor']} millones de pesos.")
+                    if st.button(f"Aprobar Desembolso a {info_bancaria['Nombre']}", key=f"aprobar_desembolso_{index}"):
+                        st.success("Desembolso aprobado.")
+                    if st.button(f"No Aprobar Desembolso a {info_bancaria['Nombre']}", key=f"no_aprobar_desembolso_{index}"):
+                        st.write("Desembolso no aprobado, regresando a la lista.")
+
+    # Mostrar nuevamente las ofertas en proceso
+    st.subheader("Ofertas en Proceso")
+    st.dataframe(df_ofertas)
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
