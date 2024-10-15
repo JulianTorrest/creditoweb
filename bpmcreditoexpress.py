@@ -808,7 +808,7 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
-ef gestion_ordenador_gasto():
+def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
