@@ -808,7 +808,7 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
-def gestion_ordenador_gasto():
+ef gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
@@ -817,6 +817,7 @@ def gestion_ordenador_gasto():
 
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
+    # Verificaciones de columnas
     if 'GarantiaFirmada' not in df_ofertas.columns:
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
         return
@@ -835,33 +836,25 @@ def gestion_ordenador_gasto():
         st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
         return
 
+    # Presupuesto y progreso
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
-
-    # Calcular el porcentaje de progreso
-    if presupuesto_disponible > 0:  # Asegurarse de que el presupuesto no sea cero o negativo
-        porcentaje_progreso = min((presupuesto_disponible / 10000) * 100, 100)  # Asegurar que no exceda 100
-    else:
-        porcentaje_progreso = 0  # Si no hay presupuesto disponible, el progreso es 0
-
-    # Mostrar presupuesto disponible con barra de progreso
-    if presupuesto_disponible < 0:
-        st.error("El presupuesto disponible no puede ser negativo.")
-        presupuesto_disponible = 0  # Asegúrate de que sea cero si está por debajo
-
-    # Mostrar el porcentaje de progreso asegurando que sea válido
+    porcentaje_progreso = max(0, min((presupuesto_disponible / 10000) * 100, 100))
+    
+    # Mostrar presupuesto
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
-    st.progress(max(0, min(100, porcentaje_progreso)))  # Asegúrate de que esté entre 0 y 100
+    st.progress(porcentaje_progreso)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
+    # Control presupuestal
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
         "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, 10000 - presupuesto_disponible - presupuesto_comprometido]
     })
-    
     st.subheader("Control Presupuestal")
     st.dataframe(control_presupuestal)
 
+    # Indicadores de cantidad y valor
     cantidad_ofertas = df_ofertas.shape[0]
     ofertas_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
     ofertas_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
@@ -873,7 +866,7 @@ def gestion_ordenador_gasto():
     total_convenio = ofertas_convenio['Valor'].sum()
     total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
 
-    # Mejorar visualización agregando barras de progreso
+    # Indicadores de cantidades
     st.subheader("Indicadores de Cantidades")
     indicadores_cantidad = pd.DataFrame({
         "Indicador": [
@@ -885,6 +878,7 @@ def gestion_ordenador_gasto():
     })
     st.dataframe(indicadores_cantidad)
 
+    # Indicadores de valores
     st.subheader("Indicadores de Valores")
     indicadores_valor = pd.DataFrame({
         "Indicador": [
@@ -896,78 +890,63 @@ def gestion_ordenador_gasto():
     })
     st.dataframe(indicadores_valor)
 
-    # Mostrar gráfica de barras de valores formateados
+    # Gráficos de indicadores
     st.subheader("Gráficos de Indicadores")
-    plt.figure(figsize=(8, 4))
-    plt.bar(indicadores_cantidad['Indicador'], indicadores_cantidad['Valor'], color=['blue', 'orange', 'green'])
-    plt.title("Indicadores de Cantidades")
-    plt.xticks(rotation=45)
-    plt.ylabel("Cantidad")
-    st.pyplot(plt)
+    st.bar_chart(indicadores_cantidad.set_index('Indicador'))
+    st.bar_chart(indicadores_valor.set_index('Indicador'))
 
-    plt.figure(figsize=(8, 4))
-    plt.bar(indicadores_valor['Indicador'], indicadores_valor['Valor'], color=['blue', 'orange', 'green'])
-    plt.title("Indicadores de Valores")
-    plt.xticks(rotation=45)
-    plt.ylabel("Valor (millones de pesos)")
-    ax = plt.gca()
-    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
-    st.pyplot(plt)
+    # Consultar todos los casos
+    if st.button("Consultar todos los Casos"):
+        for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
+            st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
+            st.write(beneficiario)
 
-    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
-        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
+            if beneficiario['tiene_convenio'] == "No":
+                if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
+                    info_bancaria = generar_info_bancaria()
+                    if info_bancaria:
+                        st.write(f"NIT: {info_bancaria['NIT']}")
+                        st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+                        st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+                        st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+                        st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+                        st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
-        if beneficiario['tiene_convenio'] == "No":
-            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()
-                if info_bancaria:
-                    st.write(f"NIT: {info_bancaria['NIT']}")
-                    st.write(f"Nombre IES: {info_bancaria['Nombre']}")
-                    st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
-                    st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
-                    st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
-                    st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
-                    
-                    if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                        validacion_info = random.choice(["Sí", "No"])
-                        if validacion_info == "Sí":
-                            st.success("Validación exitosa. Procediendo a giro...")
-                            if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
-                                st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
-                        else:
-                            st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
-        else:
-            st.success("Iniciando liquidación automática del desembolso...")
-            instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre')}."
-            st.write(instruccion_giro)
-            if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
-    
-    # Crear columnas
-    col1, col2 = st.columns(2)
+                        if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
+                            validacion_info = random.choice(["Sí", "No"])
+                            if validacion_info == "Sí":
+                                st.success("Validación exitosa. Procediendo a giro...")
+                                if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
+                                    st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
+                            else:
+                                st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
+            else:
+                st.success("Iniciando liquidación automática del desembolso...")
+                instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre')}."
+                st.write(instruccion_giro)
+                if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
+                    st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
 
-    with col1:
-        if st.button("Aprobar Digitalmente IES con Convenio"):
-            total_aprobado_convenio = ofertas_convenio['Valor'].sum()
-            if presupuesto_disponible >= total_aprobado_convenio:
-                presupuesto_disponible -= total_aprobado_convenio
-                st.success(f"Se ha aprobado el giro total de {total_aprobado_convenio} millones de pesos.")
+    # Filtro para aprobar desembolsos
+    selected_ies = st.multiselect("Selecciona las IES para aprobar desembolsos:", df_ofertas['Nombre'].unique())
+
+    if st.button("Aprobar Desembolso por IES"):
+        if selected_ies:
+            total_aprobado = df_ofertas[df_ofertas['Nombre'].isin(selected_ies)]['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado:
+                presupuesto_disponible -= total_aprobado
+                st.success(f"Se ha aprobado el giro total de {total_aprobado} millones de pesos para las IES seleccionadas.")
             else:
                 st.error("No hay suficiente presupuesto para aprobar el giro.")
 
-    with col2:
-        if st.button("Aprobar Digitalmente IES sin Convenio"):
-            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
-            if presupuesto_disponible >= total_aprobado_sin_convenio:
-                presupuesto_disponible -= total_aprobado_sin_convenio
-                st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones de pesos.")
-            else:
-                st.error("No hay suficiente presupuesto para aprobar el giro.")
+    # Botón para solicitar información financiera para IES sin información
+    if st.button("Solicitar Información Financiera para IES sin Información"):
+        for index, beneficiario in enumerate(ofertas_sin_convenio.to_dict('records')):
+            st.write(f"Solicitando información financiera para IES: {beneficiario.get('Nombre')}...")
+            # Lógica para solicitar información financiera aquí
 
-    # Actualización de la barra de progreso
+    # Mostrar nuevamente el progreso
     st.progress(max(0, min(100, (presupuesto_disponible / 10000) * 100)))
-
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
