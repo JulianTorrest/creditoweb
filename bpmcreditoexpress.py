@@ -943,8 +943,10 @@ def gestion_ordenador_gasto():
             if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                 st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
     
-    # Actualización en tiempo real del presupuesto
-    with st.columns(2):
+    # Crear columnas
+    col1, col2 = st.columns(2)
+
+    with col1:
         if st.button("Aprobar Digitalmente IES con Convenio"):
             total_aprobado_convenio = ofertas_convenio['Valor'].sum()
             if presupuesto_disponible >= total_aprobado_convenio:
@@ -953,6 +955,7 @@ def gestion_ordenador_gasto():
             else:
                 st.error("No hay suficiente presupuesto para aprobar el giro.")
 
+    with col2:
         if st.button("Aprobar Digitalmente IES sin Convenio"):
             total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
             if presupuesto_disponible >= total_aprobado_sin_convenio:
@@ -963,6 +966,7 @@ def gestion_ordenador_gasto():
 
     # Actualización de la barra de progreso
     st.progress(max(0, min(100, (presupuesto_disponible / 10000) * 100)))
+
 
 
 #Pagina de creación de indicadores 
