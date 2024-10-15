@@ -849,12 +849,10 @@ def gestion_ordenador_gasto():
         st.error("El presupuesto disponible no puede ser negativo.")
         presupuesto_disponible = 0  # Asegúrate de que sea cero si está por debajo
 
-    porcentaje_progreso = min((presupuesto_disponible / 10000) * 100, 100)  # Asegúrate de que no exceda 100
-
+    # Mostrar el porcentaje de progreso asegurando que sea válido
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
-    st.progress(porcentaje_progreso)
+    st.progress(max(0, min(100, porcentaje_progreso)))  # Asegúrate de que esté entre 0 y 100
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
-
 
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
@@ -953,7 +951,18 @@ def gestion_ordenador_gasto():
                 presupuesto_disponible -= total_aprobado_convenio
                 st.success(f"Se ha aprobado el giro total de {total_aprobado_convenio} millones de pesos.")
             else:
-                st.error("No hay suficiente presupuesto disponible para aprobar este giro.")
+                st.error("No hay suficiente presupuesto para aprobar el giro.")
+
+        if st.button("Aprobar Digitalmente IES sin Convenio"):
+            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_sin_convenio:
+                presupuesto_disponible -= total_aprobado_sin_convenio
+                st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones de pesos.")
+            else:
+                st.error("No hay suficiente presupuesto para aprobar el giro.")
+
+    # Actualización de la barra de progreso
+    st.progress(max(0, min(100, (presupuesto_disponible / 10000) * 100)))
 
 
 #Pagina de creación de indicadores 
