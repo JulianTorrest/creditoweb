@@ -838,9 +838,15 @@ def gestion_ordenador_gasto():
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
 
+    # Calcular el porcentaje de progreso
+    if presupuesto_disponible > 0:  # Asegurarse de que el presupuesto no sea cero o negativo
+        porcentaje_progreso = min((presupuesto_disponible / 10000) * 100, 100)  # Asegurar que no exceda 100
+    else:
+        porcentaje_progreso = 0  # Si no hay presupuesto disponible, el progreso es 0
+
     # Mostrar presupuesto disponible con barra de progreso
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
-    st.progress((presupuesto_disponible / 10000) * 100)
+    st.progress(porcentaje_progreso)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
     control_presupuestal = pd.DataFrame({
