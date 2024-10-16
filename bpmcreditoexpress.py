@@ -176,6 +176,9 @@ def generar_datos_ficticios(n):
         año = fecha_random.year
         mes = fecha_random.month
         periodo = "1er Semestre" if mes <= 6 else "2do Semestre"
+        # Generar periodicidad aleatoria
+        periodicidad = random.choice(['Anual', 'Semestral'])
+
         
         datos.append({
             "Nombre": nombre,
@@ -189,7 +192,8 @@ def generar_datos_ficticios(n):
             "Fecha": fecha_random.strftime("%Y-%m-%d"),
             "Año": año,
             "Mes": mes,
-            "Periodo": periodo
+            "Periodo": periodo,
+            "Periodicidad": periodicidad  # Nuevo campo Periodicidad
         })
     return datos
 
@@ -401,6 +405,9 @@ def captura_datos():
 
     year = st.selectbox("Selecciona el año", options=[2024])
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
+    
+    # Nuevo filtro para seleccionar la periodicidad
+    periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
 
     # Formulario actual de captura de datos
     st.subheader("Datos del Postulante")
