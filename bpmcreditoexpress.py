@@ -929,22 +929,16 @@ def gestion_ordenador_gasto():
 
     st.pyplot(plt)
 
-    # Inicializar un diccionario para controlar la visibilidad de detalles
-    if 'detalles_visible' not in st.session_state:
-        st.session_state.detalles_visible = {}
+    # Agregar un botón para ocultar/mostrar detalles
+    if 'mostrar_detalles' not in st.session_state:
+        st.session_state.mostrar_detalles = True
+
+    if st.button("Ocultar Detalles" if st.session_state.mostrar_detalles else "Mostrar Detalles"):
+        st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
-        key = f"detalle_{index}"
-        if key not in st.session_state.detalles_visible:
-            st.session_state.detalles_visible[key] = False  # Inicializa como oculto
-
-        # Botón para mostrar/ocultar detalles
-        toggle_button_text = "Mostrar Detalle" if not st.session_state.detalles_visible[key] else "Ocultar Detalle"
-        if st.button(toggle_button_text, key=key):
-            st.session_state.detalles_visible[key] = not st.session_state.detalles_visible[key]  # Cambiar visibilidad
-
-        if st.session_state.detalles_visible[key]:
+        if st.session_state.mostrar_detalles:
             st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
 
             # Preguntar si la IES tiene convenio
@@ -970,40 +964,35 @@ def gestion_ordenador_gasto():
                                 st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
                         else:
                             st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
-
+            
             elif beneficiario['tiene_convenio'] == "Sí":
                 st.success("Iniciando liquidación automática del desembolso...")
                 instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
                 st.write(instruccion_giro)
+                
+                if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
+                    st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
 
-    # Botones de aprobación digital
-    st.subheader("Aprobaciones Digitales")
+    # Botones para aprobar digitalmente por grupos
     col1, col2 = st.columns(2)
+
     with col1:
-        st.button("Aprobar Digitalmente IES con Convenio")
+        if st.button("Aprobar Digitalmente IES con Convenio"):
+            total_aprobado_convenio = ofertas_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_convenio:
+                presupuesto_disponible -= total_aprobado_convenio
+                st.success(f"Se ha aprobado digitalmente el giro a todas las IES con convenio por un total de {total_aprobado_convenio} millones de pesos.")
+            else:
+                st.error("No hay presupuesto suficiente para realizar el giro.")
+
     with col2:
-        st.button("Aprobar Digitalmente IES sin Convenio")
-
-    # Nuevo botón "Aprobar Liquidación de IES con Convenio"
-    if st.button("Aprobar Liquidación de IES con Convenio"):
-        # Filtrar IES con convenio
-        ias_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
-
-        if ias_convenio.empty:
-            st.warning("No hay IES con convenio para aprobar.")
-        else:
-            total_solicitudes = ias_convenio.shape[0]
-            total_solicitado_convenio = ias_convenio['Valor'].sum()
-            st.write(f"Total solicitado para IES con convenio: {total_solicitado_convenio} millones de pesos")
-            st.write(f"Cantidad de solicitudes: {total_solicitudes}")
-
-            # Gráfico de distribución de valores solicitados por IES con convenio
-            plt.figure(figsize=(8, 4))
-            plt.bar(ias_convenio['Nombre'], ias_convenio['Valor'], color='orange')
-            plt.title("Distribución de Valores Solicitados por IES con Convenio")
-            plt.xticks(rotation=45)
-            plt.ylabel("Valor (millones de pesos)")
-            st.pyplot(plt)
+        if st.button("Aprobar Digitalmente IES sin Convenio"):
+            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_sin_convenio:
+                presupuesto_disponible -= total_aprobado_sin_convenio
+                st.success(f"Se ha aprobado digitalmente el giro a todas las IES sin convenio por un total de {total_aprobado_sin_convenio} millones de pesos.")
+            else:
+                st.error("No hay presupuesto suficiente para realizar el giro.")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
