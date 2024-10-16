@@ -830,7 +830,8 @@ def gestion_ordenador_gasto():
 
     # Filtrar ofertas
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
-    
+
+    # Validación de columnas
     if 'GarantiaFirmada' not in df_ofertas.columns:
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
         return
@@ -841,13 +842,10 @@ def gestion_ordenador_gasto():
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
+    # Adicionar la columna 'tiene_convenio'
     if 'tiene_convenio' not in df_ofertas.columns:
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
-
-    if 'Valor' not in df_ofertas.columns:
-        st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
-        return
 
     # Presupuesto
     presupuesto_disponible = 10000  # millones de pesos
@@ -981,9 +979,15 @@ def gestion_ordenador_gasto():
         ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
         if not ies_convenio.empty:
             ies_seleccionadas = st.multiselect("Selecciona las IES con Convenio", options=ies_convenio['Nombre'].tolist())
-            for ies in ies_seleccionadas:
-                if st.button(f"Aprobar desembolso para {ies}"):
-                    st.success(f"Desembolso aprobado para {ies}.")
+            if st.button("Procesar"):
+                if ies_seleccionadas:
+                    total_aprobado = ies_convenio[ies_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+                    st.success(f"Total aprobado para IES con Convenio: {total_aprobado} millones de pesos.")
+                    for ies in ies_seleccionadas:
+                        valor_ies = ies_convenio[ies_convenio['Nombre'] == ies]['Valor'].values[0]
+                        st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
+                else:
+                    st.warning("No has seleccionado ninguna IES con convenio.")
         else:
             st.warning("No hay IES con convenio disponibles para aprobación.")
 
@@ -993,9 +997,17 @@ def gestion_ordenador_gasto():
         ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
         if not ies_sin_convenio.empty:
             ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
-            for ies in ies_seleccionadas:
-                if st.button(f"Aprobar desembolso para {ies}"):
-                    st.success(f"Desembolso aprobado para {ies}.")
+            if st.button("Procesar Sin Convenio"):
+                if ies_seleccionadas:
+                    total_aprobado_sin_convenio = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+                    st.success(f"Total aprobado para IES sin Convenio: {total_aprobado_sin_convenio} millones de pesos.")
+                    for ies in ies_seleccionadas:
+                        valor_ies_sin_convenio = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
+                        st.write(f"IES: {ies}, Valor aprobado: {valor_ies_sin_convenio} millones de pesos.")
+                else:
+                    st.warning("No has seleccionado ninguna IES sin convenio.")
+            for ies in ies_sin_convenio['Nombre']:
+                st.write(f"IES: {ies}, Valor solicitado: {ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]} millones de pesos.")
         else:
             st.warning("No hay IES sin convenio disponibles para aprobación.")
 
