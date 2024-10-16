@@ -977,12 +977,28 @@ def gestion_ordenador_gasto():
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                     st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
 
-    # Botón para aprobar todas las IES con convenio
-    if st.button("Aprobar todas las IES con Convenio"):
-        for index, beneficiario in enumerate(df_ofertas[df_ofertas['tiene_convenio'] == "Sí"].to_dict('records')):
-            # Implementar la lógica de aprobación
-            st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}.")
-    
+    # Opción para aprobar IES con convenio
+    st.subheader("Aprobar IES con Convenio")
+    if st.button("IES con Convenio"):
+        # Seleccionar IES con convenio para aprobación
+        ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
+        if not ies_convenio.empty:
+            ies_seleccionadas = st.multiselect("Selecciona las IES para aprobar:", options=ies_convenio['Nombre'].tolist())
+            if st.button("Aprobar IES seleccionadas"):
+                for nombre in ies_seleccionadas:
+                    st.success(f"Liquidación aprobada para IES {nombre}. Procediendo con el desembolso.")
+                # Aquí se pueden incluir las funciones para los gráficos
+                # Graficar las solicitudes aprobadas
+                valores_aprobados = ies_convenio[ies_convenio['Nombre'].isin(ies_seleccionadas)]
+                
+                # Gráfico de Cantidades Aprobadas
+                plt.figure(figsize=(8, 4))
+                plt.bar(valores_aprobados['Nombre'], valores_aprobados['Valor'], color='blue')
+                plt.title("Cantidad de Solicitudes Aprobadas por IES con Convenio")
+                plt.xticks(rotation=45)
+                plt.ylabel("Valor (millones de pesos)")
+                st.pyplot(plt)
+
     # Total solicitado
     st.subheader("Total solicitado por todas las IES")
     st.write(f"Total solicitado: {total_solicitado} millones de pesos")
