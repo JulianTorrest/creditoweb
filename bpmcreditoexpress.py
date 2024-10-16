@@ -1080,11 +1080,11 @@ def Indicadores_Proceso():
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
     "Selecciona una página",
-    ["Captura de Datos", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto", "Indicadores Proceso"]
+    ["Consulta de Solicitudes", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto", "Indicadores Proceso"]
 )
 
 # Ejecutar la página seleccionada
-if menu == "Captura de Datos":
+if menu == "Consulta de Solicitudes":
     captura_datos()
 elif menu == "Validación de Beneficiarios":
     validacion_beneficiarios()
