@@ -808,6 +808,11 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
+import streamlit as st
+import pandas as pd
+import random
+from io import BytesIO
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
@@ -819,7 +824,7 @@ def gestion_ordenador_gasto():
             {'GarantiaFirmada': True, 'tiene_convenio': 'No', 'Valor': 300},
             {'GarantiaFirmada': True, 'tiene_convenio': 'Sí', 'Valor': 150}
         ]
-        
+
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     # Verificaciones de columnas
@@ -847,10 +852,9 @@ def gestion_ordenador_gasto():
     # Presupuesto y progreso
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
-    
+
     # Mostrar progreso
     porcentaje_progreso = max(0, min(presupuesto_disponible / 10000, 1))  # Asegurarse de que esté entre 0 y 1
-    # Mostrar progreso (ahora en formato decimal)
     st.progress(porcentaje_progreso)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
@@ -913,22 +917,31 @@ def gestion_ordenador_gasto():
             st.session_state.mostrar_casos = False
         else:
             # Mostrar tabla con todos los casos
-            st.subheader("Tabla de Todos los Casos")
-            st.dataframe(df_ofertas)
+            st.subheader("Detalle de Todos los Casos")
+            for index, row in df_ofertas.iterrows():
+                st.write(f"**Caso {index + 1}:**")
+                st.write(f"Valor: {row['Valor']} millones")
+                st.write(f"Convenio: {row['tiene_convenio']}")
+                st.write("---")
 
             # Botón para descargar el archivo Excel
-            if st.button("Descargar todos los casos en Excel"):
-                # Lógica para descargar el DataFrame a un archivo Excel
-                df_ofertas.to_excel("todos_los_casos.xlsx", index=False)
-                st.success("Archivo descargado: todos_los_casos.xlsx")
+            output = BytesIO()
+            df_ofertas.to_excel(output, index=False, engine='xlsxwriter')
+            output.seek(0)
+            st.download_button(label="Descargar todos los casos en Excel", 
+                               data=output, 
+                               file_name="todos_los_casos.xlsx", 
+                               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     else:
         if st.button("Consultar todos los Casos"):
             st.session_state.mostrar_casos = True
 
-    # Mostrar nuevamente las ofertas en proceso
-    st.subheader("Ofertas en Proceso")
-    st.dataframe(df_ofertas)
+    # No mostrar la tabla 'Ofertas en Proceso' cuando se muestran todos los casos
+    if not st.session_state.mostrar_casos:
+        st.subheader("Ofertas en Proceso")
+        st.dataframe(df_ofertas)
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
