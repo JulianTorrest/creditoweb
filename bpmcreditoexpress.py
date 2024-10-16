@@ -985,65 +985,39 @@ def gestion_ordenador_gasto():
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                     st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
 
-    # Opción para aprobar IES con convenio
-    st.subheader("Aprobar IES con Convenio")
-    if st.button("IES con Convenio"):
+    st.subheader("Aprobar IES")
+
+    # Filtrar las IES según convenio
+    tipo_convenio = st.selectbox("Seleccionar tipo de IES", ["Con Convenio", "Sin Convenio"])
+    ies_seleccionadas = None
+
+    if tipo_convenio == "Con Convenio":
         ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
         if not ies_convenio.empty:
             ies_seleccionadas = st.multiselect("Selecciona las IES con Convenio", options=ies_convenio['Nombre'].tolist())
-            if st.button("Procesar"):
-                if ies_seleccionadas:
-                    total_aprobado = ies_convenio[ies_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
-                    st.success(f"Se ha aprobado el desembolso de {total_aprobado} millones de pesos para las IES seleccionadas.")
-                else:
-                    st.warning("No has seleccionado ninguna IES.")
         else:
             st.warning("No hay IES con convenio para aprobar.")
-
-    # Opción para aprobar IES sin convenio
-    st.subheader("Aprobar IES sin Convenio")
-
-    # Primer botón para solicitar información financiera
-    if st.button("Solicitar información financiera IES sin Convenio"):
+    else:
         ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
         if not ies_sin_convenio.empty:
-            # Validación de la columna 'Nombre'
-            if 'Nombre' not in ies_sin_convenio.columns:
-                st.error("Error: La columna 'Nombre' no está presente en el DataFrame.")
-            else:
-                # Generar y mostrar información financiera para cada IES sin convenio
-                info_generada = []
-                for _, row in ies_sin_convenio.iterrows():
-                    try:
-                        info = generar_info_bancaria(row['Nombre'])
-                        info_generada.append(info)
-                    except Exception as e:
-                        st.error(f"Error al generar información para {row['Nombre']}: {e}")
-        
-                st.success("Información financiera generada:")
-                for info in info_generada:
-                    st.write(info)
+            ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
+        else:
+            st.warning("No hay IES sin convenio disponibles.")
 
-            # Permitir seleccionar IES sin convenio después de generar la información
-                ies_nombres = ies_sin_convenio['Nombre'].tolist()
-                ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_nombres)
-            
-            # Botón para procesar la información
-            if st.button("Procesar"):
-                if ies_seleccionadas:
-                    total_aprobado = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
-                    st.success(f"Total aprobado para IES sin Convenio: {total_aprobado} millones de pesos.")
-                    for ies in ies_seleccionadas:
-                        valor_ies = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
-                        st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
-                else:
-                    st.warning("No has seleccionado ninguna IES sin convenio.")
-                
-            # Botón para aprobar desembolso
-            if st.button("Aprobar desembolso"):
-                st.success("Desembolso aprobado para las IES seleccionadas.")
-    else:
-        st.warning("No hay IES sin convenio disponibles para aprobación.")
+# Botón para procesar y aprobar desembolso
+    if ies_seleccionadas and st.button("Procesar Aprobación"):
+        total_aprobado = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+        st.success(f"Se ha aprobado el desembolso de {total_aprobado} millones de pesos para las IES seleccionadas.")
+
+        for ies in ies_seleccionadas:
+            valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
+            st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
+            st.info(f"Se inició el proceso financiero para la IES: {ies}")
+
+        # Confirmación de aprobación final
+        if st.button("Confirmar Aprobación Final"):
+            st.success("Desembolso aprobado para las IES seleccionadas.")
+
         
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
