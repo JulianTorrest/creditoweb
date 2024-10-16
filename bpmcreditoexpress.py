@@ -424,6 +424,7 @@ def captura_datos():
     limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
     deudor = st.text_input("Nombre del deudor")
     fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
+    fecha_aplicación = st.date_input("Fecha de aplicación", value=datetime.today())
 
     if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
