@@ -997,17 +997,15 @@ def gestion_ordenador_gasto():
         ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
         if not ies_sin_convenio.empty:
             ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
-            if st.button("Procesar Sin Convenio"):
+            if st.button("Procesar"):
                 if ies_seleccionadas:
-                    total_aprobado_sin_convenio = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
-                    st.success(f"Total aprobado para IES sin Convenio: {total_aprobado_sin_convenio} millones de pesos.")
+                    total_aprobado = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+                    st.success(f"Total aprobado para IES sin Convenio: {total_aprobado} millones de pesos.")
                     for ies in ies_seleccionadas:
-                        valor_ies_sin_convenio = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
-                        st.write(f"IES: {ies}, Valor aprobado: {valor_ies_sin_convenio} millones de pesos.")
+                        valor_ies = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
+                        st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
                 else:
                     st.warning("No has seleccionado ninguna IES sin convenio.")
-            for ies in ies_sin_convenio['Nombre']:
-                st.write(f"IES: {ies}, Valor solicitado: {ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]} millones de pesos.")
         else:
             st.warning("No hay IES sin convenio disponibles para aprobación.")
 
