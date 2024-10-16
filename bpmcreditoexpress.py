@@ -950,42 +950,37 @@ def gestion_ordenador_gasto():
             else:
                 st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
 
-    # Procesar cada beneficiario
-    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
-        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
+    # Sección para solicitar información financiera para IES sin Convenio
+    if st.button("Solicitar Información Financiera IES sin Convenio"):
+        # Generar datos para las IES sin convenio
+        datos_ies_sin_convenio = []
+        for _ in range(cantidad_sin_convenio):
+            datos_ies_sin_convenio.append(generar_info_bancaria())
 
-        # Preguntar si la IES tiene convenio
-        if beneficiario['tiene_convenio'] == "No":
-            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
-                st.write("Información bancaria generada:")
-                st.write(f"NIT: {info_bancaria['NIT']}")
-                st.write(f"Nombre IES: {info_bancaria['Nombre']}")
-                st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
-                st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
-                st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
-                st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+        # Convertir los datos a DataFrame
+        df_ies_sin_convenio = pd.DataFrame(datos_ies_sin_convenio)
 
-                if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                    validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
-                    if validacion_info == "Sí":
-                        st.success("Validación exitosa. Procediendo a giro...")
-                        # Agregar confirmación del giro
-                        if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
-                            st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
-                        else:
-                            st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
-                    else:
-                        st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
-        
-        elif beneficiario['tiene_convenio'] == "Sí":
-            st.success("Iniciando liquidación automática del desembolso...")
-            instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
-            st.write(instruccion_giro)
+        # Mostrar la tabla con la información financiera
+        st.subheader("Información Financiera de IES sin Convenio")
+        st.dataframe(df_ies_sin_convenio)
+
+        # Calcular el total de valores solicitados
+        total_valores_sin_convenio = df_ies_sin_convenio['Valor'].sum()
+
+        # Botón para ocultar la tabla y mostrar mensaje de registro
+        if st.button("Registrar Información Financiera de IES sin Convenio"):
+            st.success(f"Información financiera registrada para IES sin convenio. Total solicitado: {total_valores_sin_convenio} millones de pesos.")
             
-            if st.button(f"Aprobar Giro a {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"aprobar_giro_{index}"):
-                st.success("Giro aprobado exitosamente.")
-                st.balloons()
+            # Mostrar gráfico de valores solicitados por las IES sin convenio
+            plt.figure(figsize=(8, 4))
+            plt.bar(df_ies_sin_convenio['Nombre'], df_ies_sin_convenio['Valor'], color='purple')
+            plt.title("Valores Solicitados por IES sin Convenio")
+            plt.xticks(rotation=45)
+            plt.ylabel("Valor (millones de pesos)")
+            ax = plt.gca()
+            ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
+            st.pyplot(plt)
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
