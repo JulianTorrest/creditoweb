@@ -9,6 +9,7 @@ import seaborn as sns
 from fpdf import FPDF
 from io import BytesIO
 import tempfile
+import csv
 
 
 # Crear una función para generar datos ficticios
