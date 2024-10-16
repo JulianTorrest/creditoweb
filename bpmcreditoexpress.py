@@ -811,7 +811,7 @@ def generar_info_bancaria():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
-    # Inicializa las ofertas en sesión
+    # Asegúrate de que las ofertas en sesión están inicializadas
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
@@ -929,7 +929,43 @@ def gestion_ordenador_gasto():
 
     st.pyplot(plt)
 
-    # Mover los botones aquí
+    # Procesar cada beneficiario
+    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
+        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
+
+        # Preguntar si la IES tiene convenio
+        if beneficiario['tiene_convenio'] == "No":
+            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
+                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
+                st.write("Información bancaria generada:")
+                st.write(f"NIT: {info_bancaria['NIT']}")
+                st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+                st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+                st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+                st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+                st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+
+                if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
+                    validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
+                    if validacion_info == "Sí":
+                        st.success("Validación exitosa. Procediendo a giro...")
+                        # Agregar confirmación del giro
+                        if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
+                            st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
+                        else:
+                            st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
+                    else:
+                        st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
+        
+        elif beneficiario['tiene_convenio'] == "Sí":
+            st.success("Iniciando liquidación automática del desembolso...")
+            instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
+            st.write(instruccion_giro)
+            
+            if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
+                st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
+
+    # Botones para aprobar digitalmente por grupos
     col1, col2 = st.columns(2)
 
     with col1:
@@ -949,56 +985,6 @@ def gestion_ordenador_gasto():
                 st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones a IES sin convenio.")
             else:
                 st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
-
-    # Inicializa el estado para mostrar detalles
-    if 'mostrar_detalles' not in st.session_state:
-        st.session_state.mostrar_detalles = False
-
-    # Procesar cada beneficiario
-    total_valor_solicitado_sin_convenio = 0  # Inicializar el total
-    detalles = []  # Para almacenar los detalles
-
-    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
-        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
-
-        # Preguntar si la IES tiene convenio
-        if beneficiario['tiene_convenio'] == "No":
-            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
-                st.write("Información bancaria generada:")
-                st.write(f"NIT: {info_bancaria['NIT']}")
-                st.write(f"Nombre IES: {info_bancaria['Nombre']}")
-                st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
-                st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
-                st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
-                st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
-
-                # Guardar el valor solicitado
-                total_valor_solicitado_sin_convenio += beneficiario['Valor']
-                detalles.append({
-                    "Nombre IES": beneficiario.get("Nombre", "IES Desconocida"),
-                    "Valor Solicitado": beneficiario['Valor'],
-                    "Información Bancaria": info_bancaria
-                })
-
-    if detalles:
-        st.write("Resumen de Solicitudes sin Convenio:")
-        for detalle in detalles:
-            st.write(f"IES: {detalle['Nombre IES']}, Valor Solicitado: {detalle['Valor Solicitado']} millones de pesos")
-            st.write(f"Información Bancaria: {detalle['Información Bancaria']}")
-
-    st.write(f"Total Solicitado sin Convenio: {total_valor_solicitado_sin_convenio} millones de pesos")
-    
-    # Visualizar resumen de detalles
-    if st.button("Mostrar Resumen de Detalles"):
-        st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
-
-    if st.session_state.mostrar_detalles:
-        st.subheader("Detalles de Solicitudes")
-        for detalle in detalles:
-            st.write(f"IES: {detalle['Nombre IES']}, Valor: {detalle['Valor Solicitado']} millones de pesos")
-            st.write(f"Información Bancaria: {detalle['Información Bancaria']}")
-
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
     st.title("Dashboard")
