@@ -948,42 +948,48 @@ def gestion_ordenador_gasto():
     if st.button("Mostrar Detalles" if not st.session_state.mostrar_detalles else "Ocultar Detalles"):
         st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
-    # Procesar cada beneficiario
+    # Filtros para la tabla
     if st.session_state.mostrar_detalles:
-        for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
-            st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
-            st.write(f"Valor Solicitado: {beneficiario['Valor']} millones de pesos")
-            st.write(f"Tiene Convenio: {beneficiario['tiene_convenio']}")
+        st.subheader("Filtros")
+    
+    # Filtros para actualizar la tabla
+        filtro_convenio = st.selectbox("Filtrar por convenio", ["Todos", "Sí", "No"])
+        filtro_informacion = st.selectbox("Filtrar por información financiera", ["Todos", "Sí", "No"])
 
-            if beneficiario['tiene_convenio'] == "No":
-                if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                    info_bancaria = generar_info_bancaria()
-                    st.write("Información bancaria generada:")
-                    st.write(f"NIT: {info_bancaria['NIT']}")
-                    st.write(f"Nombre IES: {info_bancaria['Nombre']}")
-                    st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
-                    st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
-                    st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
-                    st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+    # Filtrar DataFrame
+        df_filtrado = df_ofertas.copy()
+    
+        if filtro_convenio != "Todos":
+            df_filtrado = df_filtrado[df_filtrado['tiene_convenio'] == filtro_convenio]
+    
+        if filtro_informacion != "Todos":
+            df_filtrado = df_filtrado[df_filtrado['informacion_financiera'] == filtro_informacion]
 
-                    if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                        validacion_info = random.choice(["Sí", "No"])
-                        if validacion_info == "Sí":
-                            st.success("Validación exitosa. Procediendo a giro...")
-                            if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
-                                st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
-                            else:
-                                st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
-                        else:
-                            st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
-            
-            elif beneficiario['tiene_convenio'] == "Sí":
-                st.success("Iniciando liquidación automática del desembolso...")
-                instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
-                st.write(instruccion_giro)
-                
-                if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                    st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
+    # Mostrar tabla de beneficiarios
+        st.subheader("Tabla de Beneficiarios")
+    
+        for index, beneficiario in df_filtrado.iterrows():
+            col1, col2, col3, col4 = st.columns(4)
+        
+            with col1:
+                st.write(beneficiario['Nombre'])
+            with col2:
+                st.write(f"Valor: {beneficiario['Valor']} millones de pesos")
+            with col3:
+                if beneficiario['tiene_convenio'] == "No" and beneficiario['informacion_financiera'] == "No":
+                    if st.button(f"Solicitar información financiera de {beneficiario['Nombre']}", key=f"solicitar_{index}"):
+                        info_bancaria = generar_info_bancaria()
+                        st.write(f"Información bancaria generada para {beneficiario['Nombre']}:")
+                        st.write(info_bancaria)
+                    # Aquí puedes actualizar el estado de 'informacion_financiera' para reflejar que se ha registrado
+                        df_ofertas.at[index, 'informacion_financiera'] = "Sí"
+                elif beneficiario['tiene_convenio'] == "No" and beneficiario['informacion_financiera'] == "Sí":
+                    st.write("Información financiera registrada")
+            with col4:
+                if beneficiario['tiene_convenio'] == "Sí" or beneficiario['informacion_financiera'] == "Sí":
+                    if st.button(f"Aprobar Liquidación/Desembolso de {beneficiario['Nombre']}", key=f"aprobar_{index}"):
+                        st.success(f"Desembolso aprobado para {beneficiario['Nombre']}")
+                    # Aquí puedes agregar lógica adicional si es necesario, como confirmar el desembolso
 
     st.subheader("Aprobar IES")
 
