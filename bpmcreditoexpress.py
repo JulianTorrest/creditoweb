@@ -992,6 +992,7 @@ def gestion_ordenador_gasto():
             st.warning("No hay IES con convenio disponibles para aprobación.")
 
     # Opción para aprobar IES sin convenio
+    st.subheader("Aprobar IES sin Convenio")
     if st.button("Solicitar información financiera IES sin Convenio"):
         info_bancaria = generar_info_bancaria()
         st.success("Información financiera generada:")
