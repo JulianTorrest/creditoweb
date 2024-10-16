@@ -937,6 +937,14 @@ def gestion_ordenador_gasto():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+    # Nuevo botón para calcular el valor solicitado
+    if st.button("Calcular valor solicitado"):
+        valor_solicitado_por_ies = df_ofertas.groupby('Interesado')['Valor'].sum()
+        mensaje = "Valor solicitado por cada IES:\n\n"
+        for ies, valor in valor_solicitado_por_ies.items():
+            mensaje += f"{ies}: {valor} millones de pesos\n"
+        st.success(mensaje)
+
     if not st.session_state.mostrar_casos:
         st.subheader("Ofertas en Proceso")
         st.dataframe(df_ofertas)
