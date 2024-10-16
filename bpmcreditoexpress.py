@@ -976,38 +976,28 @@ def gestion_ordenador_gasto():
                 # Guardar el valor solicitado
                 total_valor_solicitado_sin_convenio += beneficiario['Valor']
                 detalles.append({
-                    "Nombre IES": info_bancaria['Nombre'],
+                    "Nombre IES": beneficiario.get("Nombre", "IES Desconocida"),
                     "Valor Solicitado": beneficiario['Valor'],
-                    "Info Bancaria": info_bancaria
+                    "Información Bancaria": info_bancaria
                 })
-                
-            # Botón para mostrar/ocultar detalles
-            if st.button("Mostrar todos los casos" if not st.session_state.mostrar_detalles else "Ocultar todos los casos"):
-                st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
-    # Mostrar detalles si se solicita
-    if st.session_state.mostrar_detalles:
-        st.subheader("Detalles de Solicitudes sin Convenio")
+    if detalles:
+        st.write("Resumen de Solicitudes sin Convenio:")
         for detalle in detalles:
-            st.write(f"**Nombre IES:** {detalle['Nombre IES']}")
-            st.write(f"**Valor Solicitado:** {detalle['Valor Solicitado']} millones de pesos")
-            st.write("**Información Bancaria:**")
-            st.write(f"- NIT: {detalle['Info Bancaria']['NIT']}")
-            st.write(f"- Tipo de Cuenta: {detalle['Info Bancaria']['Tipo Cuenta']}")
-            st.write(f"- Número de Cuenta: {detalle['Info Bancaria']['Numero Cuenta']}")
-            st.write(f"- Nombre del Banco: {detalle['Info Bancaria']['Nombre Banco']}")
-            st.write(f"- Número de Factura: {detalle['Info Bancaria']['Numero Factura']}")
-            st.write("---")
+            st.write(f"IES: {detalle['Nombre IES']}, Valor Solicitado: {detalle['Valor Solicitado']} millones de pesos")
+            st.write(f"Información Bancaria: {detalle['Información Bancaria']}")
 
-    st.write(f"**Total Valor Solicitado por IES sin Convenio:** {total_valor_solicitado_sin_convenio} millones de pesos")
+    st.write(f"Total Solicitado sin Convenio: {total_valor_solicitado_sin_convenio} millones de pesos")
+    
+    # Visualizar resumen de detalles
+    if st.button("Mostrar Resumen de Detalles"):
+        st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
-# Simular datos iniciales para el estado de la sesión
-if 'ofertas_en_proceso' not in st.session_state:
-    st.session_state.ofertas_en_proceso = [
-        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)},
-        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)},
-        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)}
-    ]
+    if st.session_state.mostrar_detalles:
+        st.subheader("Detalles de Solicitudes")
+        for detalle in detalles:
+            st.write(f"IES: {detalle['Nombre IES']}, Valor: {detalle['Valor Solicitado']} millones de pesos")
+            st.write(f"Información Bancaria: {detalle['Información Bancaria']}")
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
