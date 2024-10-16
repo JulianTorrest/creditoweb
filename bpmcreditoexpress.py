@@ -1001,6 +1001,10 @@ def gestion_ordenador_gasto():
         ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
         if not ies_sin_convenio.empty:
             ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
+                    # Botón para solicitar información financiera
+            if ies_seleccionadas and st.button("Solicitar información financiera de las IES sin convenio"):
+                for ies in ies_seleccionadas:
+                    st.write(f"Solicitud de información financiera enviada para: {ies}")
         else:
             st.warning("No hay IES sin convenio disponibles.")
 
