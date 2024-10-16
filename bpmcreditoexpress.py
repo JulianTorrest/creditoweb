@@ -925,20 +925,21 @@ def gestion_ordenador_gasto():
             for key, value in caso.items():
                 st.write(f"- **{key}:** {value}")
             st.write("---")
-        # Botón para descargar el archivo Excel
-        output = BytesIO()
-        df_ofertas.to_excel(output, index=False, engine='xlsxwriter')
-        output.seek(0)
-        st.download_button(
-            label="Descargar todos los casos en Excel",
-            data=output,
-            file_name="todos_los_casos.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-    else:
+
+    # Botón para descargar el archivo Excel (moverlo aquí)
+    output = BytesIO()
+    df_ofertas.to_excel(output, index=False, engine='xlsxwriter')
+    output.seek(0)
+    st.download_button(
+        label="Descargar todos los casos en Excel",
+        data=output,
+        file_name="todos_los_casos.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    if not st.session_state.mostrar_casos:
         st.subheader("Ofertas en Proceso")
         st.dataframe(df_ofertas)
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
