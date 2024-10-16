@@ -985,11 +985,21 @@ def gestion_ordenador_gasto():
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                     st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
 
+    # Inicializar historial de solicitudes en estado de sesión
+    if "historial_solicitudes" not in st.session_state:
+        st.session_state.historial_solicitudes = []
+
     st.subheader("Aprobar IES")
 
     # Filtrar las IES según convenio
     tipo_convenio = st.selectbox("Seleccionar tipo de IES", ["Con Convenio", "Sin Convenio"])
     ies_seleccionadas = None
+
+    # Filtro de valor
+    min_valor, max_valor = st.slider("Selecciona un rango de valores", 
+                                       min_value=0, 
+                                       max_value=int(df_ofertas['Valor'].max()), 
+                                       value=(0, int(df_ofertas['Valor'].max())))
 
     if tipo_convenio == "Con Convenio":
         ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
@@ -1007,6 +1017,11 @@ def gestion_ordenador_gasto():
                     st.write(f"Solicitud de información financiera enviada para: {ies}")
         else:
             st.warning("No hay IES sin convenio disponibles.")
+
+    # Mostrar historial de solicitudes
+    st.subheader("Historial de Solicitudes")
+    for solicitud in st.session_state.historial_solicitudes:
+        st.write(solicitud)
 
 # Botón para procesar y aprobar desembolso
     if ies_seleccionadas and st.button("Procesar Aprobación"):
