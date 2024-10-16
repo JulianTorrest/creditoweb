@@ -399,7 +399,7 @@ def captura_datos():
     # Filtros de Año y Periodo
     st.subheader("Filtros de búsqueda")
 
-    year = st.selectbox("Selecciona el año", options=[2022, 2023, 2024])
+    year = st.selectbox("Selecciona el año", options=[2024])
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
 
     # Formulario actual de captura de datos
