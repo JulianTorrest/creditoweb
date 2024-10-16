@@ -1037,6 +1037,23 @@ def gestion_ordenador_gasto():
         if st.button("Confirmar Aprobación Final"):
             st.success("Desembolso aprobado para las IES seleccionadas.")
 
+# Exportar a CSV
+    if st.button("Exportar a CSV"):
+        with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
+            fieldnames = ['Nombre', 'Valor']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for ies in ies_seleccionadas:
+                valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
+                writer.writerow({'Nombre': ies, 'Valor': valor_ies})
+        st.success("Archivo CSV generado con éxito.")
+
+# Visualización de datos
+    st.subheader("Distribución de IES por Convenio")
+    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
+
+
         
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
