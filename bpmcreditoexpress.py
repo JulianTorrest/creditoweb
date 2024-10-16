@@ -808,18 +808,29 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
+def generar_info_bancaria():
+    # Generar información bancaria aleatoria
+    return {
+        "NIT": random.randint(100000000, 999999999),
+        "Nombre": f"IES {random.choice(['A', 'B', 'C', 'D'])}",
+        "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
+        "Numero Cuenta": random.randint(10000000, 99999999),
+        "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
+        "Numero Factura": random.randint(1000, 9999),
+        "Valor": random.randint(100000, 35000000)  # Valor aleatorio
+    }
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
-    # Asegúrate de que las ofertas en sesión están inicializadas
+    # Inicialización de sesión
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
 
-    # Filtrar las ofertas para solo mostrar las que tienen garantía firmada
+    # Filtrar ofertas
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
-
-    # Verificar si 'GarantiaFirmada' está en el DataFrame
+    
     if 'GarantiaFirmada' not in df_ofertas.columns:
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
         return
@@ -830,28 +841,22 @@ def gestion_ordenador_gasto():
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
-    # Asegúrate de que la columna 'tiene_convenio' exista
     if 'tiene_convenio' not in df_ofertas.columns:
-        # Asignar valores aleatorios para la columna 'tiene_convenio'
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
-        
-        # Guardar el DataFrame actualizado en la sesión
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
-    # Verificar si la columna 'Valor' existe
     if 'Valor' not in df_ofertas.columns:
         st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
         return
 
-    # Presupuesto fijo
+    # Presupuesto
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
 
-    # Mostrar el presupuesto
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
-    # Tabla de control presupuestal
+    # Control presupuestal
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
         "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, 10000 - presupuesto_disponible - presupuesto_comprometido]
@@ -872,7 +877,7 @@ def gestion_ordenador_gasto():
     total_convenio = ofertas_convenio['Valor'].sum()
     total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
 
-    # Crear la tabla de indicadores
+    # Crear tablas de indicadores
     indicadores_cantidad = pd.DataFrame({
         "Indicador": [
             "Cantidad de Ofertas con Garantías Firmadas",
@@ -905,9 +910,9 @@ def gestion_ordenador_gasto():
     st.subheader("Tabla de Indicadores - Valores")
     st.dataframe(indicadores_valor)
 
-    # Graficar las tablas de indicadores
+    # Gráficos de indicadores
     st.subheader("Gráficos de Indicadores")
-
+    
     # Gráfico de Cantidades
     plt.figure(figsize=(8, 4))
     plt.bar(indicadores_cantidad['Indicador'], indicadores_cantidad['Valor'], color=['blue', 'orange', 'green'])
@@ -922,11 +927,8 @@ def gestion_ordenador_gasto():
     plt.title("Indicadores de Valores")
     plt.xticks(rotation=45)
     plt.ylabel("Valor (millones de pesos)")
-
-    # Formatear el eje Y para mostrar valores en formato nominal
     ax = plt.gca()
-    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
-
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     st.pyplot(plt)
 
     # Mostrar detalles
@@ -940,15 +942,12 @@ def gestion_ordenador_gasto():
     if st.session_state.mostrar_detalles:
         for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
-
-            # Detalles de la solicitud
             st.write(f"Valor Solicitado: {beneficiario['Valor']} millones de pesos")
             st.write(f"Tiene Convenio: {beneficiario['tiene_convenio']}")
-            
-            # Preguntar si la IES tiene convenio
+
             if beneficiario['tiene_convenio'] == "No":
                 if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
-                    info_bancaria = generar_info_bancaria()  # Generar la info bancaria
+                    info_bancaria = generar_info_bancaria()
                     st.write("Información bancaria generada:")
                     st.write(f"NIT: {info_bancaria['NIT']}")
                     st.write(f"Nombre IES: {info_bancaria['Nombre']}")
@@ -958,10 +957,9 @@ def gestion_ordenador_gasto():
                     st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
                     if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
-                        validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
+                        validacion_info = random.choice(["Sí", "No"])
                         if validacion_info == "Sí":
                             st.success("Validación exitosa. Procediendo a giro...")
-                            # Agregar confirmación del giro
                             if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
                                 st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
                             else:
@@ -980,28 +978,27 @@ def gestion_ordenador_gasto():
     # Opción para aprobar IES con convenio
     st.subheader("Aprobar IES con Convenio")
     if st.button("IES con Convenio"):
-        # Seleccionar IES con convenio para aprobación
         ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
         if not ies_convenio.empty:
-            ies_seleccionadas = st.multiselect("Selecciona las IES para aprobar:", options=ies_convenio['Nombre'].tolist())
-            if st.button("Aprobar IES seleccionadas"):
-                for nombre in ies_seleccionadas:
-                    st.success(f"Liquidación aprobada para IES {nombre}. Procediendo con el desembolso.")
-                # Aquí se pueden incluir las funciones para los gráficos
-                # Graficar las solicitudes aprobadas
-                valores_aprobados = ies_convenio[ies_convenio['Nombre'].isin(ies_seleccionadas)]
-                
-                # Gráfico de Cantidades Aprobadas
-                plt.figure(figsize=(8, 4))
-                plt.bar(valores_aprobados['Nombre'], valores_aprobados['Valor'], color='blue')
-                plt.title("Cantidad de Solicitudes Aprobadas por IES con Convenio")
-                plt.xticks(rotation=45)
-                plt.ylabel("Valor (millones de pesos)")
-                st.pyplot(plt)
+            ies_seleccionadas = st.multiselect("Selecciona las IES con Convenio", options=ies_convenio['Nombre'].tolist())
+            for ies in ies_seleccionadas:
+                if st.button(f"Aprobar desembolso para {ies}"):
+                    st.success(f"Desembolso aprobado para {ies}.")
+        else:
+            st.warning("No hay IES con convenio disponibles para aprobación.")
 
-    # Total solicitado
-    st.subheader("Total solicitado por todas las IES")
-    st.write(f"Total solicitado: {total_solicitado} millones de pesos")
+    # Opción para aprobar IES sin convenio
+    st.subheader("Aprobar IES sin Convenio")
+    if st.button("IES sin Convenio"):
+        ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
+        if not ies_sin_convenio.empty:
+            ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
+            for ies in ies_seleccionadas:
+                if st.button(f"Aprobar desembolso para {ies}"):
+                    st.success(f"Desembolso aprobado para {ies}.")
+        else:
+            st.warning("No hay IES sin convenio disponibles para aprobación.")
+
                 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
