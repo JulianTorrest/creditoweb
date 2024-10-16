@@ -645,10 +645,13 @@ def gestion_comercial():
 
     # Seleccionar año
     anio_actual = datetime.now().year
-    anio_seleccionado = st.selectbox("Selecciona el año", list(range(2021, anio_actual + 1)))
+    anio_seleccionado = st.selectbox("Selecciona el año", list(range(2024, anio_actual + 1)))
 
     # Seleccionar periodo (semestre)
     periodo_seleccionado = st.selectbox("Selecciona el periodo", ["1er Semestre", "2do Semestre"])
+    
+    # Nuevo filtro para seleccionar la periodicidad
+    periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
 
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Respuesta a oferta de pre-aprobación enviada", ["Todos", "Sí", "No", "Sí, pero después"])
