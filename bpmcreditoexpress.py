@@ -1004,7 +1004,7 @@ def gestion_ordenador_gasto():
             else:
                 # Generar y mostrar información financiera para cada IES sin convenio
                 info_generada = []
-                    for _, row in ies_sin_convenio.iterrows():
+                for _, row in ies_sin_convenio.iterrows():
                     try:
                         info = generar_info_bancaria(row['Nombre'])
                         info_generada.append(info)
