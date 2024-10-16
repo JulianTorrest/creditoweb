@@ -811,31 +811,27 @@ def generar_info_bancaria():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
-    # Asegúrate de que las ofertas en sesión están inicializadas
+    # Inicializar o verificar la existencia de ofertas en proceso
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
 
-    # Filtrar las ofertas para solo mostrar las que tienen garantía firmada
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
-    # Verificar si 'GarantiaFirmada' está en el DataFrame
+    # Filtrar ofertas con garantías firmadas
     if 'GarantiaFirmada' not in df_ofertas.columns:
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
         return
-
+    
     df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
 
     if df_ofertas.empty:
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
-    # Asegúrate de que la columna 'tiene_convenio' exista
+    # Añadir columna 'tiene_convenio' si no existe
     if 'tiene_convenio' not in df_ofertas.columns:
-        # Asignar valores aleatorios para la columna 'tiene_convenio'
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
-        
-        # Guardar el DataFrame actualizado en la sesión
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
     # Verificar si la columna 'Valor' existe
@@ -854,7 +850,7 @@ def gestion_ordenador_gasto():
     # Tabla de control presupuestal
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
-        "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, 10000 - presupuesto_disponible - presupuesto_comprometido]
+        "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, presupuesto_disponible - presupuesto_comprometido]
     })
     
     st.subheader("Control Presupuestal")
@@ -957,7 +953,7 @@ def gestion_ordenador_gasto():
                         validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                         if validacion_info == "Sí":
                             st.success("Validación exitosa. Procediendo a giro...")
-                            # Agregar confirmación del giro
+                            # Confirmación del giro
                             if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
                                 st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
                             else:
@@ -976,7 +972,6 @@ def gestion_ordenador_gasto():
     # Volver al inicio
     if st.button("Volver al Inicio"):
         st.session_state.clear()  # Limpia la sesión para regresar al inicio
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
