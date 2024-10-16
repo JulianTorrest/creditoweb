@@ -948,7 +948,7 @@ def gestion_ordenador_gasto():
     if st.button("Mostrar Detalles" if not st.session_state.mostrar_detalles else "Ocultar Detalles"):
         st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
-    # Filtros para la tabla
+# Filtros para la tabla
     if st.session_state.mostrar_detalles:
         st.subheader("Filtros")
     
@@ -965,12 +965,16 @@ def gestion_ordenador_gasto():
         if filtro_informacion != "Todos":
             df_filtrado = df_filtrado[df_filtrado['informacion_financiera'] == filtro_informacion]
 
-    # Mostrar tabla de beneficiarios
-        st.subheader("Tabla de Beneficiarios")
-    
+    # Verificar si hay datos filtrados
+        if df_filtrado.empty:
+            st.warning("No hay datos que coincidan con los filtros seleccionados.")
+        else:
+        # Mostrar tabla de beneficiarios
+            st.subheader("Tabla de Beneficiarios")
+        
         for index, beneficiario in df_filtrado.iterrows():
             col1, col2, col3, col4 = st.columns(4)
-        
+            
             with col1:
                 st.write(beneficiario['Nombre'])
             with col2:
@@ -981,7 +985,7 @@ def gestion_ordenador_gasto():
                         info_bancaria = generar_info_bancaria()
                         st.write(f"Información bancaria generada para {beneficiario['Nombre']}:")
                         st.write(info_bancaria)
-                    # Aquí puedes actualizar el estado de 'informacion_financiera' para reflejar que se ha registrado
+                        # Aquí puedes actualizar el estado de 'informacion_financiera' para reflejar que se ha registrado
                         df_ofertas.at[index, 'informacion_financiera'] = "Sí"
                 elif beneficiario['tiene_convenio'] == "No" and beneficiario['informacion_financiera'] == "Sí":
                     st.write("Información financiera registrada")
@@ -989,7 +993,7 @@ def gestion_ordenador_gasto():
                 if beneficiario['tiene_convenio'] == "Sí" or beneficiario['informacion_financiera'] == "Sí":
                     if st.button(f"Aprobar Liquidación/Desembolso de {beneficiario['Nombre']}", key=f"aprobar_{index}"):
                         st.success(f"Desembolso aprobado para {beneficiario['Nombre']}")
-                    # Aquí puedes agregar lógica adicional si es necesario, como confirmar el desembolso
+
 
     st.subheader("Aprobar IES")
 
