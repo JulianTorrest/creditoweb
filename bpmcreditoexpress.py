@@ -457,7 +457,7 @@ def captura_datos():
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
-            st.write("Beneficiarios encontrados:")
+            st.write("Solicitudes encontrados:")
             st.dataframe(df_beneficiarios)
 
             # Mostrar gráficos
@@ -496,7 +496,7 @@ def captura_datos():
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
-            st.write("Beneficiarios encontrados:")
+            st.write("Solicitudes encontrados:")
             st.dataframe(df_beneficiarios)
 
             # Mostrar gráficos
