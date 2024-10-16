@@ -847,9 +847,10 @@ def gestion_ordenador_gasto():
     # Presupuesto y progreso
     presupuesto_disponible = 10000  # millones de pesos
     presupuesto_comprometido = 1500  # millones de pesos
-    porcentaje_progreso = max(0, min((presupuesto_disponible / 10000) * 100, 100))
-
+    
     # Mostrar progreso
+    porcentaje_progreso = max(0, min(presupuesto_disponible / 10000, 1))  # Asegurarse de que esté entre 0 y 1
+    # Mostrar progreso (ahora en formato decimal)
     st.progress(porcentaje_progreso)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
