@@ -811,7 +811,7 @@ def generar_info_bancaria():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
-    # Asegúrate de que las ofertas en sesión están inicializadas
+    # Inicializa las ofertas en sesión
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
         st.warning("No hay ofertas en proceso para gestionar.")
         return
@@ -950,39 +950,64 @@ def gestion_ordenador_gasto():
             else:
                 st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
 
-    # Sección para solicitar información financiera para IES sin Convenio
-    if st.button("Solicitar Información Financiera IES sin Convenio"):
-        # Generar datos para las IES sin convenio
-        datos_ies_sin_convenio = []
-        for _ in range(cantidad_sin_convenio):
-            datos_ies_sin_convenio.append(generar_info_bancaria())
+    # Inicializa el estado para mostrar detalles
+    if 'mostrar_detalles' not in st.session_state:
+        st.session_state.mostrar_detalles = False
 
-        # Convertir los datos a DataFrame
-        df_ies_sin_convenio = pd.DataFrame(datos_ies_sin_convenio)
+    # Procesar cada beneficiario
+    total_valor_solicitado_sin_convenio = 0  # Inicializar el total
+    detalles = []  # Para almacenar los detalles
 
-        # Mostrar la tabla con la información financiera
-        st.subheader("Información Financiera de IES sin Convenio")
-        st.dataframe(df_ies_sin_convenio)
+    for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
+        st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
 
-        # Calcular el total de valores solicitados
-        total_valores_sin_convenio = df_ies_sin_convenio['Valor'].sum()
+        # Preguntar si la IES tiene convenio
+        if beneficiario['tiene_convenio'] == "No":
+            if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
+                info_bancaria = generar_info_bancaria()  # Generar la info bancaria
+                st.write("Información bancaria generada:")
+                st.write(f"NIT: {info_bancaria['NIT']}")
+                st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+                st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+                st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+                st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+                st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
 
-        # Mostrar mensaje de registro
-        st.success(f"Información financiera registrada para IES sin convenio. Total solicitado: {total_valores_sin_convenio} millones de pesos.")
-        
-        # Mostrar gráfico de valores solicitados por las IES sin convenio
-        plt.figure(figsize=(8, 4))
-        plt.bar(df_ies_sin_convenio['Nombre'], df_ies_sin_convenio['Valor'], color='purple')
-        plt.title("Valores Solicitados por IES sin Convenio")
-        plt.xticks(rotation=45)
-        plt.ylabel("Valor (millones de pesos)")
-        
-        # Formatear el eje Y para mostrar valores en formato nominal
-        ax = plt.gca()
-        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
+                # Guardar el valor solicitado
+                total_valor_solicitado_sin_convenio += beneficiario['Valor']
+                detalles.append({
+                    "Nombre IES": info_bancaria['Nombre'],
+                    "Valor Solicitado": beneficiario['Valor'],
+                    "Info Bancaria": info_bancaria
+                })
+                
+            # Botón para mostrar/ocultar detalles
+            if st.button("Mostrar todos los casos" if not st.session_state.mostrar_detalles else "Ocultar todos los casos"):
+                st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
 
-        st.pyplot(plt)
+    # Mostrar detalles si se solicita
+    if st.session_state.mostrar_detalles:
+        st.subheader("Detalles de Solicitudes sin Convenio")
+        for detalle in detalles:
+            st.write(f"**Nombre IES:** {detalle['Nombre IES']}")
+            st.write(f"**Valor Solicitado:** {detalle['Valor Solicitado']} millones de pesos")
+            st.write("**Información Bancaria:**")
+            st.write(f"- NIT: {detalle['Info Bancaria']['NIT']}")
+            st.write(f"- Tipo de Cuenta: {detalle['Info Bancaria']['Tipo Cuenta']}")
+            st.write(f"- Número de Cuenta: {detalle['Info Bancaria']['Numero Cuenta']}")
+            st.write(f"- Nombre del Banco: {detalle['Info Bancaria']['Nombre Banco']}")
+            st.write(f"- Número de Factura: {detalle['Info Bancaria']['Numero Factura']}")
+            st.write("---")
 
+    st.write(f"**Total Valor Solicitado por IES sin Convenio:** {total_valor_solicitado_sin_convenio} millones de pesos")
+
+# Simular datos iniciales para el estado de la sesión
+if 'ofertas_en_proceso' not in st.session_state:
+    st.session_state.ofertas_en_proceso = [
+        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)},
+        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)},
+        {"GarantiaFirmada": True, "Valor": random.randint(100, 1000)}
+    ]
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
