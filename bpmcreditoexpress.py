@@ -931,7 +931,7 @@ def gestion_ordenador_gasto():
 
     # Agregar un botón para ocultar/mostrar detalles
     if 'mostrar_detalles' not in st.session_state:
-        st.session_state.mostrar_detalles = True
+        st.session_state.mostrar_detalles = False
 
     if st.button("Ocultar Detalles" if st.session_state.mostrar_detalles else "Mostrar Detalles"):
         st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
@@ -971,42 +971,11 @@ def gestion_ordenador_gasto():
                 st.write(instruccion_giro)
                 
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                    st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
-
-    # Botones para aprobar digitalmente por grupos
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("Aprobar digitalmente ofertas con convenio"):
-            st.success("Ofertas con convenio aprobadas digitalmente.")
-
-    with col2:
-        if st.button("Aprobar digitalmente ofertas sin convenio"):
-            st.success("Ofertas sin convenio aprobadas digitalmente.")
-
-    # Crear un DataFrame con todas las solicitudes para mostrar en tabla
-    df_solicitudes = df_ofertas[['Nombre', 'Valor', 'tiene_convenio']]
-    
-    st.subheader("Tabla de Solicitudes")
-    st.dataframe(df_solicitudes)
-
-    # Agregar filtros
-    ies_filter = st.selectbox("Filtrar por IES", options=df_solicitudes['Nombre'].unique().tolist(), index=0)
-    año_filter = st.selectbox("Filtrar por Año", options=["2023", "2024"], index=0)  # Cambia esto según tus datos
-    periodo_filter = st.selectbox("Filtrar por Periodo", options=["Primer Semestre", "Segundo Semestre"], index=0)  # Cambia esto según tus datos
-
-    filtered_solicitudes = df_solicitudes[(df_solicitudes['Nombre'] == ies_filter)]  # Aquí puedes agregar más condiciones de filtrado
-
-    st.subheader("Solicitudes Filtradas")
-    st.dataframe(filtered_solicitudes)
-
-    # Funcionalidad para descargar en Excel
-    if st.button("Descargar Solicitudes en Excel"):
-        # Crear un archivo Excel a partir del DataFrame
-        excel_file = "solicitudes.xlsx"
-        filtered_solicitudes.to_excel(excel_file, index=False)
-
-        st.success(f"Descargaste el archivo: {excel_file}")
+                    st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada. Procediendo con el giro.")
+                    
+    # Volver al inicio
+    if st.button("Volver al Inicio"):
+        st.session_state.clear()  # Limpia la sesión para regresar al inicio
 
 
 #Pagina de creación de indicadores 
