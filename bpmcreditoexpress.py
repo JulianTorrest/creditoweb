@@ -808,45 +808,40 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
-import streamlit as st
-import pandas as pd
-import random
-from io import BytesIO
-
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
     # Simulación de datos en sesión (puedes reemplazar esto con tus datos reales)
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
-        # Simulación de datos de ejemplo
+        # Simulación de datos de ejemplo con todas las columnas necesarias
         st.session_state.ofertas_en_proceso = [
-            {'GarantiaFirmada': True, 'tiene_convenio': 'Sí', 'Valor': 200},
-            {'GarantiaFirmada': True, 'tiene_convenio': 'No', 'Valor': 300},
-            {'GarantiaFirmada': True, 'tiene_convenio': 'Sí', 'Valor': 150}
+            {
+                'Nombre': 'Juan Perez', 'Nacionalidad': 'Colombiana', 'Edad': 45, 'Estado Crédito': 'Aprobado',
+                'Lista SARLAFT': 'No', 'Score Crediticio': 720, 'Capacidad de Pago (COP)': 5000000,
+                'Límite de Endeudamiento (COP)': 20000000, 'Fecha': '2024-10-01', 'Año': 2024, 'Mes': 10, 
+                'Periodo': 'Q4', 'Interesado': 'ABC Corp', 'GarantiaFirmada': True, 'Valor': 200, 
+                'tiene_convenio': 'Sí'
+            },
+            {
+                'Nombre': 'Ana Gomez', 'Nacionalidad': 'Peruana', 'Edad': 38, 'Estado Crédito': 'En proceso',
+                'Lista SARLAFT': 'No', 'Score Crediticio': 680, 'Capacidad de Pago (COP)': 4000000,
+                'Límite de Endeudamiento (COP)': 15000000, 'Fecha': '2024-09-15', 'Año': 2024, 'Mes': 9, 
+                'Periodo': 'Q3', 'Interesado': 'XYZ Ltda', 'GarantiaFirmada': True, 'Valor': 300, 
+                'tiene_convenio': 'No'
+            },
+            {
+                'Nombre': 'Carlos Lopez', 'Nacionalidad': 'Argentina', 'Edad': 50, 'Estado Crédito': 'Rechazado',
+                'Lista SARLAFT': 'Sí', 'Score Crediticio': 610, 'Capacidad de Pago (COP)': 3000000,
+                'Límite de Endeudamiento (COP)': 10000000, 'Fecha': '2024-08-22', 'Año': 2024, 'Mes': 8, 
+                'Periodo': 'Q3', 'Interesado': 'DEF S.A.', 'GarantiaFirmada': True, 'Valor': 150, 
+                'tiene_convenio': 'Sí'
+            }
         ]
 
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
-    # Verificaciones de columnas
-    if 'GarantiaFirmada' not in df_ofertas.columns:
-        st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
-        return
-
-    # Filtrar solo ofertas con garantías firmadas
-    df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
-
     if df_ofertas.empty:
-        st.warning("No hay ofertas con garantías firmadas para gestionar.")
-        return
-
-    # Agregar columna 'tiene_convenio' si no existe
-    if 'tiene_convenio' not in df_ofertas.columns:
-        df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
-        st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
-
-    # Verificación de la columna 'Valor'
-    if 'Valor' not in df_ofertas.columns:
-        st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
+        st.warning("No hay ofertas para gestionar.")
         return
 
     # Presupuesto y progreso
@@ -911,34 +906,36 @@ def gestion_ordenador_gasto():
     if "mostrar_casos" not in st.session_state:
         st.session_state.mostrar_casos = False
 
-    # Mostrar/Ocultar Casos
     if st.session_state.mostrar_casos:
         if st.button("Ocultar todos los Casos"):
             st.session_state.mostrar_casos = False
-        else:
-            # Mostrar tabla con todos los casos
-            st.subheader("Detalle de Todos los Casos")
-            for index, row in df_ofertas.iterrows():
-                st.write(f"**Caso {index + 1}:**")
-                st.write(f"Valor: {row['Valor']} millones")
-                st.write(f"Convenio: {row['tiene_convenio']}")
-                st.write("---")
-
-            # Botón para descargar el archivo Excel
-            output = BytesIO()
-            df_ofertas.to_excel(output, index=False, engine='xlsxwriter')
-            output.seek(0)
-            st.download_button(label="Descargar todos los casos en Excel", 
-                               data=output, 
-                               file_name="todos_los_casos.xlsx", 
-                               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
     else:
         if st.button("Consultar todos los Casos"):
             st.session_state.mostrar_casos = True
 
-    # No mostrar la tabla 'Ofertas en Proceso' cuando se muestran todos los casos
-    if not st.session_state.mostrar_casos:
+    # Mostrar/Ocultar la información de los casos
+    if st.session_state.mostrar_casos:
+        st.subheader("Detalle de Todos los Casos")
+        # Convertir el DataFrame a una lista de diccionarios
+        casos = df_ofertas.to_dict(orient='records')
+        # Mostrar cada caso como una lista
+        for index, caso in enumerate(casos):
+            st.write(f"**Caso {index + 1}:**")
+            # Mostrar los datos del caso como una lista
+            for key, value in caso.items():
+                st.write(f"- **{key}:** {value}")
+            st.write("---")
+        # Botón para descargar el archivo Excel
+        output = BytesIO()
+        df_ofertas.to_excel(output, index=False, engine='xlsxwriter')
+        output.seek(0)
+        st.download_button(
+            label="Descargar todos los casos en Excel",
+            data=output,
+            file_name="todos_los_casos.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+    else:
         st.subheader("Ofertas en Proceso")
         st.dataframe(df_ofertas)
 
