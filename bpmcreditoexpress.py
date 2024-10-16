@@ -929,6 +929,27 @@ def gestion_ordenador_gasto():
 
     st.pyplot(plt)
 
+    # Mover los botones aquí
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Aprobar Digitalmente IES con Convenio"):
+            total_aprobado_convenio = ofertas_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_convenio:
+                presupuesto_disponible -= total_aprobado_convenio
+                st.success(f"Se ha aprobado el giro total de {total_aprobado_convenio} millones a IES con convenio.")
+            else:
+                st.warning("Presupuesto insuficiente para aprobar el giro a IES con convenio.")
+
+    with col2:
+        if st.button("Aprobar Digitalmente IES sin Convenio"):
+            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+            if presupuesto_disponible >= total_aprobado_sin_convenio:
+                presupuesto_disponible -= total_aprobado_sin_convenio
+                st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones a IES sin convenio.")
+            else:
+                st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
+
     # Procesar cada beneficiario
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
         st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
@@ -962,29 +983,9 @@ def gestion_ordenador_gasto():
             instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
             st.write(instruccion_giro)
             
-            if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                st.success(f"Liquidación de {beneficiario.get('Nombre')} aprobada.")
-
-    # Botones para aprobar digitalmente por grupos
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("Aprobar Digitalmente IES con Convenio"):
-            total_aprobado_convenio = ofertas_convenio['Valor'].sum()
-            if presupuesto_disponible >= total_aprobado_convenio:
-                presupuesto_disponible -= total_aprobado_convenio
-                st.success(f"Se ha aprobado el giro total de {total_aprobado_convenio} millones a IES con convenio.")
-            else:
-                st.warning("Presupuesto insuficiente para aprobar el giro a IES con convenio.")
-
-    with col2:
-        if st.button("Aprobar Digitalmente IES sin Convenio"):
-            total_aprobado_sin_convenio = ofertas_sin_convenio['Valor'].sum()
-            if presupuesto_disponible >= total_aprobado_sin_convenio:
-                presupuesto_disponible -= total_aprobado_sin_convenio
-                st.success(f"Se ha aprobado el giro total de {total_aprobado_sin_convenio} millones a IES sin convenio.")
-            else:
-                st.warning("Presupuesto insuficiente para aprobar el giro a IES sin convenio.")
+            if st.button(f"Aprobar Giro a {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"aprobar_giro_{index}"):
+                st.success("Giro aprobado exitosamente.")
+                st.balloons()
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
