@@ -406,26 +406,18 @@ def captura_datos():
 
     year = st.selectbox("Selecciona el año", options=[2024])
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
-    
     # Nuevo filtro para seleccionar la periodicidad
     periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
 
     # Formulario actual de captura de datos
     st.subheader("Datos del Postulante")
-
-    nombre = st.text_input("Nombre completo")
+    id_solicitud = st.text_input("ID Solicitud")
+    nombre = st.text_input("Nombre")
+    apellido = st.text_input("Apellido")
     tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
     numero_documento = st.text_input("Número de Documento")
-    nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
-    edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
-    estado_credito = st.multiselect("Estado del crédito anterior (en caso de tener alguno)", ["Ninguno", "Castigado", "En mora y castigado"])
-    lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
-    score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
-    capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
-    limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
-    deudor = st.text_input("Nombre del deudor")
-    fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
-    fecha_aplicación = st.date_input("Fecha de aplicación", value=datetime.today())
+    fecha_solicitud = st.date_input("Fecha de Solicitud", value=datetime.today())
+    estado_solicitud = st.selectbox("Estado de Solicitud", ["Pendiente", "Aprobada", "Rechazada"])
 
     if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
