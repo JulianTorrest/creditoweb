@@ -937,7 +937,7 @@ def gestion_ordenador_gasto():
     for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
         st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
 
-        # Botón para mostrar/ocultar detalles del beneficiario
+        # Inicializar la visibilidad de detalles si no existe
         if f"toggle_detalles_{index}" not in st.session_state.mostrar_detalles:
             st.session_state.mostrar_detalles[f"toggle_detalles_{index}"] = False
 
@@ -982,6 +982,7 @@ def gestion_ordenador_gasto():
                         st.warning("La validación no fue exitosa. Revise la información.")
         else:
             st.write(f"IES {beneficiario.get('Nombre', 'IES Desconocida')} ya tiene convenio.")
+
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
