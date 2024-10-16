@@ -404,6 +404,7 @@ def captura_datos():
     # Filtros de Año y Periodo
     st.subheader("Filtros de búsqueda")
 
+    # Filtros de Año y Periodo
     year = st.selectbox("Selecciona el año", options=[2024])
     periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
     periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
@@ -443,6 +444,7 @@ def captura_datos():
     if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
 
+        # Aplicar filtros
         if nacionalidad:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
         if estado_credito:
@@ -454,44 +456,8 @@ def captura_datos():
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
 
-        if df_beneficiarios.empty:
-            st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
-        else:
-            st.write("Solicitudes encontrados:")
-            st.dataframe(df_beneficiarios)
-
-            # Mostrar gráficos
-            mostrar_graficos(df_beneficiarios)
-
-
-    # Opción para mostrar/ocultar campos adicionales
-    if st.checkbox("Mostrar campos adicionales"):
-        # Campos ocultos
-        nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
-        edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
-        estado_credito = st.multiselect("Estado del crédito anterior (en caso de tener alguno)", ["Ninguno", "Castigado", "En mora y castigado"])
-        lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
-        score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
-        capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
-        limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
-        deudor = st.text_input("Nombre del deudor")
-        fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
-        fecha_aplicación = st.date_input("Fecha de aplicación", value=datetime.today())
-
-
-    if st.button("Mostrar datos de beneficiarios"):
-        df_beneficiarios = pd.DataFrame(beneficiarios_data)
-
-        if nacionalidad:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
-        if estado_credito:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
-        if lista_sarlaft:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
-        if year:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
-        if periodo:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
+        # Eliminar la columna de "Nacionalidad"
+        df_beneficiarios = df_beneficiarios.drop(columns=["Nacionalidad"], errors='ignore')
 
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
@@ -501,6 +467,7 @@ def captura_datos():
 
             # Mostrar gráficos
             mostrar_graficos(df_beneficiarios)
+
 
         
 # Página de validación de beneficiarios
