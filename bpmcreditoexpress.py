@@ -808,6 +808,17 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
+def generar_info_bancaria():
+    return {
+        "NIT": random.randint(100000000, 999999999),
+        "Nombre": f"IES {random.choice(['A', 'B', 'C', 'D'])}",
+        "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
+        "Numero Cuenta": random.randint(10000000, 99999999),
+        "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
+        "Numero Factura": random.randint(1000, 9999),
+        "Valor": random.randint(100000, 35000000)  # Asegúrate de agregar el valor aquí por IES
+    }
+
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
@@ -967,19 +978,21 @@ def gestion_ordenador_gasto():
         # Calcular el total de valores solicitados
         total_valores_sin_convenio = df_ies_sin_convenio['Valor'].sum()
 
-        # Botón para ocultar la tabla y mostrar mensaje de registro
-        if st.button("Registrar Información Financiera de IES sin Convenio"):
-            st.success(f"Información financiera registrada para IES sin convenio. Total solicitado: {total_valores_sin_convenio} millones de pesos.")
-            
-            # Mostrar gráfico de valores solicitados por las IES sin convenio
-            plt.figure(figsize=(8, 4))
-            plt.bar(df_ies_sin_convenio['Nombre'], df_ies_sin_convenio['Valor'], color='purple')
-            plt.title("Valores Solicitados por IES sin Convenio")
-            plt.xticks(rotation=45)
-            plt.ylabel("Valor (millones de pesos)")
-            ax = plt.gca()
-            ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
-            st.pyplot(plt)
+        # Mostrar mensaje de registro
+        st.success(f"Información financiera registrada para IES sin convenio. Total solicitado: {total_valores_sin_convenio} millones de pesos.")
+        
+        # Mostrar gráfico de valores solicitados por las IES sin convenio
+        plt.figure(figsize=(8, 4))
+        plt.bar(df_ies_sin_convenio['Nombre'], df_ies_sin_convenio['Valor'], color='purple')
+        plt.title("Valores Solicitados por IES sin Convenio")
+        plt.xticks(rotation=45)
+        plt.ylabel("Valor (millones de pesos)")
+        
+        # Formatear el eje Y para mostrar valores en formato nominal
+        ax = plt.gca()
+        ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))  # Formato de miles
+
+        st.pyplot(plt)
 
 
 #Pagina de creación de indicadores 
