@@ -811,10 +811,15 @@ def generar_info_bancaria():
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
+    # Simulación de datos en sesión (puedes reemplazar esto con tus datos reales)
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
-        st.warning("No hay ofertas en proceso para gestionar.")
-        return
-
+        # Simulación de datos de ejemplo
+        st.session_state.ofertas_en_proceso = [
+            {'GarantiaFirmada': True, 'tiene_convenio': 'Sí', 'Valor': 200},
+            {'GarantiaFirmada': True, 'tiene_convenio': 'No', 'Valor': 300},
+            {'GarantiaFirmada': True, 'tiene_convenio': 'Sí', 'Valor': 150}
+        ]
+        
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     # Verificaciones de columnas
@@ -822,16 +827,19 @@ def gestion_ordenador_gasto():
         st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
         return
 
+    # Filtrar solo ofertas con garantías firmadas
     df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
 
     if df_ofertas.empty:
         st.warning("No hay ofertas con garantías firmadas para gestionar.")
         return
 
+    # Agregar columna 'tiene_convenio' si no existe
     if 'tiene_convenio' not in df_ofertas.columns:
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
+    # Verificación de la columna 'Valor'
     if 'Valor' not in df_ofertas.columns:
         st.error("La columna 'Valor' no existe en el DataFrame. Por favor, verifica la generación de las ofertas.")
         return
@@ -898,6 +906,7 @@ def gestion_ordenador_gasto():
     if "mostrar_casos" not in st.session_state:
         st.session_state.mostrar_casos = False
 
+    # Mostrar/Ocultar Casos
     if st.session_state.mostrar_casos:
         if st.button("Ocultar todos los Casos"):
             st.session_state.mostrar_casos = False
@@ -919,7 +928,6 @@ def gestion_ordenador_gasto():
     # Mostrar nuevamente las ofertas en proceso
     st.subheader("Ofertas en Proceso")
     st.dataframe(df_ofertas)
-
 
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
