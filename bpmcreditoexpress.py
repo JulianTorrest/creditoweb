@@ -1015,11 +1015,11 @@ def gestion_ordenador_gasto():
         # Botón para procesar la información
                 if st.button("Procesar"):
                     if ies_seleccionadas:
-                    total_aprobado = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
-                    st.success(f"Total aprobado para IES sin Convenio: {total_aprobado} millones de pesos.")
-                        for ies in ies_seleccionadas:
-                            valor_ies = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
-                            st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
+                        total_aprobado = ies_sin_convenio[ies_sin_convenio['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+                        st.success(f"Total aprobado para IES sin Convenio: {total_aprobado} millones de pesos.")
+                            for ies in ies_seleccionadas:
+                                valor_ies = ies_sin_convenio[ies_sin_convenio['Nombre'] == ies]['Valor'].values[0]
+                                st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
                 else:
                     st.warning("No has seleccionado ninguna IES sin convenio.")
         
