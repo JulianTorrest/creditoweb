@@ -976,14 +976,11 @@ def gestion_ordenador_gasto():
                 if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
                     validacion_info = random.choice(["Sí", "No"])  # Simulación de validación
                     if validacion_info == "Sí":
-                        st.success("Validación exitosa. Procediendo a giro...")
-                        # Agregar confirmación del giro o lógica adicional
+                        st.success("Validación exitosa. Procediendo a girar el dinero.")
                     else:
                         st.warning("La validación no fue exitosa. Revise la información.")
         else:
             st.write(f"IES {beneficiario.get('Nombre', 'IES Desconocida')} ya tiene convenio.")
-
-
 #Pagina de creación de indicadores 
 def Indicadores_Proceso():
     st.title("Dashboard")
