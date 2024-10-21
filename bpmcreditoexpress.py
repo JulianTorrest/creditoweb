@@ -914,15 +914,6 @@ def gestion_ordenador_gasto():
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     st.pyplot(plt)
 
-    # Gráfico interactivo de indicadores de valores
-    fig_valores = px.bar(indicadores_valor, x='Indicador', y='Valor', 
-                         title='Indicadores de Valores', text_auto=True)
-    st.plotly_chart(fig_valores)
-
-    # Gráfico interactivo de indicadores de cantidades
-    fig_cantidades = px.bar(indicadores_cantidad, x='Indicador', y='Valor', 
-                            title='Indicadores de Cantidades', text_auto=True)
-    st.plotly_chart(fig_cantidades)
 
     # Mostrar detalles
     if 'mostrar_detalles' not in st.session_state:
