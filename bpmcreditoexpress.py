@@ -682,20 +682,18 @@ def gestion_comercial():
     # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
-    # Filtrar por año
+    # Filtrar por año y semestre
     if 'Fecha' in df_ofertas.columns:
-        # Asegurarse de que la columna 'Fecha' esté en formato datetime
         df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
-
-        # Filtrar por semestre
         if periodo_seleccionado == "1er Semestre":
             df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 1) & (df_ofertas['Fecha'].dt.month <= 6)]
-        else:  # 2do Semestre
+        else:
             df_ofertas = df_ofertas[(df_ofertas['Fecha'].dt.month >= 7) & (df_ofertas['Fecha'].dt.month <= 12)]
     else:
         st.error("La columna 'Fecha' no se encuentra en los datos.")
-        return  # Agregar return para salir de la función en caso de error
+        return
 
+    # Filtrar por estado
     if estado_filtrado != "Todos":
         df_ofertas = df_ofertas[df_ofertas['Interesado'] == estado_filtrado]
 
@@ -708,13 +706,11 @@ def gestion_comercial():
 
     # Informe de seguimiento
     st.subheader("Informe de Seguimiento")
-
+    
     # Contar interesados y garantías
     total_interesados = df_ofertas[df_ofertas['Interesado'] == "Sí"].shape[0]
     total_no_interesados = df_ofertas[df_ofertas['Interesado'] == "No"].shape[0]
     total_si_pero_despues = df_ofertas[df_ofertas['Interesado'] == "Sí, pero después"].shape[0]
-
-    # Filtrar los que respondieron "Sí" y verificar si hay garantía firmada
     total_garantias_firmadas = df_ofertas[(df_ofertas['Interesado'] == "Sí") & (df_ofertas['GarantiaFirmada'] == True)].shape[0]
     total_garantias_no_firmadas = total_interesados - total_garantias_firmadas if total_interesados > 0 else 0
 
@@ -725,17 +721,17 @@ def gestion_comercial():
     st.write(f"Total garantías firmadas: {total_garantias_firmadas}")
     st.write(f"Total garantías no firmadas: {total_garantias_no_firmadas}")
 
-    # Crear primer gráfico: Distribución de interesados
+    # Gráfico de distribución de interesados
     st.subheader("Distribución de Interesados")
     labels_interesados = ['Interesados', 'No Interesados', 'Sí, pero después']
     sizes_interesados = [total_interesados, total_no_interesados, total_si_pero_despues]
-
+    
     plt.figure(figsize=(10, 6))
     plt.pie(sizes_interesados, labels=labels_interesados, autopct='%1.1f%%', startangle=140)
-    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    plt.axis('equal')
     st.pyplot(plt)
 
-    # Crear segundo gráfico: Garantías firmadas y no firmadas
+    # Gráfico de garantías firmadas
     st.subheader("Estado de Garantías")
     labels_garantias = ['Garantías Firmadas', 'Garantías No Firmadas']
     sizes_garantias = [total_garantias_firmadas, total_garantias_no_firmadas]
@@ -748,76 +744,48 @@ def gestion_comercial():
 
     # Mostrar las ofertas filtradas
     if not df_ofertas.empty:
-        # Registro de beneficiarios con garantía firmada
-        st.session_state.beneficiarios = []  # Inicializar la lista si no existe
         for i, oferta in enumerate(df_ofertas.to_dict('records')):
             st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
             st.write(f"Interesado: {oferta['Interesado']}")
-
-            # Ajustar la respuesta de garantía firmada
-            if oferta['Interesado'] == "No":
-                st.write("¿Garantía firmada? No")  # No se firma garantía si no está interesado
-                estado = "Garantía No Firmada"
-            elif oferta['Interesado'] == "Sí":
-                st.write(f"¿Garantía firmada? {'Sí'}")
-                garantia_firmada = st.checkbox("Garantía firmada recibida", value=True, key=f"garantia_firmada_{i}")
-                if garantia_firmada:
-                    st.session_state.ofertas_en_proceso[i]['GarantiaFirmada'] = True
-                    st.session_state.beneficiarios.append(oferta)  # Agregar a beneficiarios
-                    st.write("Gracias, hemos registrado la garantía firmada.")
-                    estado = "Garantía Firmada"
-                else:
-                    st.write("Esperando la confirmación de la garantía firmada.")
-                    estado = "Esperando Confirmación"
-            elif oferta['Interesado'] == "Sí, pero después":
-                st.write("¿Garantía firmada? No se requiere pregunta.")  # No se hace seguimiento de garantías
-                estado = "No se requiere seguimiento"
-
-            st.write(f"Estado: {estado}")  # Mostrar el estado derivado
-
-            if oferta['Interesado'] == "Sí, pero después":
-                st.write("Generando marca 'Sí, pero después'...")
-                st.session_state.ofertas_en_proceso[i]["Estado"] = "Marca Sí, pero después"
+            estado = "Sin especificar"
+            if oferta['Interesado'] == "Sí":
+                st.write(f"¿Garantía firmada? {'Sí' if oferta.get('GarantiaFirmada') else 'No'}")
+                estado = "Garantía Firmada" if oferta.get('GarantiaFirmada') else "Esperando Confirmación"
             elif oferta['Interesado'] == "No":
-                st.write("Beneficiario No se encuentra interesado.")
-                st.success("Registros actualizados y flujo finalizado.")
-            elif oferta['Interesado'] == "Sí":
-                st.write("Generando marca positiva...")
-                st.write("Realizando seguimiento periódico para retomar contacto.")
+                estado = "No Interesado"
+            elif oferta['Interesado'] == "Sí, pero después":
+                estado = "Sí, pero después"
 
-# Botones para descargar en Excel y PDF después de los gráficos
-        if st.button("Descargar en Excel"):
-            excel_buffer = io.BytesIO()
-            df_ofertas.to_excel(excel_buffer, index=False, engine='openpyxl')
-            excel_buffer.seek(0)
-            st.download_button("Descargar Excel", data=excel_buffer, file_name="ofertas.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            st.write(f"Estado: {estado}")
 
+    # Botones de descarga (después del informe)
+    if st.button("Descargar en Excel"):
+        excel_buffer = io.BytesIO()
+        df_ofertas.to_excel(excel_buffer, index=False, engine='openpyxl')
+        excel_buffer.seek(0)
+        st.download_button("Descargar Excel", data=excel_buffer, file_name="ofertas.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-        if st.button("Descargar en PDF"):
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
+    if st.button("Descargar en PDF"):
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
 
-            # Agregar contenido al PDF
-            for i, oferta in enumerate(df_ofertas.to_dict('records')):
-                pdf.cell(200, 10, txt=f"Oferta {i + 1}: {oferta['Nombre']}", ln=True)
-                pdf.cell(200, 10, txt=f"Interesado: {oferta['Interesado']}", ln=True)
-                pdf.cell(200, 10, txt=f"Estado: {estado}", ln=True)
-                pdf.cell(200, 10, ln=True)  # Nueva línea
+        # Agregar contenido al PDF
+        for i, oferta in enumerate(df_ofertas.to_dict('records')):
+            pdf.cell(200, 10, txt=f"Oferta {i + 1}: {oferta['Nombre']}", ln=True)
+            pdf.cell(200, 10, txt=f"Interesado: {oferta['Interesado']}", ln=True)
+            pdf.cell(200, 10, txt=f"Estado: {estado}", ln=True)
+            pdf.cell(200, 10, ln=True)  # Nueva línea
 
-        # Guardar el PDF en un archivo temporal
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-                pdf.output(temp_pdf.name, 'F')
-                temp_pdf.seek(0)  # Asegurarse de que el puntero esté al principio del archivo
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+            pdf.output(temp_pdf.name, 'F')
+            temp_pdf.seek(0)
 
-            # Leer el contenido del archivo temporal
-            with open(temp_pdf.name, 'rb') as f:
-                pdf_output = f.read()
+        with open(temp_pdf.name, 'rb') as f:
+            pdf_output = f.read()
 
-            st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
+        st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
 
-    else:
-        st.warning("No hay ofertas que coincidan con los criterios de filtro."),
         
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
