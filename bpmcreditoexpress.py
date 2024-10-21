@@ -1068,11 +1068,24 @@ def export_excel(df):
     return processed_data
 
 if st.button("Exportar a Excel"):
-    df_export = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]
-    excel_data = export_excel(df_export)
-    b64 = base64.b64encode(excel_data).decode()
-    href = f'<a href="data:application/octet-stream;base64,{b64}" download="ies_aprobadas.xlsx">Descargar archivo Excel</a>'
-    st.markdown(href, unsafe_allow_html=True)
+    # Verificar si las variables están definidas y contienen datos
+    if 'df_ofertas' not in locals():
+        st.error("El DataFrame 'df_ofertas' no ha sido definido")
+    elif 'ies_seleccionadas' not in locals():
+        st.error("La lista 'ies_seleccionadas' no ha sido definida")
+    else:
+        # Filtrar el DataFrame por las instituciones seleccionadas
+        df_export = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]
+        
+        # Verificar si df_export contiene datos
+        if df_export.empty:
+            st.error("No hay datos para exportar.")
+        else:
+            # Exportar el DataFrame a Excel
+            excel_data = export_excel(df_export)
+            b64 = base64.b64encode(excel_data).decode()
+            href = f'<a href="data:application/octet-stream;base64,{b64}" download="ies_aprobadas.xlsx">Descargar archivo Excel</a>'
+            st.markdown(href, unsafe_allow_html=True)
 
 # Visualización de datos
     st.subheader("Distribución de IES por Convenio")
