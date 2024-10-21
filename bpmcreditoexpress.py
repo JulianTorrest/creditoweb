@@ -1058,34 +1058,17 @@ def gestion_ordenador_gasto():
     for solicitud in st.session_state.historial_solicitudes:
         st.write(f"IES: {solicitud['IES']}, Valor: {solicitud['Valor']} millones, Fecha: {solicitud['Fecha']}")
 
-# Función para descargar como Excel
-def export_excel(df):
-    output = io.BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index=False, sheet_name='IES Aprobadas')
-    writer.save()
-    processed_data = output.getvalue()
-    return processed_data
+# Exportar a CSV
+    if st.button("Exportar a CSV"):
+        with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
+            fieldnames = ['Nombre', 'Valor']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
-if st.button("Exportar a Excel"):
-    # Verificar si las variables están definidas y contienen datos
-    if 'df_ofertas' not in locals():
-        st.error("El DataFrame 'df_ofertas' no ha sido definido")
-    elif 'ies_seleccionadas' not in locals():
-        st.error("La lista 'ies_seleccionadas' no ha sido definida")
-    else:
-        # Filtrar el DataFrame por las instituciones seleccionadas
-        df_export = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]
-        
-        # Verificar si df_export contiene datos
-        if df_export.empty:
-            st.error("No hay datos para exportar.")
-        else:
-            # Exportar el DataFrame a Excel
-            excel_data = export_excel(df_export)
-            b64 = base64.b64encode(excel_data).decode()
-            href = f'<a href="data:application/octet-stream;base64,{b64}" download="ies_aprobadas.xlsx">Descargar archivo Excel</a>'
-            st.markdown(href, unsafe_allow_html=True)
+            writer.writeheader()
+            for ies in ies_seleccionadas:
+                valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
+                writer.writerow({'Nombre': ies, 'Valor': valor_ies})
+        st.success("Archivo CSV generado con éxito.")
 
 # Visualización de datos
     st.subheader("Distribución de IES por Convenio")
