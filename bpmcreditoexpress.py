@@ -832,9 +832,9 @@ def gestion_ordenador_gasto():
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
-    # Variables de presupuesto
-    presupuesto_disponible = 10000  # millones de pesos
-    presupuesto_comprometido = 1500  # millones de pesos
+    # Presupuesto disponible y comprometido
+    presupuesto_disponible = st.number_input("Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000)
+    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
 
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
