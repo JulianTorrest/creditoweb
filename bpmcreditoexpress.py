@@ -943,6 +943,10 @@ def gestion_ordenador_gasto():
                         validacion_info = random.choice(["Sí", "No"])
                         if validacion_info == "Sí":
                             st.success("Validación exitosa. Procediendo a giro...")
+                            presupuesto_disponible -= beneficiario['Valor']
+                            st.session_state.presupuesto_disponible = presupuesto_disponible
+                            if presupuesto_disponible < limite_presupuesto:
+                                st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
                             if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
                                 st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
                             else:
@@ -957,6 +961,12 @@ def gestion_ordenador_gasto():
                 
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
                     st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
+                    # Descontar del presupuesto disponible
+                    presupuesto_disponible -= beneficiario['Valor']
+                    st.session_state.presupuesto_disponible = presupuesto_disponible
+                    if presupuesto_disponible < limite_presupuesto:
+                        st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
+
 
     # Inicializar historial de solicitudes en estado de sesión
     if "historial_solicitudes" not in st.session_state:
