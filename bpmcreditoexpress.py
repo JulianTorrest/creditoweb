@@ -839,18 +839,6 @@ def generar_info_bancaria():
         st.error(f"Error al generar información bancaria: {str(e)}")
         return None
 
-def generar_info_bancaria():
-    # Generar información bancaria aleatoria
-    return {
-        "NIT": random.randint(100000000, 999999999),
-        "Nombre": f"IES {random.choice(['A', 'B', 'C', 'D'])}",
-        "Tipo Cuenta": random.choice(['Corriente', 'Ahorros']),
-        "Numero Cuenta": random.randint(10000000, 99999999),
-        "Nombre Banco": random.choice(['Banco A', 'Banco B', 'Banco C']),
-        "Numero Factura": random.randint(1000, 9999),
-        "Valor": random.randint(100000, 35000000)  # Valor aleatorio
-    }
-
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
 
