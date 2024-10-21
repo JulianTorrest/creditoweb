@@ -7,7 +7,10 @@ import matplotlib.ticker as ticker
 from datetime import datetime,timedelta  # Importación directa de datetime
 import seaborn as sns
 from fpdf import FPDF
+import io
 from io import BytesIO
+import xlsxwriter
+import base64
 import tempfile
 import csv
 
@@ -1047,25 +1050,37 @@ def gestion_ordenador_gasto():
         st.success(f"Se ha aprobado el desembolso de {total_aprobado} millones de pesos para las IES seleccionadas.")
 
         for ies in ies_seleccionadas:
-            valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
-            st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
-            st.info(f"Se inició el proceso financiero para la IES: {ies}")
-
+            solicitud = {
+                'IES': ies,
+                'Valor': df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0],
+                'Fecha': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            st.session_state.historial_solicitudes.append(solicitud)
+        
         # Confirmación de aprobación final
         if st.button("Confirmar Aprobación Final"):
             st.success("Desembolso aprobado para las IES seleccionadas.")
 
-# Exportar a CSV
-    if st.button("Exportar a CSV"):
-        with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
-            fieldnames = ['Nombre', 'Valor']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    # Mostrar historial
+    st.subheader("Historial de Solicitudes")
+    for solicitud in st.session_state.historial_solicitudes:
+        st.write(f"IES: {solicitud['IES']}, Valor: {solicitud['Valor']} millones, Fecha: {solicitud['Fecha']}")
 
-            writer.writeheader()
-            for ies in ies_seleccionadas:
-                valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
-                writer.writerow({'Nombre': ies, 'Valor': valor_ies})
-        st.success("Archivo CSV generado con éxito.")
+# Función para descargar como Excel
+def export_excel(df):
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='IES Aprobadas')
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
+
+if st.button("Exportar a Excel"):
+    df_export = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]
+    excel_data = export_excel(df_export)
+    b64 = base64.b64encode(excel_data).decode()
+    href = f'<a href="data:application/octet-stream;base64,{b64}" download="ies_aprobadas.xlsx">Descargar archivo Excel</a>'
+    st.markdown(href, unsafe_allow_html=True)
 
 # Visualización de datos
     st.subheader("Distribución de IES por Convenio")
