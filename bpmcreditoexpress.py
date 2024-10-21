@@ -785,12 +785,13 @@ def gestion_comercial():
                 st.write("Generando marca positiva...")
                 st.write("Realizando seguimiento periódico para retomar contacto.")
 
-        # Botones para descargar en Excel y PDF después de los gráficos
+# Botones para descargar en Excel y PDF después de los gráficos
         if st.button("Descargar en Excel"):
             excel_buffer = io.BytesIO()
             df_ofertas.to_excel(excel_buffer, index=False, engine='openpyxl')
             excel_buffer.seek(0)
             st.download_button("Descargar Excel", data=excel_buffer, file_name="ofertas.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
 
         if st.button("Descargar en PDF"):
             pdf = FPDF()
@@ -813,10 +814,11 @@ def gestion_comercial():
             with open(temp_pdf.name, 'rb') as f:
                 pdf_output = f.read()
 
-        st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf")
+            st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
 
     else:
         st.warning("No hay ofertas que coincidan con los criterios de filtro."),
+        
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
     try:
