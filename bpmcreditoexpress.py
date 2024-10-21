@@ -210,14 +210,6 @@ if "ofertas_en_proceso" not in st.session_state:
 
 # Procesar y mostrar gráficos
 def mostrar_graficos(df_beneficiarios):
-    # Gráfico 1: Conteo de beneficiarios por nacionalidad
-    fig, ax = plt.subplots()
-    df_beneficiarios['Nacionalidad'].value_counts().plot(kind='bar', ax=ax, color='skyblue')
-    ax.set_title('Número de Beneficiarios por Nacionalidad')
-    ax.set_ylabel('Cantidad')
-    ax.set_xlabel('Nacionalidad')
-    st.pyplot(fig)
-
     # Gráfico 2: Distribución del estado de crédito
     fig, ax = plt.subplots()
     df_beneficiarios['Estado Crédito'].value_counts().plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90, colors=['gold', 'lightcoral', 'lightskyblue'])
