@@ -27,9 +27,10 @@ try:
     st.write(f"Contenido de la hoja: {selected_sheet}")
     st.write(df)
 
-    # Agregar resumen estadístico debajo del contenido
-    st.write("Resumen estadístico de los datos:")
-    st.write(df.describe())
+    # Agregar resumen estadístico debajo del contenido, omitiendo los valores nulos
+    st.write("Resumen estadístico de los datos (sin valores nulos):")
+    df_clean = df.dropna()  # Elimina las filas con valores nulos
+    st.write(df_clean.describe())
 
 except Exception as e:
     st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
