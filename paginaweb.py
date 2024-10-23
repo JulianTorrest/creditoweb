@@ -149,7 +149,8 @@ try:
             if selected_columns:
                 for col in selected_columns:
                     count_data = df[col].value_counts()
-                    if count_data.size <= 10:  # Limita a 10 valores únicos para la torta
+                    if count_data.size > 10:
+                        count_data = count_data[:9].append(pd.Series(count_data[9:].sum(), index=["Otros"]))
                         plt.figure(figsize=(8, 4))
                         plt.pie(count_data, labels=count_data.index, autopct='%1.1f%%', startangle=90)
                         plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
