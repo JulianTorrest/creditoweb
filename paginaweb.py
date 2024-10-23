@@ -37,6 +37,8 @@ try:
 
         # Crear subcategorías basadas en el texto de 'Línea de crédito'
         def asignar_subcategoria(linea_credito):
+            # Asegurarnos de que la línea de crédito no sea nula y eliminar espacios extra
+            linea_credito = str(linea_credito).strip().lower()
             if "Posgrado País" in linea_credito:
                 return "Posgrado País"
             elif "Posgrado Exterior" in linea_credito:
