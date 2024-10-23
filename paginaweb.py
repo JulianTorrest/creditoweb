@@ -29,6 +29,28 @@ try:
     # Permitir al usuario seleccionar las columnas a mostrar
     selected_columns = st.multiselect("Selecciona las columnas que deseas ver:", df.columns)
 
+    # Limpiar la columna 'Línea de crédito'
+    if 'Línea de crédito' in df.columns:
+        # Eliminar encabezados duplicados o valores vacíos
+        df['Línea de crédito'] = df['Línea de crédito'].dropna().apply(lambda x: x.strip()).replace('Línea de crédito', None)
+        df = df.dropna(subset=['Línea de crédito'])
+
+        # Crear subcategorías basadas en el texto de 'Línea de crédito'
+        def asignar_subcategoria(linea_credito):
+            if "Posgrado País" in linea_credito:
+                return "Posgrado País"
+            elif "Posgrado Exterior" in linea_credito:
+                return "Posgrado Exterior"
+            elif "Pregrado Largo Plazo" in linea_credito:
+                return "Pregrado Largo Plazo"
+            elif "Pregrado Mediano Plazo" in linea_credito:
+                return "Pregrado Mediano Plazo"
+            else:
+                return "Otra categoría"
+
+        # Crear nueva columna con subcategorías
+        df['Subcategoría'] = df['Línea de crédito'].apply(asignar_subcategoria)
+
     # Mostrar las columnas seleccionadas
     if selected_columns:
         st.write(f"Contenido de las columnas seleccionadas: {selected_columns}")
@@ -43,8 +65,7 @@ try:
         st.write("Valores únicos en las columnas seleccionadas (sin títulos de columnas):")
         for col in selected_columns:
             st.write(f"Columna '{col}':")
-            # Tomar solo los datos a partir de la segunda fila (omitir encabezados)
-            st.write(df[col].iloc[1:].dropna().unique())  # Mostrar valores únicos omitiendo nulos
+            st.write(df[col].dropna().unique())  # Mostrar valores únicos omitiendo nulos
 
         # Gráficos
         st.subheader("Gráficos")
@@ -64,11 +85,10 @@ try:
                     plt.xlabel(col)
                     plt.ylabel("Cantidad de registros")
                     st.pyplot(plt)
-        
+
         elif chart_type == "Torta":
             if selected_columns:
                 for col in selected_columns:
-                    # Contar la cantidad de registros por categoría
                     count_data = df[col].value_counts()
                     if count_data.size <= 10:  # Limita a 10 valores únicos para la torta
                         plt.figure(figsize=(8, 4))
