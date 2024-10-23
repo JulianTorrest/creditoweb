@@ -1,3 +1,6 @@
+import pandas as pd
+import streamlit as st
+
 # Título de la aplicación
 st.title("Visualización de Hojas en un Archivo Excel")
 
@@ -46,3 +49,4 @@ try:
 
 except Exception as e:
     st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
+
