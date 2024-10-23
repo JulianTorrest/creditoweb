@@ -56,18 +56,23 @@ try:
         if chart_type == "Barras":
             if selected_columns:
                 for col in selected_columns:
-                    if pd.api.types.is_numeric_dtype(df[col]):
-                        st.bar_chart(df[col].dropna())
-                    else:
-                        st.write(f"La columna '{col}' no es numérica, no se puede graficar en barras.")
+                    # Contar la cantidad de registros por categoría
+                    count_data = df[col].value_counts()
+                    plt.figure(figsize=(8, 4))
+                    count_data.plot(kind='bar')
+                    plt.title(f"Gráfico de barras para la columna '{col}'")
+                    plt.xlabel(col)
+                    plt.ylabel("Cantidad de registros")
+                    st.pyplot(plt)
         
         elif chart_type == "Torta":
             if selected_columns:
                 for col in selected_columns:
-                    if df[col].nunique() <= 10:  # Limitamos a 10 valores únicos para la torta
-                        data = df[col].value_counts()
+                    # Contar la cantidad de registros por categoría
+                    count_data = df[col].value_counts()
+                    if count_data.size <= 10:  # Limita a 10 valores únicos para la torta
                         plt.figure(figsize=(8, 4))
-                        plt.pie(data, labels=data.index, autopct='%1.1f%%', startangle=90)
+                        plt.pie(count_data, labels=count_data.index, autopct='%1.1f%%', startangle=90)
                         plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
                         st.pyplot(plt)
                     else:
