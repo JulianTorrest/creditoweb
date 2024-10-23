@@ -88,41 +88,19 @@ try:
     # Listar las hojas (páginas) del archivo Excel
     sheets = xls.sheet_names
 
-    # Mostrar la lista de hojas en Streamlit
-    st.write("Hojas en el archivo Excel:")
-    st.write(sheets)
-
     # Permitir que el usuario seleccione una hoja para visualizarla
     selected_sheet = st.selectbox("Selecciona una hoja para ver su contenido:", sheets)
 
     # Mostrar el contenido de la hoja seleccionada
     df = pd.read_excel(url, sheet_name=selected_sheet, engine='openpyxl')
 
-    # Depuración: Mostrar primeras filas del DataFrame original
-    st.write("DataFrame original:")
-    st.write(df.head())
-
     # Limpiar todas las columnas de valores nulos, vacíos y espacios
-    # Eliminar espacios solo en columnas de texto
     df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)  
-    # Convertir a minúsculas solo en columnas de texto
     df = df.apply(lambda x: x.str.lower() if x.dtype == "object" else x)  
-
-    # Depuración: Mostrar primeras filas después de limpiar los datos
-    st.write("DataFrame después de limpieza (sin espacios y en minúsculas):")
-    st.write(df.head())
 
     # Crear nueva columna 'Tipo de línea de crédito' basada en la función asignar_tipo_linea_credito
     if 'Línea de crédito' in df.columns:
         df['Tipo de línea de crédito'] = df['Línea de crédito'].apply(asignar_tipo_linea_credito)
-
-    # Depuración: Mostrar primeras filas con la nueva columna 'Tipo de línea de crédito'
-    st.write("DataFrame con 'Tipo de línea de crédito':")
-    st.write(df[['Línea de crédito', 'Tipo de línea de crédito']].head())
-
-    # Mostrar los valores únicos en la columna 'Línea de crédito' para verificar los datos
-    st.write("Valores únicos en la columna 'Línea de crédito':")
-    st.write(df['Línea de crédito'].unique())
 
     # Permitir al usuario seleccionar las columnas a mostrar
     selected_columns = st.multiselect("Selecciona las columnas que deseas ver:", df.columns)
@@ -132,16 +110,49 @@ try:
         st.write(f"Contenido de las columnas seleccionadas: {selected_columns}")
         st.write(df[selected_columns])
 
-        # Agregar resumen estadístico debajo del contenido, omitiendo los valores nulos
-        st.write("Resumen estadístico de los datos (sin valores nulos):")
-        df_clean = df[selected_columns].dropna()  # Elimina las filas con valores nulos en las columnas seleccionadas
-        st.write(df_clean.describe())
+    # Gráficos
+    st.subheader("Gráficos")
 
-        # Mostrar valores únicos (distinct) de las columnas seleccionadas sin tomar en cuenta los encabezados
-        st.write("Valores únicos en las columnas seleccionadas:")
-        for col in selected_columns:
-            st.write(f"Columna '{col}':")
-            st.write(df[col].dropna().unique())  # Mostrar valores únicos omitiendo nulos
+    # Seleccionar el tipo de gráfico
+    chart_type = st.selectbox("Selecciona el tipo de gráfico:", ["Barras", "Torta", "Puntos"])
+
+    # Crear gráfico basado en la selección
+    if chart_type == "Barras":
+        if selected_columns:
+            for col in selected_columns:
+                count_data = df[col].value_counts()
+                plt.figure(figsize=(8, 4))
+                count_data.plot(kind='bar')
+                plt.title(f"Gráfico de barras para la columna '{col}'")
+                plt.xlabel(col)
+                plt.ylabel("Cantidad de registros")
+                st.pyplot(plt)
+
+    elif chart_type == "Torta":
+        if selected_columns:
+            for col in selected_columns:
+                count_data = df[col].value_counts()
+                if count_data.size <= 10:  # Limita a 10 valores únicos para la torta
+                    plt.figure(figsize=(8, 4))
+                    plt.pie(count_data, labels=count_data.index, autopct='%1.1f%%', startangle=90)
+                    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+                    st.pyplot(plt)
+                else:
+                    st.write(f"La columna '{col}' tiene más de 10 categorías únicas, no se puede graficar en torta.")
+
+    elif chart_type == "Puntos":
+        if selected_columns and len(selected_columns) >= 2:
+            x_axis = st.selectbox("Selecciona la columna para el eje X", selected_columns)
+            y_axis = st.selectbox("Selecciona la columna para el eje Y", selected_columns)
+            if pd.api.types.is_numeric_dtype(df[x_axis]) and pd.api.types.is_numeric_dtype(df[y_axis]):
+                plt.figure(figsize=(8, 4))
+                plt.scatter(df[x_axis], df[y_axis])
+                plt.title(f"Gráfico de dispersión: {x_axis} vs {y_axis}")
+                plt.xlabel(x_axis)
+                plt.ylabel(y_axis)
+                st.pyplot(plt)
+            else:
+                st.write("Ambas columnas deben ser numéricas para generar un gráfico de puntos.")
 except Exception as e:
     st.write("Error al cargar el archivo Excel:", e)
 
