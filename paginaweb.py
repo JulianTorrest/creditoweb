@@ -27,5 +27,9 @@ try:
     st.write(f"Contenido de la hoja: {selected_sheet}")
     st.write(df)
 
+    # Agregar resumen estadístico debajo del contenido
+    st.write("Resumen estadístico de los datos:")
+    st.write(df.describe())
+
 except Exception as e:
     st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
