@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import matplotlib.pyplot as plt
 
 # Título de la aplicación
 st.title("Visualización de Hojas en un Archivo Excel")
@@ -44,6 +45,48 @@ try:
             st.write(f"Columna '{col}':")
             # Tomar solo los datos a partir de la segunda fila (omitir encabezados)
             st.write(df[col].iloc[1:].dropna().unique())  # Mostrar valores únicos omitiendo nulos
+
+        # Gráficos
+        st.subheader("Gráficos")
+
+        # Seleccionar el tipo de gráfico
+        chart_type = st.selectbox("Selecciona el tipo de gráfico:", ["Barras", "Torta", "Puntos"])
+
+        # Crear gráfico basado en la selección
+        if chart_type == "Barras":
+            if selected_columns:
+                for col in selected_columns:
+                    if pd.api.types.is_numeric_dtype(df[col]):
+                        st.bar_chart(df[col].dropna())
+                    else:
+                        st.write(f"La columna '{col}' no es numérica, no se puede graficar en barras.")
+        
+        elif chart_type == "Torta":
+            if selected_columns:
+                for col in selected_columns:
+                    if df[col].nunique() <= 10:  # Limitamos a 10 valores únicos para la torta
+                        data = df[col].value_counts()
+                        plt.figure(figsize=(8, 4))
+                        plt.pie(data, labels=data.index, autopct='%1.1f%%', startangle=90)
+                        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+                        st.pyplot(plt)
+                    else:
+                        st.write(f"La columna '{col}' tiene más de 10 categorías únicas, no se puede graficar en torta.")
+
+        elif chart_type == "Puntos":
+            if selected_columns and len(selected_columns) >= 2:  # Se requieren al menos 2 columnas para un gráfico de dispersión
+                x_col = st.selectbox("Selecciona la columna para el eje X:", selected_columns)
+                y_col = st.selectbox("Selecciona la columna para el eje Y:", selected_columns)
+                if pd.api.types.is_numeric_dtype(df[x_col]) and pd.api.types.is_numeric_dtype(df[y_col]):
+                    plt.figure(figsize=(8, 4))
+                    plt.scatter(df[x_col], df[y_col])
+                    plt.xlabel(x_col)
+                    plt.ylabel(y_col)
+                    plt.title(f"Gráfico de dispersión: {y_col} vs {x_col}")
+                    st.pyplot(plt)
+                else:
+                    st.write("Asegúrate de seleccionar columnas numéricas para el gráfico de dispersión.")
+
     else:
         st.write("No se han seleccionado columnas para mostrar.")
 
