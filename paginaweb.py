@@ -32,11 +32,12 @@ try:
     df_clean = df.dropna()  # Elimina las filas con valores nulos
     st.write(df_clean.describe())
 
-    # Mostrar valores únicos (distinct) de cada columna
-    st.write("Valores únicos en cada columna:")
+    # Mostrar valores únicos (distinct) de cada columna sin tomar en cuenta los encabezados
+    st.write("Valores únicos en cada columna (sin títulos de columnas):")
     for col in df.columns:
         st.write(f"Columna '{col}':")
-        st.write(df[col].dropna().unique())  # Mostrar valores únicos omitiendo nulos
-
+        # Tomar solo los datos a partir de la segunda fila (omitir encabezados)
+        st.write(df[col].iloc[1:].dropna().unique())  # Mostrar valores únicos omitiendo nulos
+        
 except Exception as e:
     st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
