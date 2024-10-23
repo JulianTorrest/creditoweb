@@ -12,68 +12,68 @@ url = 'https://github.com/JulianTorrest/creditoweb/raw/main/tabla%20Condiciones%
 def asignar_tipo_linea_credito(linea_credito):
     # Clasificación en Posgrado País
     if any(sub in linea_credito for sub in [
-        "Posgrado País con Deudor Solidario", 
-        "Posgrado País sin Deudor Solidario", 
-        "Posgrado País Medicina con Deudor Solidario", 
-        "Posgrado País Medicina sin Deudor Solidario", 
-        "Posgrado País - Servidores Públicos - con Deudor Solidario", 
-        "Posgrado País - Servidores Públicos - sin Deudor Solidario", 
-        "Posgrado País - Funcionarios del MEN y entidades adscritas - sin Deudor Solidario"]):
+        "posgrado país con deudor solidario", 
+        "posgrado país sin deudor solidario", 
+        "posgrado país medicina con deudor solidario", 
+        "posgrado país medicina sin deudor solidario", 
+        "posgrado país - servidores públicos - con deudor solidario", 
+        "posgrado país - servidores públicos - sin deudor solidario", 
+        "posgrado país - funcionarios del men y entidades adscritas - sin deudor solidario"]):
         return "posgrado país"
 
     # Clasificación en Posgrado Exterior
     elif any(sub in linea_credito for sub in [
-        "Posgrado Exterior Largo Plazo USD 25.000", 
-        "Posgrado Exterior USD 25.000 como complemento a las becas", 
-        "Posgrado o Pregrado Exterior Largo Plazo para Sostenimiento USD 12.500", 
-        "Posgrado Exterior - Servidores Públicos", 
-        "Posgrado Exterior - Funcionarios del MEN y entidades adscritas"]):
+        "posgrado exterior largo plazo usd 25.000", 
+        "posgrado exterior usd 25.000 como complemento a las becas", 
+        "posgrado o pregrado exterior largo plazo para sostenimiento usd 12.500", 
+        "posgrado exterior - servidores públicos", 
+        "posgrado exterior - funcionarios del men y entidades adscritas"]):
         return "posgrado exterior"
 
     # Clasificación en Pregrado Largo Plazo
     elif any(sub in linea_credito for sub in [
-        "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación Económica", 
-        "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación en Salud", 
-        "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación Económica", 
-        "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación en Salud", 
-        "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación Económica", 
-        "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación en Salud", 
-        "País Largo Plazo Estudiantes de Comunidades de Especial Protección Constitucional", 
-        "País Largo Plazo - Territorial", 
-        "País Largo Plazo - Talento de mi Territorio", 
-        "País Largo Plazo Mas Colombiano que Nunca", 
-        "País Largo Plazo Estudiantes beneficiarios rezagados de programas", 
-        "País Largo Plazo Línea para estudiantes que cuentan con apoyo económico", 
-        "País Largo Plazo Reservistas de Honor", 
-        "País Largo Plazo Oficiales", 
-        "País Largo Plazo Suboficiales", 
-        "País Largo Plazo Funcionarios del MEN y entidades adscritas"]):
+        "país largo plazo tú eliges 0% fondo de garantía covid19 afectación económica", 
+        "país largo plazo tú eliges 0% fondo de garantía covid19 afectación en salud", 
+        "país largo plazo tú eliges 10% fondo de garantía covid19 afectación económica", 
+        "país largo plazo tú eliges 10% fondo de garantía covid19 afectación en salud", 
+        "país largo plazo tú eliges 25% con fondo de garantía covid19 afectación económica", 
+        "país largo plazo tú eliges 25% con fondo de garantía covid19 afectación en salud", 
+        "país largo plazo estudiantes de comunidades de especial protección constitucional", 
+        "país largo plazo - territorial", 
+        "país largo plazo - talento de mi territorio", 
+        "país largo plazo mas colombiano que nunca", 
+        "país largo plazo estudiantes beneficiarios rezagados de programas", 
+        "país largo plazo línea para estudiantes que cuentan con apoyo económico", 
+        "país largo plazo reservistas de honor", 
+        "país largo plazo oficiales", 
+        "país largo plazo suboficiales", 
+        "país largo plazo funcionarios del men y entidades adscritas"]):
         return "pregrado largo plazo"
 
     # Clasificación en Pregrado Mediano Plazo
     elif any(sub in linea_credito for sub in [
-        "País Mediano Plazo Tú Eliges 30%", 
-        "País Mediano Plazo Tú Eliges 40%", 
-        "País Mediano Plazo Tú Eliges 60%", 
-        "País Mediano Plazo - Reservistas Primera Clase 30%", 
-        "País Mediano Plazo Volvamos a Clases", 
-        "País Mediano Plazo Francisco José de Caldas", 
-        "País Mediano Plazo Funcionarios del MEN y entidades adscritas", 
-        "País Mediano Plazo Servidores Públicos"]):
+        "país mediano plazo tú eliges 30%", 
+        "país mediano plazo tú eliges 40%", 
+        "país mediano plazo tú eliges 60%", 
+        "país mediano plazo - reservistas primera clase 30%", 
+        "país mediano plazo volvamos a clases", 
+        "país mediano plazo francisco josé de caldas", 
+        "país mediano plazo funcionarios del men y entidades adscritas", 
+        "país mediano plazo servidores públicos"]):
         return "pregrado mediano plazo"
 
     # Clasificación en Pregrado Corto Plazo
     elif any(sub in linea_credito for sub in [
-        "País Corto Plazo Tú Eliges 100%", 
-        "País Corto Plazo - Línea Funcionarios del MEN y entidades adscritas - con pago del 100%", 
-        "País Corto Plazo Servidores Públicos - con pago del 100%"]):
+        "país corto plazo tú eliges 100%", 
+        "país corto plazo - línea funcionarios del men y entidades adscritas - con pago del 100%", 
+        "país corto plazo servidores públicos - con pago del 100%"]):
         return "pregrado corto plazo"
 
     # Clasificación en Otros Programas
     elif any(sub in linea_credito for sub in [
-        "Capacitación de Idiomas en el exterior", 
-        "Pasantías e Intercambio Educativo en el exterior", 
-        "Capacitación de idiomas en el país"]):
+        "capacitación de idiomas en el exterior", 
+        "pasantías e intercambio educativo en el exterior", 
+        "capacitación de idiomas en el país"]):
         return "otros programas"
 
     # Si no coincide con ninguna categoría
@@ -103,9 +103,17 @@ try:
     df = df.apply(lambda x: x.str.lower() if x.dtype == "object" else x)  # Convertir a minúsculas
     df = df.dropna()  # Eliminar filas con valores nulos
 
+    # Mostrar los primeros registros de la columna 'Línea de crédito' para depuración
+    st.write("Valores en la columna 'Línea de crédito':")
+    st.write(df['Línea de crédito'].unique())
+
     # Crear nueva columna 'Tipo de línea de crédito' basada en la función asignar_tipo_linea_credito
     if 'Línea de crédito' in df.columns:
         df['Tipo de línea de crédito'] = df['Línea de crédito'].apply(asignar_tipo_linea_credito)
+
+    # Mostrar los primeros registros de la nueva columna 'Tipo de línea de crédito' para verificación
+    st.write("Valores en la columna 'Tipo de línea de crédito':")
+    st.write(df[['Línea de crédito', 'Tipo de línea de crédito']].head())
 
     # Permitir al usuario seleccionar las columnas a mostrar
     selected_columns = st.multiselect("Selecciona las columnas que deseas ver:", df.columns)
@@ -148,17 +156,17 @@ try:
         elif chart_type == "Torta":
             if selected_columns:
                 for col in selected_columns:
-                    if count_data.size > 10:
-                        count_data = count_data[:9].append(pd.Series(count_data[9:].sum(), index=["Otros"]))
+                    count_data = df[col].value_counts()
+                    if count_data.size <= 10:  # Limita a 10 valores únicos para la torta
                         plt.figure(figsize=(8, 4))
                         plt.pie(count_data, labels=count_data.index, autopct='%1.1f%%', startangle=90)
-                        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+                        plt.title(f"Gráfico de torta para la columna '{col}'")
                         st.pyplot(plt)
                     else:
-                        st.write(f"La columna '{col}' tiene más de 10 categorías únicas, no se puede graficar en torta.")
+                        st.write(f"Demasiados valores únicos en la columna '{col}' para un gráfico de torta.")
 
         elif chart_type == "Puntos":
-            if selected_columns and len(selected_columns) >= 2:
+            if len(selected_columns) >= 2:
                 # Mostrar gráfico de dispersión con dos columnas numéricas seleccionadas
                 x_axis = st.selectbox("Selecciona la columna para el eje X", selected_columns)
                 y_axis = st.selectbox("Selecciona la columna para el eje Y", selected_columns)
@@ -173,4 +181,3 @@ try:
                     st.write("Ambas columnas deben ser numéricas para generar un gráfico de puntos.")
 except Exception as e:
     st.write("Error al cargar el archivo Excel:", e)
-
