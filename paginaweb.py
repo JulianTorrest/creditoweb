@@ -36,19 +36,77 @@ try:
         df = df.dropna(subset=['Línea de crédito'])
 
         # Crear subcategorías basadas en el texto de 'Línea de crédito'
-        def asignar_subcategoria(linea_credito):
-            # Asegurarnos de que la línea de crédito no sea nula y eliminar espacios extra
-            linea_credito = str(linea_credito).strip().lower()
-            if "Posgrado País" in linea_credito:
-                return "Posgrado País"
-            elif "Posgrado Exterior" in linea_credito:
-                return "Posgrado Exterior"
-            elif "Pregrado Largo Plazo" in linea_credito:
-                return "Pregrado Largo Plazo"
-            elif "Pregrado Mediano Plazo" in linea_credito:
-                return "Pregrado Mediano Plazo"
-            else:
-                return "Otra categoría"
+def asignar_subcategoria(linea_credito):
+    # Clasificación en Posgrado País
+        if any(sub in linea_credito for sub in [
+            "Posgrado País con Deudor Solidario", 
+            "Posgrado País sin Deudor Solidario", 
+            "Posgrado País Medicina con Deudor Solidario", 
+            "Posgrado País Medicina sin Deudor Solidario", 
+            "Posgrado País - Servidores Públicos - con Deudor Solidario", 
+            "Posgrado País - Servidores Públicos - sin Deudor Solidario", 
+            "Posgrado País - Funcionarios del MEN y entidades adscritas - sin Deudor Solidario"]):
+            return "Posgrado País"
+    
+    # Clasificación en Posgrado Exterior
+        elif any(sub in linea_credito for sub in [
+            "Posgrado Exterior Largo Plazo USD 25.000", 
+            "Posgrado Exterior USD 25.000 como complemento a las becas", 
+            "Posgrado o Pregrado Exterior Largo Plazo para Sostenimiento USD 12.500", 
+            "Posgrado Exterior - Servidores Públicos", 
+            "Posgrado Exterior - Funcionarios del MEN y entidades adscritas"]):
+            return "Posgrado Exterior"
+    
+    # Clasificación en Pregrado Largo Plazo
+        elif any(sub in linea_credito for sub in [
+            "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación Económica", 
+            "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación en Salud", 
+            "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación Económica", 
+            "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación en Salud", 
+            "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación Económica", 
+            "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación en Salud", 
+            "País Largo Plazo Estudiantes de Comunidades de Especial Protección Constitucional", 
+            "País Largo Plazo - Territorial", 
+            "País Largo Plazo - Talento de mi Territorio", 
+            "País Largo Plazo Mas Colombiano que Nunca", 
+            "País Largo Plazo Estudiantes beneficiarios rezagados de programas", 
+            "País Largo Plazo Línea para estudiantes que cuentan con apoyo económico", 
+            "País Largo Plazo Reservistas de Honor", 
+            "País Largo Plazo Oficiales", 
+            "País Largo Plazo Suboficiales", 
+            "País Largo Plazo Funcionarios del MEN y entidades adscritas"]):
+            return "Pregrado Largo Plazo"
+    
+    # Clasificación en Pregrado Mediano Plazo
+        elif any(sub in linea_credito for sub in [
+            "País Mediano Plazo Tú Eliges 30%", 
+            "País Mediano Plazo Tú Eliges 40%", 
+            "País Mediano Plazo Tú Eliges 60%", 
+            "País Mediano Plazo - Reservistas Primera Clase 30%", 
+            "País Mediano Plazo Volvamos a Clases", 
+            "País Mediano Plazo Francisco José de Caldas", 
+            "País Mediano Plazo Funcionarios del MEN y entidades adscritas", 
+            "País Mediano Plazo Servidores Públicos"]):
+            return "Pregrado Mediano Plazo"
+    
+    # Clasificación en Pregrado Corto Plazo
+        elif any(sub in linea_credito for sub in [
+            "País Corto Plazo Tú Eliges 100%", 
+            "País Corto Plazo - Línea Funcionarios del MEN y entidades adscritas - con pago del 100%", 
+            "País Corto Plazo Servidores Públicos - con pago del 100%"]):
+            return "Pregrado Corto Plazo"
+    
+    # Clasificación en Otros Programas
+        elif any(sub in linea_credito for sub in [
+            "Capacitación de Idiomas en el exterior", 
+            "Pasantías e Intercambio Educativo en el exterior", 
+            "Capacitación de idiomas en el país"]):
+            return "Otros Programas"
+    
+        # Si no coincide con ninguna categoría
+        else:
+            return "Otra categoría"
+
 
         # Crear nueva columna con subcategorías
         df['Subcategoría'] = df['Línea de crédito'].apply(asignar_subcategoria)
