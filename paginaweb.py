@@ -8,8 +8,8 @@ st.title("Visualización de Hojas en un Archivo Excel")
 # URL del archivo Excel en el repositorio público de GitHub (versión raw)
 url = 'https://github.com/JulianTorrest/creditoweb/raw/main/tabla%20Condiciones%20Credito%20ICETEX%202024-1%20-%20Revisi%C3%B3n%20Pagina%20Web%20(1).xlsx'
 
-# Función para asignar subcategoría
-def asignar_subcategoria(linea_credito):
+# Función para asignar tipo de línea de crédito (anteriormente subcategoría)
+def asignar_tipo_linea_credito(linea_credito):
     # Clasificación en Posgrado País
     if any(sub in linea_credito for sub in [
         "Posgrado País con Deudor Solidario", 
@@ -19,7 +19,7 @@ def asignar_subcategoria(linea_credito):
         "Posgrado País - Servidores Públicos - con Deudor Solidario", 
         "Posgrado País - Servidores Públicos - sin Deudor Solidario", 
         "Posgrado País - Funcionarios del MEN y entidades adscritas - sin Deudor Solidario"]):
-        return "Posgrado País"
+        return "posgrado país"
 
     # Clasificación en Posgrado Exterior
     elif any(sub in linea_credito for sub in [
@@ -28,7 +28,7 @@ def asignar_subcategoria(linea_credito):
         "Posgrado o Pregrado Exterior Largo Plazo para Sostenimiento USD 12.500", 
         "Posgrado Exterior - Servidores Públicos", 
         "Posgrado Exterior - Funcionarios del MEN y entidades adscritas"]):
-        return "Posgrado Exterior"
+        return "posgrado exterior"
 
     # Clasificación en Pregrado Largo Plazo
     elif any(sub in linea_credito for sub in [
@@ -48,7 +48,7 @@ def asignar_subcategoria(linea_credito):
         "País Largo Plazo Oficiales", 
         "País Largo Plazo Suboficiales", 
         "País Largo Plazo Funcionarios del MEN y entidades adscritas"]):
-        return "Pregrado Largo Plazo"
+        return "pregrado largo plazo"
 
     # Clasificación en Pregrado Mediano Plazo
     elif any(sub in linea_credito for sub in [
@@ -60,25 +60,25 @@ def asignar_subcategoria(linea_credito):
         "País Mediano Plazo Francisco José de Caldas", 
         "País Mediano Plazo Funcionarios del MEN y entidades adscritas", 
         "País Mediano Plazo Servidores Públicos"]):
-        return "Pregrado Mediano Plazo"
+        return "pregrado mediano plazo"
 
     # Clasificación en Pregrado Corto Plazo
     elif any(sub in linea_credito for sub in [
         "País Corto Plazo Tú Eliges 100%", 
         "País Corto Plazo - Línea Funcionarios del MEN y entidades adscritas - con pago del 100%", 
         "País Corto Plazo Servidores Públicos - con pago del 100%"]):
-        return "Pregrado Corto Plazo"
+        return "pregrado corto plazo"
 
     # Clasificación en Otros Programas
     elif any(sub in linea_credito for sub in [
         "Capacitación de Idiomas en el exterior", 
         "Pasantías e Intercambio Educativo en el exterior", 
         "Capacitación de idiomas en el país"]):
-        return "Otros Programas"
+        return "otros programas"
 
     # Si no coincide con ninguna categoría
     else:
-        return "Otra categoría"
+        return "otra categoría"
 
 # Cargar el archivo Excel
 try:
@@ -98,17 +98,17 @@ try:
     # Mostrar el contenido de la hoja seleccionada
     df = pd.read_excel(url, sheet_name=selected_sheet, engine='openpyxl')
 
+    # Limpiar todas las columnas de valores nulos, vacíos y espacios
+    df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)  # Eliminar espacios
+    df = df.apply(lambda x: x.str.lower() if x.dtype == "object" else x)  # Convertir a minúsculas
+    df = df.dropna()  # Eliminar filas con valores nulos
+
+    # Crear nueva columna 'Tipo de línea de crédito' basada en la función asignar_tipo_linea_credito
+    if 'Línea de crédito' in df.columns:
+        df['Tipo de línea de crédito'] = df['Línea de crédito'].apply(asignar_tipo_linea_credito)
+
     # Permitir al usuario seleccionar las columnas a mostrar
     selected_columns = st.multiselect("Selecciona las columnas que deseas ver:", df.columns)
-
-    # Limpiar la columna 'Línea de crédito'
-    if 'Línea de crédito' in df.columns:
-        # Eliminar encabezados duplicados o valores vacíos
-        df['Línea de crédito'] = df['Línea de crédito'].dropna().apply(lambda x: x.strip()).replace('Línea de crédito', None)
-        df = df.dropna(subset=['Línea de crédito'])
-
-        # Crear nueva columna con subcategorías
-        df['Subcategoría'] = df['Línea de crédito'].apply(asignar_subcategoria)
 
     # Mostrar las columnas seleccionadas
     if selected_columns:
@@ -121,7 +121,7 @@ try:
         st.write(df_clean.describe())
 
         # Mostrar valores únicos (distinct) de las columnas seleccionadas sin tomar en cuenta los encabezados
-        st.write("Valores únicos en las columnas seleccionadas (sin títulos de columnas):")
+        st.write("Valores únicos en las columnas seleccionadas:")
         for col in selected_columns:
             st.write(f"Columna '{col}':")
             st.write(df[col].dropna().unique())  # Mostrar valores únicos omitiendo nulos
@@ -148,7 +148,6 @@ try:
         elif chart_type == "Torta":
             if selected_columns:
                 for col in selected_columns:
-                    count_data = df[col].value_counts()
                     if count_data.size > 10:
                         count_data = count_data[:9].append(pd.Series(count_data[9:].sum(), index=["Otros"]))
                         plt.figure(figsize=(8, 4))
@@ -159,18 +158,19 @@ try:
                         st.write(f"La columna '{col}' tiene más de 10 categorías únicas, no se puede graficar en torta.")
 
         elif chart_type == "Puntos":
-            if selected_columns and len(selected_columns) >= 2:  # Se requieren al menos 2 columnas para un gráfico de dispersión
-                x_col = st.selectbox("Selecciona la columna para el eje X:", selected_columns)
-                y_col = st.selectbox("Selecciona la columna para el eje Y:", selected_columns)
-                if pd.api.types.is_numeric_dtype(df[x_col]) and pd.api.types.is_numeric_dtype(df[y_col]):
+            if selected_columns and len(selected_columns) >= 2:
+                # Mostrar gráfico de dispersión con dos columnas numéricas seleccionadas
+                x_axis = st.selectbox("Selecciona la columna para el eje X", selected_columns)
+                y_axis = st.selectbox("Selecciona la columna para el eje Y", selected_columns)
+                if pd.api.types.is_numeric_dtype(df[x_axis]) and pd.api.types.is_numeric_dtype(df[y_axis]):
                     plt.figure(figsize=(8, 4))
-                    plt.scatter(df[x_col], df[y_col])
-                    plt.title(f"Gráfico de puntos ({x_col} vs {y_col})")
-                    plt.xlabel(x_col)
-                    plt.ylabel(y_col)
+                    plt.scatter(df[x_axis], df[y_axis])
+                    plt.title(f"Gráfico de dispersión: {x_axis} vs {y_axis}")
+                    plt.xlabel(x_axis)
+                    plt.ylabel(y_axis)
                     st.pyplot(plt)
                 else:
-                    st.write("Ambas columnas seleccionadas deben ser numéricas para este gráfico.")
-
+                    st.write("Ambas columnas deben ser numéricas para generar un gráfico de puntos.")
 except Exception as e:
-    st.error(f"Ocurrió un error al cargar el archivo: {e}")
+    st.write("Error al cargar el archivo Excel:", e)
+
