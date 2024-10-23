@@ -117,4 +117,3 @@ try:
 
 except Exception as e:
     st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
-
