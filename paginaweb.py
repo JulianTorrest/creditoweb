@@ -8,6 +8,78 @@ st.title("Visualización de Hojas en un Archivo Excel")
 # URL del archivo Excel en el repositorio público de GitHub (versión raw)
 url = 'https://github.com/JulianTorrest/creditoweb/raw/main/tabla%20Condiciones%20Credito%20ICETEX%202024-1%20-%20Revisi%C3%B3n%20Pagina%20Web%20(1).xlsx'
 
+# Función para asignar subcategoría
+def asignar_subcategoria(linea_credito):
+    # Clasificación en Posgrado País
+    if any(sub in linea_credito for sub in [
+        "Posgrado País con Deudor Solidario", 
+        "Posgrado País sin Deudor Solidario", 
+        "Posgrado País Medicina con Deudor Solidario", 
+        "Posgrado País Medicina sin Deudor Solidario", 
+        "Posgrado País - Servidores Públicos - con Deudor Solidario", 
+        "Posgrado País - Servidores Públicos - sin Deudor Solidario", 
+        "Posgrado País - Funcionarios del MEN y entidades adscritas - sin Deudor Solidario"]):
+        return "Posgrado País"
+
+    # Clasificación en Posgrado Exterior
+    elif any(sub in linea_credito for sub in [
+        "Posgrado Exterior Largo Plazo USD 25.000", 
+        "Posgrado Exterior USD 25.000 como complemento a las becas", 
+        "Posgrado o Pregrado Exterior Largo Plazo para Sostenimiento USD 12.500", 
+        "Posgrado Exterior - Servidores Públicos", 
+        "Posgrado Exterior - Funcionarios del MEN y entidades adscritas"]):
+        return "Posgrado Exterior"
+
+    # Clasificación en Pregrado Largo Plazo
+    elif any(sub in linea_credito for sub in [
+        "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación Económica", 
+        "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación en Salud", 
+        "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación Económica", 
+        "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación en Salud", 
+        "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación Económica", 
+        "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación en Salud", 
+        "País Largo Plazo Estudiantes de Comunidades de Especial Protección Constitucional", 
+        "País Largo Plazo - Territorial", 
+        "País Largo Plazo - Talento de mi Territorio", 
+        "País Largo Plazo Mas Colombiano que Nunca", 
+        "País Largo Plazo Estudiantes beneficiarios rezagados de programas", 
+        "País Largo Plazo Línea para estudiantes que cuentan con apoyo económico", 
+        "País Largo Plazo Reservistas de Honor", 
+        "País Largo Plazo Oficiales", 
+        "País Largo Plazo Suboficiales", 
+        "País Largo Plazo Funcionarios del MEN y entidades adscritas"]):
+        return "Pregrado Largo Plazo"
+
+    # Clasificación en Pregrado Mediano Plazo
+    elif any(sub in linea_credito for sub in [
+        "País Mediano Plazo Tú Eliges 30%", 
+        "País Mediano Plazo Tú Eliges 40%", 
+        "País Mediano Plazo Tú Eliges 60%", 
+        "País Mediano Plazo - Reservistas Primera Clase 30%", 
+        "País Mediano Plazo Volvamos a Clases", 
+        "País Mediano Plazo Francisco José de Caldas", 
+        "País Mediano Plazo Funcionarios del MEN y entidades adscritas", 
+        "País Mediano Plazo Servidores Públicos"]):
+        return "Pregrado Mediano Plazo"
+
+    # Clasificación en Pregrado Corto Plazo
+    elif any(sub in linea_credito for sub in [
+        "País Corto Plazo Tú Eliges 100%", 
+        "País Corto Plazo - Línea Funcionarios del MEN y entidades adscritas - con pago del 100%", 
+        "País Corto Plazo Servidores Públicos - con pago del 100%"]):
+        return "Pregrado Corto Plazo"
+
+    # Clasificación en Otros Programas
+    elif any(sub in linea_credito for sub in [
+        "Capacitación de Idiomas en el exterior", 
+        "Pasantías e Intercambio Educativo en el exterior", 
+        "Capacitación de idiomas en el país"]):
+        return "Otros Programas"
+
+    # Si no coincide con ninguna categoría
+    else:
+        return "Otra categoría"
+
 # Cargar el archivo Excel
 try:
     # Abrimos el archivo Excel desde la URL
@@ -34,79 +106,6 @@ try:
         # Eliminar encabezados duplicados o valores vacíos
         df['Línea de crédito'] = df['Línea de crédito'].dropna().apply(lambda x: x.strip()).replace('Línea de crédito', None)
         df = df.dropna(subset=['Línea de crédito'])
-
-        # Crear subcategorías basadas en el texto de 'Línea de crédito'
-def asignar_subcategoria(linea_credito):
-    # Clasificación en Posgrado País
-        if any(sub in linea_credito for sub in [
-            "Posgrado País con Deudor Solidario", 
-            "Posgrado País sin Deudor Solidario", 
-            "Posgrado País Medicina con Deudor Solidario", 
-            "Posgrado País Medicina sin Deudor Solidario", 
-            "Posgrado País - Servidores Públicos - con Deudor Solidario", 
-            "Posgrado País - Servidores Públicos - sin Deudor Solidario", 
-            "Posgrado País - Funcionarios del MEN y entidades adscritas - sin Deudor Solidario"]):
-            return "Posgrado País"
-    
-    # Clasificación en Posgrado Exterior
-        elif any(sub in linea_credito for sub in [
-            "Posgrado Exterior Largo Plazo USD 25.000", 
-            "Posgrado Exterior USD 25.000 como complemento a las becas", 
-            "Posgrado o Pregrado Exterior Largo Plazo para Sostenimiento USD 12.500", 
-            "Posgrado Exterior - Servidores Públicos", 
-            "Posgrado Exterior - Funcionarios del MEN y entidades adscritas"]):
-            return "Posgrado Exterior"
-    
-    # Clasificación en Pregrado Largo Plazo
-        elif any(sub in linea_credito for sub in [
-            "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación Económica", 
-            "País Largo Plazo Tú Eliges 0% Fondo de Garantía Covid19 Afectación en Salud", 
-            "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación Económica", 
-            "País Largo Plazo Tú Eliges 10% Fondo de Garantía Covid19 Afectación en Salud", 
-            "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación Económica", 
-            "País Largo Plazo Tú Eliges 25% con Fondo de Garantía Covid19 Afectación en Salud", 
-            "País Largo Plazo Estudiantes de Comunidades de Especial Protección Constitucional", 
-            "País Largo Plazo - Territorial", 
-            "País Largo Plazo - Talento de mi Territorio", 
-            "País Largo Plazo Mas Colombiano que Nunca", 
-            "País Largo Plazo Estudiantes beneficiarios rezagados de programas", 
-            "País Largo Plazo Línea para estudiantes que cuentan con apoyo económico", 
-            "País Largo Plazo Reservistas de Honor", 
-            "País Largo Plazo Oficiales", 
-            "País Largo Plazo Suboficiales", 
-            "País Largo Plazo Funcionarios del MEN y entidades adscritas"]):
-            return "Pregrado Largo Plazo"
-    
-    # Clasificación en Pregrado Mediano Plazo
-        elif any(sub in linea_credito for sub in [
-            "País Mediano Plazo Tú Eliges 30%", 
-            "País Mediano Plazo Tú Eliges 40%", 
-            "País Mediano Plazo Tú Eliges 60%", 
-            "País Mediano Plazo - Reservistas Primera Clase 30%", 
-            "País Mediano Plazo Volvamos a Clases", 
-            "País Mediano Plazo Francisco José de Caldas", 
-            "País Mediano Plazo Funcionarios del MEN y entidades adscritas", 
-            "País Mediano Plazo Servidores Públicos"]):
-            return "Pregrado Mediano Plazo"
-    
-    # Clasificación en Pregrado Corto Plazo
-        elif any(sub in linea_credito for sub in [
-            "País Corto Plazo Tú Eliges 100%", 
-            "País Corto Plazo - Línea Funcionarios del MEN y entidades adscritas - con pago del 100%", 
-            "País Corto Plazo Servidores Públicos - con pago del 100%"]):
-            return "Pregrado Corto Plazo"
-    
-    # Clasificación en Otros Programas
-        elif any(sub in linea_credito for sub in [
-            "Capacitación de Idiomas en el exterior", 
-            "Pasantías e Intercambio Educativo en el exterior", 
-            "Capacitación de idiomas en el país"]):
-            return "Otros Programas"
-    
-        # Si no coincide con ninguna categoría
-        else:
-            return "Otra categoría"
-
 
         # Crear nueva columna con subcategorías
         df['Subcategoría'] = df['Línea de crédito'].apply(asignar_subcategoria)
@@ -165,15 +164,12 @@ def asignar_subcategoria(linea_credito):
                 if pd.api.types.is_numeric_dtype(df[x_col]) and pd.api.types.is_numeric_dtype(df[y_col]):
                     plt.figure(figsize=(8, 4))
                     plt.scatter(df[x_col], df[y_col])
+                    plt.title(f"Gráfico de puntos ({x_col} vs {y_col})")
                     plt.xlabel(x_col)
                     plt.ylabel(y_col)
-                    plt.title(f"Gráfico de dispersión: {y_col} vs {x_col}")
                     st.pyplot(plt)
                 else:
-                    st.write("Asegúrate de seleccionar columnas numéricas para el gráfico de dispersión.")
-
-    else:
-        st.write("No se han seleccionado columnas para mostrar.")
+                    st.write("Ambas columnas seleccionadas deben ser numéricas para este gráfico.")
 
 except Exception as e:
-    st.error(f"No se pudo cargar el archivo Excel. Error: {e}")
+    st.error(f"Ocurrió un error al cargar el archivo: {e}")
