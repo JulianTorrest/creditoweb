@@ -659,13 +659,16 @@ def gestion_comercial():
         st.warning("No hay ofertas enviadas para gestionar.")
         return
 
+    # Inicializar DataFrame de ofertas
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+
     # Seleccionar año
     anio_actual = datetime.now().year
     anio_seleccionado = st.selectbox("Selecciona el año", list(range(2024, anio_actual + 1)))
 
     # Seleccionar periodo (semestre)
     periodo_seleccionado = st.selectbox("Selecciona el periodo", ["1er Semestre", "2do Semestre"])
-    
+
     # Nuevo filtro para seleccionar la periodicidad
     periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
 
@@ -678,9 +681,6 @@ def gestion_comercial():
     # Mostrar filtro de Estado de Garantías solo si se selecciona "Sí"
     if estado_filtrado == "Sí":
         estado_garantia_filtrado = st.selectbox("Estado de Garantías", ["Todas", "Garantías Firmadas", "Garantías No Firmadas"])
-
-    # Crear un DataFrame para filtrar las ofertas según el estado
-    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
     # Buscador de Ofertas
     buscador = st.text_input("Buscar oferta por nombre:")
@@ -751,6 +751,27 @@ def gestion_comercial():
     if total_no_interesados > 0:
         st.warning(f"Existen {total_no_interesados} ofertas no interesadas.")
 
+    # Nuevo: Selección de Oferta
+    st.subheader("Seleccionar Oferta")
+    oferta_seleccionada = st.selectbox("Selecciona una oferta:", [f"Oferta {i + 1}: {oferta['Nombre']}" for i, oferta in enumerate(st.session_state.ofertas_en_proceso)])
+
+    if st.button("Buscar Oferta"):
+        # Filtrar la oferta seleccionada
+        nombre_oferta = oferta_seleccionada.split(": ")[1]
+        oferta_info = df_ofertas[df_ofertas['Nombre'] == nombre_oferta]
+        
+        if not oferta_info.empty:
+            st.subheader(f"Detalles de {nombre_oferta}")
+            for index, row in oferta_info.iterrows():
+                st.write(f"Interesado: {row['Interesado']}")
+                st.write(f"Estado: {'Garantía Firmada' if row['GarantiaFirmada'] else 'Esperando Confirmación'}")
+
+                # Comentarios y Feedback
+                comentarios = st.text_area(f"Comentarios sobre la oferta {row['Nombre']}", value="", key=f"comentario_{index}")
+                if st.button(f"Enviar Comentario para {row['Nombre']}", key=f"boton_comentario_{index}"):
+                    # Aquí podrías guardar los comentarios en la base de datos o en el estado de sesión
+                    st.success("Comentario enviado.")
+
     # Botones de descarga (después del informe)
     if st.button("Descargar en Excel"):
         # Exportación Personalizada
@@ -784,28 +805,6 @@ def gestion_comercial():
 
         st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
 
-    # Mostrar las ofertas filtradas
-    if not df_ofertas.empty:
-        for i, oferta in enumerate(df_ofertas.to_dict('records')):
-            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
-            st.write(f"Interesado: {oferta['Interesado']}")
-            estado = "Sin especificar"
-            if oferta['Interesado'] == "Sí":
-                st.write(f"¿Garantía firmada? {'Sí' if oferta.get('GarantiaFirmada') else 'No'}")
-                estado = "Garantía Firmada" if oferta.get('GarantiaFirmada') else "Esperando Confirmación"
-            elif oferta['Interesado'] == "No":
-                estado = "No Interesado"
-            elif oferta['Interesado'] == "Sí, pero después":
-                estado = "Sí, pero después"
-
-            st.write(f"Estado: {estado}")
-
-            # Comentarios y Feedback
-            comentarios = st.text_area(f"Comentarios sobre la oferta {oferta['Nombre']}", value="", key=f"comentario_{i}")
-            if st.button(f"Enviar Comentario para {oferta['Nombre']}", key=f"boton_comentario_{i}"):
-                # Aquí podrías guardar los comentarios en la base de datos o en el estado de sesión
-                st.success("Comentario enviado.")
-
     # Análisis de Tendencias
     st.subheader("Análisis de Tendencias")
     # Agregar aquí la lógica para analizar tendencias (ejemplo: promedios por año, meses, etc.)
@@ -832,7 +831,7 @@ def gestion_comercial():
     if st.button("Enviar Evaluaciones"):
         # Guardar evaluaciones (en base de datos o estado de sesión)
         st.success("Evaluaciones enviadas.")
-    
+	    
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
     try:
