@@ -914,6 +914,10 @@ def gestion_ordenador_gasto():
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     st.pyplot(plt)
 
+    # Visualización de datos
+    st.subheader("Distribución de IES por Convenio")
+    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
+
     # Mostrar detalles
     if 'mostrar_detalles' not in st.session_state:
         st.session_state.mostrar_detalles = False
@@ -969,10 +973,6 @@ def gestion_ordenador_gasto():
                         st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
                 else:
                     st.error("La liquidación no pudo ser aprobada.")
-
-# Visualización de datos
-    st.subheader("Distribución de IES por Convenio")
-    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
 
 # Exportar a CSV
     if st.button("Exportar a CSV"):
