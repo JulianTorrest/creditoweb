@@ -1100,18 +1100,15 @@ def gestion_ordenador_gasto():
     ax = plt.gca()
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
     st.pyplot(plt)
-    
-    # Visualización de datos
+	
+	# Visualización de datos
     st.subheader("Distribución de IES por Convenio")
     st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
+
 
     # Mostrar detalles
     if 'mostrar_detalles' not in st.session_state:
         st.session_state.mostrar_detalles = False
-
-    # Crear un registro de aprobaciones
-    if 'registro_aprobaciones' not in st.session_state:
-        st.session_state.registro_aprobaciones = []
 
     if st.button("Mostrar Detalles" if not st.session_state.mostrar_detalles else "Ocultar Detalles"):
         st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
@@ -1140,17 +1137,12 @@ def gestion_ordenador_gasto():
                             st.success("Validación exitosa. Procediendo a giro...")
                             presupuesto_disponible -= beneficiario['Valor']
                             st.session_state.presupuesto_disponible = presupuesto_disponible
-                            st.session_state.registro_aprobaciones.append({
-                                "Nombre IES": beneficiario.get('Nombre', 'IES Desconocida'),
-                                "Valor": beneficiario['Valor'],
-                                "Estado": "Aprobado",
-                                "Fecha": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                            })
-
-                            if presupuesto_disponible < 1000:  # Definir un límite de presupuesto
+                            if presupuesto_disponible < limite_presupuesto:
                                 st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
                             if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
                                 st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
+                            else:
+                                st.error(f"El giro a {beneficiario.get('Nombre')} falló. Por favor reintente.")
                         else:
                             st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
             
@@ -1160,31 +1152,78 @@ def gestion_ordenador_gasto():
                 st.write(instruccion_giro)
                 
                 if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
-                    st.success(f"Liquidación aprobada para {beneficiario.get('Nombre')}.")
-                    st.session_state.registro_aprobaciones.append({
-                        "Nombre IES": beneficiario.get('Nombre', 'IES Desconocida'),
-                        "Valor": beneficiario['Valor'],
-                        "Estado": "Aprobado",
-                        "Fecha": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
-                    })
+                    st.success(f"Liquidación aprobada para IES {beneficiario.get('Nombre')}. Procediendo con el desembolso.")
+                    # Descontar del presupuesto disponible
+                    presupuesto_disponible -= beneficiario['Valor']
+                    st.session_state.presupuesto_disponible = presupuesto_disponible
+                    if presupuesto_disponible < limite_presupuesto:
+                        st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
 
-    # Exportar a CSV
-    if st.button("Exportar Registro de Aprobaciones a CSV"):
-        if st.session_state.registro_aprobaciones:
-            df_aprobaciones = pd.DataFrame(st.session_state.registro_aprobaciones)
-            csv = df_aprobaciones.to_csv(index=False)
-            st.download_button("Descargar CSV", csv, "registro_aprobaciones.csv", "text/csv")
-            st.success("Registro de aprobaciones exportado exitosamente.")
+
+    # Inicializar historial de solicitudes en estado de sesión
+    if "historial_solicitudes" not in st.session_state:
+        st.session_state.historial_solicitudes = []
+
+    st.subheader("Aprobar IES")
+
+    # Filtrar las IES según convenio
+    tipo_convenio = st.selectbox("Seleccionar tipo de IES", ["Con Convenio", "Sin Convenio"])
+    ies_seleccionadas = None
+
+    # Filtro de valor
+    min_valor, max_valor = st.slider("Selecciona un rango de valores", 
+                                       min_value=0, 
+                                       max_value=int(df_ofertas['Valor'].max()), 
+                                       value=(0, int(df_ofertas['Valor'].max())))
+
+    if tipo_convenio == "Con Convenio":
+        ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
+        if not ies_convenio.empty:
+            ies_seleccionadas = st.multiselect("Selecciona las IES con Convenio", options=ies_convenio['Nombre'].tolist())
         else:
-            st.warning("No hay registros de aprobaciones para exportar.")
-
-    # Historial de solicitudes
-    st.subheader("Historial de Solicitudes")
-    if st.session_state.registro_aprobaciones:
-        df_historial = pd.DataFrame(st.session_state.registro_aprobaciones)
-        st.dataframe(df_historial)
+            st.warning("No hay IES con convenio para aprobar.")
     else:
-        st.warning("No hay historial de solicitudes.")
+        ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
+        if not ies_sin_convenio.empty:
+            ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
+                    # Botón para solicitar información financiera
+            if ies_seleccionadas and st.button("Solicitar información financiera de las IES sin convenio"):
+                for ies in ies_seleccionadas:
+                    st.write(f"Solicitud de información financiera enviada para: {ies}")
+        else:
+            st.warning("No hay IES sin convenio disponibles.")
+
+    # Mostrar historial de solicitudes
+    st.subheader("Historial de Solicitudes")
+    for solicitud in st.session_state.historial_solicitudes:
+        st.write(solicitud)
+
+# Botón para procesar y aprobar desembolso
+    if ies_seleccionadas and st.button("Procesar Aprobación"):
+        total_aprobado = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
+        st.success(f"Se ha aprobado el desembolso de {total_aprobado} millones de pesos para las IES seleccionadas.")
+
+        for ies in ies_seleccionadas:
+            valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
+            st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
+            st.info(f"Se inició el proceso financiero para la IES: {ies}")
+
+        # Confirmación de aprobación final
+        if st.button("Confirmar Aprobación Final"):
+            st.success("Desembolso aprobado para las IES seleccionadas.")
+
+# Exportar a CSV
+    if st.button("Exportar a CSV"):
+        with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
+            fieldnames = ['Nombre', 'Valor']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+            writer.writeheader()
+            for ies in ies_seleccionadas:
+                valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
+                writer.writerow({'Nombre': ies, 'Valor': valor_ies})
+        st.success("Archivo CSV generado con éxito.")
+
 
 
 # Configurar el menú de la aplicación
