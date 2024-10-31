@@ -682,6 +682,11 @@ def gestion_comercial():
     # Crear un DataFrame para filtrar las ofertas según el estado
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
+    # Buscador de Ofertas
+    buscador = st.text_input("Buscar oferta por nombre:")
+    if buscador:
+        df_ofertas = df_ofertas[df_ofertas['Nombre'].str.contains(buscador, case=False, na=False)]
+
     # Filtrar por año y semestre
     if 'Fecha' in df_ofertas.columns:
         df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
@@ -742,10 +747,19 @@ def gestion_comercial():
     plt.title('Estado de Garantías Firmadas y No Firmadas')
     st.pyplot(plt)
 
+    # Notificaciones y Alertas (ejemplo simple)
+    if total_no_interesados > 0:
+        st.warning(f"Existen {total_no_interesados} ofertas no interesadas.")
+
     # Botones de descarga (después del informe)
     if st.button("Descargar en Excel"):
+        # Exportación Personalizada
+        columnas_seleccionadas = st.multiselect("Selecciona las columnas para exportar:", df_ofertas.columns.tolist())
+        if not columnas_seleccionadas:
+            columnas_seleccionadas = df_ofertas.columns.tolist()  # Usar todas las columnas si no se selecciona ninguna
+
         excel_buffer = io.BytesIO()
-        df_ofertas.to_excel(excel_buffer, index=False, engine='openpyxl')
+        df_ofertas[columnas_seleccionadas].to_excel(excel_buffer, index=False, engine='openpyxl')
         excel_buffer.seek(0)
         st.download_button("Descargar Excel", data=excel_buffer, file_name="ofertas.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
@@ -785,6 +799,39 @@ def gestion_comercial():
                 estado = "Sí, pero después"
 
             st.write(f"Estado: {estado}")
+
+            # Comentarios y Feedback
+            comentarios = st.text_area(f"Comentarios sobre la oferta {oferta['Nombre']}", value="", key=f"comentario_{i}")
+            if st.button(f"Enviar Comentario para {oferta['Nombre']}", key=f"boton_comentario_{i}"):
+                # Aquí podrías guardar los comentarios en la base de datos o en el estado de sesión
+                st.success("Comentario enviado.")
+
+    # Análisis de Tendencias
+    st.subheader("Análisis de Tendencias")
+    # Agregar aquí la lógica para analizar tendencias (ejemplo: promedios por año, meses, etc.)
+
+    # Comparativa de Ofertas (simulación básica)
+    if st.button("Comparativa de Ofertas"):
+        # Aquí se podrían mostrar estadísticas comparativas
+        st.write("Comparativa de Ofertas: en desarrollo...")
+
+    # Historial de Cambios
+    st.subheader("Historial de Cambios")
+    # Aquí se podría mostrar un registro de cambios (agregar a base de datos o lista)
+    if st.button("Ver Historial de Cambios"):
+        st.write("Historial de Cambios: en desarrollo...")
+
+    # Evaluación de Ofertas
+    st.subheader("Evaluación de Ofertas")
+    # Aquí se podría implementar un sistema de evaluación (ejemplo: puntuación)
+    evaluaciones = []
+    for i, oferta in enumerate(df_ofertas.to_dict('records')):
+        puntuacion = st.slider(f"Puntuación para {oferta['Nombre']}", 0, 10, 5, key=f"puntuacion_{i}")
+        evaluaciones.append((oferta['Nombre'], puntuacion))
+
+    if st.button("Enviar Evaluaciones"):
+        # Guardar evaluaciones (en base de datos o estado de sesión)
+        st.success("Evaluaciones enviadas.")
     
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
