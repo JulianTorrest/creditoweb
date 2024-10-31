@@ -1031,8 +1031,9 @@ def gestion_ordenador_gasto():
     # Presupuesto disponible y comprometido
     presupuesto_disponible = st.number_input("Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000)
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
-	if st.session_state.presupuesto_disponible < umbral_presupuesto:
-        	st.warning("Advertencia: El presupuesto disponible está por debajo del umbral definido.")
+    
+    if st.session_state.presupuesto_disponible < umbral_presupuesto:
+        st.warning("Advertencia: El presupuesto disponible está por debajo del umbral definido.")
 		
     presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
