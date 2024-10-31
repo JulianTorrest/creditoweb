@@ -970,6 +970,10 @@ def gestion_ordenador_gasto():
                 else:
                     st.error("La liquidación no pudo ser aprobada.")
 
+# Visualización de datos
+    st.subheader("Distribución de IES por Convenio")
+    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
+
 # Exportar a CSV
     if st.button("Exportar a CSV"):
         with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
@@ -981,10 +985,6 @@ def gestion_ordenador_gasto():
                 valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
                 writer.writerow({'Nombre': ies, 'Valor': valor_ies})
         st.success("Archivo CSV generado con éxito.")
-
-# Visualización de datos
-    st.subheader("Distribución de IES por Convenio")
-    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
