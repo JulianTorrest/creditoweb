@@ -1025,13 +1025,13 @@ def gestion_ordenador_gasto():
 
     # Umbral de advertencia para presupuesto bajo
     umbral_presupuesto = st.number_input(
-        "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0
+        "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0, key="umbral_presupuesto"
     )
 
     # Inicializar presupuesto en estado de sesión si no está definido
     if "presupuesto_disponible" not in st.session_state:
         st.session_state.presupuesto_disponible = st.number_input(
-            "Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000
+            "Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000, key="presupuesto_disponible"
         )
     else:
         st.write(f"Presupuesto Disponible: {st.session_state.presupuesto_disponible} millones de pesos")
@@ -1039,6 +1039,13 @@ def gestion_ordenador_gasto():
     # Verificar si el presupuesto disponible está por debajo del umbral
     if st.session_state.presupuesto_disponible < umbral_presupuesto:
         st.warning("Advertencia: El presupuesto disponible está por debajo del umbral definido.")
+
+    # Presupuesto comprometido
+    presupuesto_comprometido = st.number_input(
+        "Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500, key="presupuesto_comprometido"
+    )
+    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
+
 
     # Presupuesto comprometido
     presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
