@@ -999,6 +999,10 @@ def gestion_ordenador_gasto():
         st.warning("No hay ofertas en proceso para gestionar.")
         return
 
+    # Inicializar historial de solicitudes en estado de sesión
+    if "historial_solicitudes" not in st.session_state:
+        st.session_state.historial_solicitudes = []
+
     # Filtrar ofertas
     df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
 
@@ -1019,11 +1023,18 @@ def gestion_ordenador_gasto():
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
+    # Umbral de advertencia para presupuesto bajo
+    umbral_presupuesto = st.number_input(
+        "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0
+    )
+
     # Presupuesto disponible y comprometido
     presupuesto_disponible = st.number_input("Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000)
-    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
-
     st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
+	if st.session_state.presupuesto_disponible < umbral_presupuesto:
+        	st.warning("Advertencia: El presupuesto disponible está por debajo del umbral definido.")
+		
+    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
     # Control presupuestal
@@ -1193,10 +1204,6 @@ def gestion_ordenador_gasto():
         else:
             st.warning("No hay IES sin convenio disponibles.")
 
-    # Mostrar historial de solicitudes
-    st.subheader("Historial de Solicitudes")
-    for solicitud in st.session_state.historial_solicitudes:
-        st.write(solicitud)
 
 # Botón para procesar y aprobar desembolso
     if ies_seleccionadas and st.button("Procesar Aprobación"):
@@ -1211,6 +1218,11 @@ def gestion_ordenador_gasto():
         # Confirmación de aprobación final
         if st.button("Confirmar Aprobación Final"):
             st.success("Desembolso aprobado para las IES seleccionadas.")
+
+    # Mostrar historial de solicitudes
+    st.subheader("Historial de Solicitudes")
+    for solicitud in st.session_state.historial_solicitudes:
+        st.write(solicitud)
 
 # Exportar a CSV
     if st.button("Exportar a CSV"):
