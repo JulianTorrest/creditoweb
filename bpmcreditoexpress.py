@@ -1035,31 +1035,11 @@ def gestion_ordenador_gasto():
 # Visualización de datos
     st.subheader("Distribución de IES por Convenio")
     st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
-#Pagina de creación de indicadores 
-def Indicadores_Proceso():
-    st.title("Dashboard")
-
-    if st.button("Generar Estadísticas"):
-        validaciones_resultado = procesar_validaciones(beneficiarios_data)
-
-        st.subheader("Validación 1")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 1']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 1']['No Aprobados']}")
-        st.write("Motivos de No Aprobación:")
-        st.write(validaciones_resultado['Validación 1']['Motivo No Aprobación'])
-
-        st.subheader("Validación 2")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 2']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 2']['No Aprobados']}")
-
-        st.subheader("Validación 3")
-        st.write(f"Aprobados: {validaciones_resultado['Validación 3']['Aprobados']}")
-        st.write(f"No Aprobados: {validaciones_resultado['Validación 3']['No Aprobados']}")
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
     "Selecciona una página",
-    ["Consulta de Solicitudes", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto", "Indicadores Proceso"]
+    ["Consulta de Solicitudes", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto"]
 )
 
 # Ejecutar la página seleccionada
@@ -1073,7 +1053,3 @@ elif menu == "Gestión Comercial":
     gestion_comercial()
 elif menu == "Gestión Ordenador del Gasto":
     gestion_ordenador_gasto()
-elif menu == "Indicadores Proceso":
-    Indicadores_Proceso()
-
-
