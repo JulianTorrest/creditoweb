@@ -1046,15 +1046,6 @@ def gestion_ordenador_gasto():
     )
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
-
-    # Presupuesto comprometido
-    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
-    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
-
-		
-    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
-    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
-
     # Control presupuestal
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
