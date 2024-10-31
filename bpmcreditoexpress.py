@@ -991,17 +991,201 @@ def gestion_ordenador_gasto():
             st.warning("No se encontraron registros para el período seleccionado.")
 
 
-# Exportar a CSV
-    if st.button("Exportar a CSV"):
-        with open('ies_aprobadas.csv', 'w', newline='') as csvfile:
-            fieldnames = ['Nombre', 'Valor']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+def gestion_ordenador_gasto():
+    st.title("Gestión Ordenador del Gasto")
 
-            writer.writeheader()
-            for ies in ies_seleccionadas:
-                valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
-                writer.writerow({'Nombre': ies, 'Valor': valor_ies})
-        st.success("Archivo CSV generado con éxito.")
+    # Inicialización de sesión
+    if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
+        st.warning("No hay ofertas en proceso para gestionar.")
+        return
+
+    # Filtrar ofertas
+    df_ofertas = pd.DataFrame(st.session_state.ofertas_en_proceso)
+
+    # Validación de columnas
+    if 'GarantiaFirmada' not in df_ofertas.columns:
+        st.error("La columna 'GarantiaFirmada' no existe en el DataFrame. Verifica la generación de las ofertas.")
+        return
+
+    # Filtrar ofertas con garantía firmada
+    df_ofertas = df_ofertas[df_ofertas['GarantiaFirmada'] == True]
+
+    if df_ofertas.empty:
+        st.warning("No hay ofertas con garantías firmadas para gestionar.")
+        return
+
+    # Adicionar la columna 'tiene_convenio'
+    if 'tiene_convenio' not in df_ofertas.columns:
+        df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
+        st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
+
+    # Presupuesto disponible y comprometido
+    presupuesto_disponible = st.number_input("Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=10000)
+    presupuesto_comprometido = st.number_input("Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500)
+
+    st.write(f"Presupuesto Disponible: {presupuesto_disponible} millones de pesos")
+    st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
+
+    # Control presupuestal
+    control_presupuestal = pd.DataFrame({
+        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
+        "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, presupuesto_disponible - presupuesto_comprometido]
+    })
+    
+    st.subheader("Control Presupuestal")
+    st.dataframe(control_presupuestal)
+
+    # Tabla de indicadores
+    cantidad_ofertas = df_ofertas.shape[0]
+    ofertas_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
+    ofertas_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
+
+    cantidad_convenio = ofertas_convenio.shape[0]
+    cantidad_sin_convenio = ofertas_sin_convenio.shape[0]
+
+    total_solicitado = df_ofertas['Valor'].sum()
+    total_convenio = ofertas_convenio['Valor'].sum()
+    total_sin_convenio = ofertas_sin_convenio['Valor'].sum()
+
+    # Crear tablas de indicadores
+    indicadores_cantidad = pd.DataFrame({
+        "Indicador": [
+            "Cantidad de Ofertas con Garantías Firmadas",
+            "Cantidad de Ofertas de IES con Convenio",
+            "Cantidad de Ofertas de IES sin Convenio",
+        ],
+        "Valor": [
+            cantidad_ofertas,
+            cantidad_convenio,
+            cantidad_sin_convenio,
+        ]
+    })
+
+    indicadores_valor = pd.DataFrame({
+        "Indicador": [
+            "Total Solicitado por IES",
+            "Total Solicitado por IES con Convenio",
+            "Total Solicitado por IES sin Convenio"
+        ],
+        "Valor": [
+            total_solicitado,
+            total_convenio,
+            total_sin_convenio
+        ]
+    })
+
+    st.subheader("Tabla de Indicadores - Cantidades")
+    st.dataframe(indicadores_cantidad)
+
+    st.subheader("Tabla de Indicadores - Valores")
+    st.dataframe(indicadores_valor)
+
+    # Gráficos de indicadores
+    st.subheader("Gráficos de Indicadores")
+    
+    # Gráfico de Cantidades
+    plt.figure(figsize=(8, 4))
+    plt.bar(indicadores_cantidad['Indicador'], indicadores_cantidad['Valor'], color=['blue', 'orange', 'green'])
+    plt.title("Indicadores de Cantidades")
+    plt.xticks(rotation=45)
+    plt.ylabel("Cantidad")
+    st.pyplot(plt)
+
+    # Gráfico de Valores
+    plt.figure(figsize=(8, 4))
+    plt.bar(indicadores_valor['Indicador'], indicadores_valor['Valor'], color=['blue', 'orange', 'green'])
+    plt.title("Indicadores de Valores")
+    plt.xticks(rotation=45)
+    plt.ylabel("Valor (millones de pesos)")
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'))
+    st.pyplot(plt)
+    
+    # Visualización de datos
+    st.subheader("Distribución de IES por Convenio")
+    st.bar_chart(df_ofertas['tiene_convenio'].value_counts())
+
+    # Mostrar detalles
+    if 'mostrar_detalles' not in st.session_state:
+        st.session_state.mostrar_detalles = False
+
+    # Crear un registro de aprobaciones
+    if 'registro_aprobaciones' not in st.session_state:
+        st.session_state.registro_aprobaciones = []
+
+    if st.button("Mostrar Detalles" if not st.session_state.mostrar_detalles else "Ocultar Detalles"):
+        st.session_state.mostrar_detalles = not st.session_state.mostrar_detalles
+
+    # Procesar cada beneficiario
+    if st.session_state.mostrar_detalles:
+        for index, beneficiario in enumerate(df_ofertas.to_dict('records')):
+            st.subheader(f"Gestión para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}")
+            st.write(f"Valor Solicitado: {beneficiario['Valor']} millones de pesos")
+            st.write(f"Tiene Convenio: {beneficiario['tiene_convenio']}")
+
+            if beneficiario['tiene_convenio'] == "No":
+                if st.button(f"Solicitar información financiera para IES {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"solicitar_{index}"):
+                    info_bancaria = generar_info_bancaria()
+                    st.write("Información bancaria generada:")
+                    st.write(f"NIT: {info_bancaria['NIT']}")
+                    st.write(f"Nombre IES: {info_bancaria['Nombre']}")
+                    st.write(f"Tipo de Cuenta: {info_bancaria['Tipo Cuenta']}")
+                    st.write(f"Número de Cuenta: {info_bancaria['Numero Cuenta']}")
+                    st.write(f"Nombre del Banco: {info_bancaria['Nombre Banco']}")
+                    st.write(f"Número de Factura de Matrícula: {info_bancaria['Numero Factura']}")
+
+                    if st.button(f"Confirmar información para giro de {beneficiario.get('Nombre', 'IES Desconocida')}", key=f"confirmar_{index}"):
+                        validacion_info = random.choice(["Sí", "No"])
+                        if validacion_info == "Sí":
+                            st.success("Validación exitosa. Procediendo a giro...")
+                            presupuesto_disponible -= beneficiario['Valor']
+                            st.session_state.presupuesto_disponible = presupuesto_disponible
+                            st.session_state.registro_aprobaciones.append({
+                                "Nombre IES": beneficiario.get('Nombre', 'IES Desconocida'),
+                                "Valor": beneficiario['Valor'],
+                                "Estado": "Aprobado",
+                                "Fecha": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                            })
+
+                            if presupuesto_disponible < 1000:  # Definir un límite de presupuesto
+                                st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
+                            if st.button(f"Giro Exitoso para {beneficiario.get('Nombre')}", key=f"giro_exitoso_{index}"):
+                                st.success(f"Giro a {beneficiario.get('Nombre')} completado exitosamente.")
+                        else:
+                            st.warning("La validación de la información ha fallado. Por favor, intente nuevamente.")
+            
+            elif beneficiario['tiene_convenio'] == "Sí":
+                st.success("Iniciando liquidación automática del desembolso...")
+                instruccion_giro = f"Instrucción de giro generada para {beneficiario.get('Nombre', 'Beneficiario Desconocido')}."
+                st.write(instruccion_giro)
+                
+                if st.button(f"Aprobar liquidación de IES {beneficiario.get('Nombre')} con convenio", key=f"aprobar_convenio_{index}"):
+                    st.success(f"Liquidación aprobada para {beneficiario.get('Nombre')}.")
+                    st.session_state.registro_aprobaciones.append({
+                        "Nombre IES": beneficiario.get('Nombre', 'IES Desconocida'),
+                        "Valor": beneficiario['Valor'],
+                        "Estado": "Aprobado",
+                        "Fecha": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
+
+    # Exportar a CSV
+    if st.button("Exportar Registro de Aprobaciones a CSV"):
+        if st.session_state.registro_aprobaciones:
+            df_aprobaciones = pd.DataFrame(st.session_state.registro_aprobaciones)
+            csv = df_aprobaciones.to_csv(index=False)
+            st.download_button("Descargar CSV", csv, "registro_aprobaciones.csv", "text/csv")
+            st.success("Registro de aprobaciones exportado exitosamente.")
+        else:
+            st.warning("No hay registros de aprobaciones para exportar.")
+
+    # Historial de solicitudes
+    st.subheader("Historial de Solicitudes")
+    if st.session_state.registro_aprobaciones:
+        df_historial = pd.DataFrame(st.session_state.registro_aprobaciones)
+        st.dataframe(df_historial)
+    else:
+        st.warning("No hay historial de solicitudes.")
+
 
 # Configurar el menú de la aplicación
 menu = st.sidebar.selectbox(
