@@ -964,61 +964,11 @@ def gestion_ordenador_gasto():
                     # Descontar del presupuesto disponible
                     presupuesto_disponible -= beneficiario['Valor']
                     st.session_state.presupuesto_disponible = presupuesto_disponible
+
                     if presupuesto_disponible < limite_presupuesto:
                         st.warning("¡Urgente! Se recomienda solicitar mayor presupuesto.")
-
-
-    # Inicializar historial de solicitudes en estado de sesión
-    if "historial_solicitudes" not in st.session_state:
-        st.session_state.historial_solicitudes = []
-
-    st.subheader("Aprobar IES")
-
-    # Filtrar las IES según convenio
-    tipo_convenio = st.selectbox("Seleccionar tipo de IES", ["Con Convenio", "Sin Convenio"])
-    ies_seleccionadas = None
-
-    # Filtro de valor
-    min_valor, max_valor = st.slider("Selecciona un rango de valores", 
-                                       min_value=0, 
-                                       max_value=int(df_ofertas['Valor'].max()), 
-                                       value=(0, int(df_ofertas['Valor'].max())))
-
-    if tipo_convenio == "Con Convenio":
-        ies_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "Sí"]
-        if not ies_convenio.empty:
-            ies_seleccionadas = st.multiselect("Selecciona las IES con Convenio", options=ies_convenio['Nombre'].tolist())
-        else:
-            st.warning("No hay IES con convenio para aprobar.")
-    else:
-        ies_sin_convenio = df_ofertas[df_ofertas['tiene_convenio'] == "No"]
-        if not ies_sin_convenio.empty:
-            ies_seleccionadas = st.multiselect("Selecciona las IES sin Convenio", options=ies_sin_convenio['Nombre'].tolist())
-                    # Botón para solicitar información financiera
-            if ies_seleccionadas and st.button("Solicitar información financiera de las IES sin convenio"):
-                for ies in ies_seleccionadas:
-                    st.write(f"Solicitud de información financiera enviada para: {ies}")
-        else:
-            st.warning("No hay IES sin convenio disponibles.")
-
-    # Mostrar historial de solicitudes
-    st.subheader("Historial de Solicitudes")
-    for solicitud in st.session_state.historial_solicitudes:
-        st.write(solicitud)
-
-# Botón para procesar y aprobar desembolso
-    if ies_seleccionadas and st.button("Procesar Aprobación"):
-        total_aprobado = df_ofertas[df_ofertas['Nombre'].isin(ies_seleccionadas)]['Valor'].sum()
-        st.success(f"Se ha aprobado el desembolso de {total_aprobado} millones de pesos para las IES seleccionadas.")
-
-        for ies in ies_seleccionadas:
-            valor_ies = df_ofertas[df_ofertas['Nombre'] == ies]['Valor'].values[0]
-            st.write(f"IES: {ies}, Valor aprobado: {valor_ies} millones de pesos.")
-            st.info(f"Se inició el proceso financiero para la IES: {ies}")
-
-        # Confirmación de aprobación final
-        if st.button("Confirmar Aprobación Final"):
-            st.success("Desembolso aprobado para las IES seleccionadas.")
+                else:
+                    st.error("La liquidación no pudo ser aprobada.")
 
 # Exportar a CSV
     if st.button("Exportar a CSV"):
