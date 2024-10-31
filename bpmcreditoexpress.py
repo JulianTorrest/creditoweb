@@ -814,36 +814,36 @@ def gestion_comercial():
 
     # Asegurarse de que hay datos para analizar
 if not df_ofertas.empty:
-	# Agrupar por mes y contar la cantidad de ofertas
-    	df_ofertas['Mes'] = df_ofertas['Fecha'].dt.to_period('M')
-    	tendencias_mensuales = df_ofertas.groupby('Mes').size().reset_index(name='Total Ofertas')
+# Agrupar por mes y contar la cantidad de ofertas
+    df_ofertas['Mes'] = df_ofertas['Fecha'].dt.to_period('M')
+    tendencias_mensuales = df_ofertas.groupby('Mes').size().reset_index(name='Total Ofertas')
 
     	# Graficar la cantidad de ofertas por mes
-    	plt.figure(figsize=(12, 6))
-    	plt.plot(tendencias_mensuales['Mes'].astype(str), tendencias_mensuales['Total Ofertas'], marker='o')
-    	plt.title('Cantidad de Ofertas Enviadas por Mes')
-    	plt.xlabel('Mes')
-    	plt.ylabel('Total Ofertas')
-    	plt.xticks(rotation=45)
-    	plt.grid()
-    	st.pyplot(plt)
+    plt.figure(figsize=(12, 6))
+    plt.plot(tendencias_mensuales['Mes'].astype(str), tendencias_mensuales['Total Ofertas'], marker='o')
+    plt.title('Cantidad de Ofertas Enviadas por Mes')
+    plt.xlabel('Mes')
+    plt.ylabel('Total Ofertas')
+    plt.xticks(rotation=45)
+    plt.grid()
+    st.pyplot(plt)
 
     	# Calcular la tasa de conversión de ofertas (interesados) por mes
-    	conversion_mensual = df_ofertas[df_ofertas['Interesado'] == 'Sí'].groupby('Mes').size().reset_index(name='Interesados')
-    	conversion_mensual = conversion_mensual.merge(tendencias_mensuales, on='Mes')
-    	conversion_mensual['Tasa de Conversión'] = conversion_mensual['Interesados'] / conversion_mensual['Total Ofertas'] * 100
+    conversion_mensual = df_ofertas[df_ofertas['Interesado'] == 'Sí'].groupby('Mes').size().reset_index(name='Interesados')
+    conversion_mensual = conversion_mensual.merge(tendencias_mensuales, on='Mes')
+    conversion_mensual['Tasa de Conversión'] = conversion_mensual['Interesados'] / conversion_mensual['Total Ofertas'] * 100
 
     	# Graficar la tasa de conversión
-    	plt.figure(figsize=(12, 6))
-    	plt.bar(conversion_mensual['Mes'].astype(str), conversion_mensual['Tasa de Conversión'], color='orange')
-    	plt.title('Tasa de Conversión de Ofertas por Mes (%)')
-    	plt.xlabel('Mes')
-    	plt.ylabel('Tasa de Conversión (%)')
-    	plt.xticks(rotation=45)
-    	plt.axhline(y=conversion_mensual['Tasa de Conversión'].mean(), color='red', linestyle='--', label='Promedio')
-    	plt.legend()
-    	plt.grid()
-    	st.pyplot(plt)
+    plt.figure(figsize=(12, 6))
+    plt.bar(conversion_mensual['Mes'].astype(str), conversion_mensual['Tasa de Conversión'], color='orange')
+    plt.title('Tasa de Conversión de Ofertas por Mes (%)')
+    plt.xlabel('Mes')
+    plt.ylabel('Tasa de Conversión (%)')
+    plt.xticks(rotation=45)
+    plt.axhline(y=conversion_mensual['Tasa de Conversión'].mean(), color='red', linestyle='--', label='Promedio')
+    plt.legend()
+    plt.grid()
+    st.pyplot(plt)
 else:
     	st.write("No hay datos suficientes para realizar un análisis de tendencias.")
 
