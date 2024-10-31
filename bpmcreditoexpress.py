@@ -810,7 +810,7 @@ def gestion_comercial():
     # Agregar aquí la lógica para analizar tendencias (ejemplo: promedios por año, meses, etc.)
 
     # Análisis de Tendencias
-    	st.subheader("Análisis de Tendencias")
+    st.subheader("Análisis de Tendencias")
 
     # Asegurarse de que hay datos para analizar
 	if not df_ofertas.empty:
