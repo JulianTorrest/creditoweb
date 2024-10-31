@@ -742,22 +742,6 @@ def gestion_comercial():
     plt.title('Estado de Garantías Firmadas y No Firmadas')
     st.pyplot(plt)
 
-    # Mostrar las ofertas filtradas
-    if not df_ofertas.empty:
-        for i, oferta in enumerate(df_ofertas.to_dict('records')):
-            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
-            st.write(f"Interesado: {oferta['Interesado']}")
-            estado = "Sin especificar"
-            if oferta['Interesado'] == "Sí":
-                st.write(f"¿Garantía firmada? {'Sí' if oferta.get('GarantiaFirmada') else 'No'}")
-                estado = "Garantía Firmada" if oferta.get('GarantiaFirmada') else "Esperando Confirmación"
-            elif oferta['Interesado'] == "No":
-                estado = "No Interesado"
-            elif oferta['Interesado'] == "Sí, pero después":
-                estado = "Sí, pero después"
-
-            st.write(f"Estado: {estado}")
-
     # Botones de descarga (después del informe)
     if st.button("Descargar en Excel"):
         excel_buffer = io.BytesIO()
@@ -786,7 +770,22 @@ def gestion_comercial():
 
         st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
 
-        
+    # Mostrar las ofertas filtradas
+    if not df_ofertas.empty:
+        for i, oferta in enumerate(df_ofertas.to_dict('records')):
+            st.subheader(f"Oferta {i + 1}: {oferta['Nombre']}")
+            st.write(f"Interesado: {oferta['Interesado']}")
+            estado = "Sin especificar"
+            if oferta['Interesado'] == "Sí":
+                st.write(f"¿Garantía firmada? {'Sí' if oferta.get('GarantiaFirmada') else 'No'}")
+                estado = "Garantía Firmada" if oferta.get('GarantiaFirmada') else "Esperando Confirmación"
+            elif oferta['Interesado'] == "No":
+                estado = "No Interesado"
+            elif oferta['Interesado'] == "Sí, pero después":
+                estado = "Sí, pero después"
+
+            st.write(f"Estado: {estado}")
+    
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
     try:
