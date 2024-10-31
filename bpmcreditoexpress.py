@@ -814,9 +814,9 @@ def gestion_comercial():
 
     # Asegurarse de que hay datos para analizar
 	if not df_ofertas.empty:
-        # Agrupar por mes y contar la cantidad de ofertas
-    	df_ofertas['Mes'] = df_ofertas['Fecha'].dt.to_period('M')
-    	tendencias_mensuales = df_ofertas.groupby('Mes').size().reset_index(name='Total Ofertas')
+        	# Agrupar por mes y contar la cantidad de ofertas
+    		df_ofertas['Mes'] = df_ofertas['Fecha'].dt.to_period('M')
+    		tendencias_mensuales = df_ofertas.groupby('Mes').size().reset_index(name='Total Ofertas')
 
     	# Graficar la cantidad de ofertas por mes
     	plt.figure(figsize=(12, 6))
