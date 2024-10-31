@@ -848,9 +848,9 @@ else:
     	st.write("No hay datos suficientes para realizar un análisis de tendencias.")
 
     # Comparativa de Ofertas (simulación básica)
-    if st.button("Comparativa de Ofertas"):
+    	if st.button("Comparativa de Ofertas"):
         # Aquí se podrían mostrar estadísticas comparativas
-        st.write("Comparativa de Ofertas: en desarrollo...")
+        	st.write("Comparativa de Ofertas: en desarrollo...")
 
     # Historial de Cambios
     st.subheader("Historial de Cambios")
