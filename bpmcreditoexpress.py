@@ -1023,7 +1023,6 @@ def gestion_ordenador_gasto():
         df_ofertas['tiene_convenio'] = [random.choice(["Sí", "No"]) for _ in range(len(df_ofertas))]
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
-    # Umbral de advertencia para presupuesto bajo
     umbral_presupuesto = st.number_input(
         "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0, key="umbral_presupuesto"
     )
@@ -1049,9 +1048,16 @@ def gestion_ordenador_gasto():
     # Control presupuestal
     control_presupuestal = pd.DataFrame({
         "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
-        "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, presupuesto_disponible - presupuesto_comprometido]
+        "Monto (Millones)": [
+            st.session_state.presupuesto_disponible,
+            presupuesto_comprometido,
+            st.session_state.presupuesto_disponible - presupuesto_comprometido
+        ]
     })
-    
+
+    st.write("Control Presupuestal:")
+    st.dataframe(control_presupuestal)
+
     st.subheader("Control Presupuestal")
     st.dataframe(control_presupuestal)
 
