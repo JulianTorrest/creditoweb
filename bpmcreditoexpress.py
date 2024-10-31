@@ -819,18 +819,6 @@ def gestion_comercial():
     # Aquí se podría mostrar un registro de cambios (agregar a base de datos o lista)
     if st.button("Ver Historial de Cambios"):
         st.write("Historial de Cambios: en desarrollo...")
-
-    # Evaluación de Ofertas
-    st.subheader("Evaluación de Ofertas")
-    # Aquí se podría implementar un sistema de evaluación (ejemplo: puntuación)
-    evaluaciones = []
-    for i, oferta in enumerate(df_ofertas.to_dict('records')):
-        puntuacion = st.slider(f"Puntuación para {oferta['Nombre']}", 0, 10, 5, key=f"puntuacion_{i}")
-        evaluaciones.append((oferta['Nombre'], puntuacion))
-
-    if st.button("Enviar Evaluaciones"):
-        # Guardar evaluaciones (en base de datos o estado de sesión)
-        st.success("Evaluaciones enviadas.")
 	    
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
