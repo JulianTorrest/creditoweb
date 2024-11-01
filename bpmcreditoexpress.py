@@ -818,10 +818,10 @@ def gestion_comercial():
         st.write("Comparativa de Ofertas: en desarrollo...")
 
     	# Historial de Cambios
-    	st.subheader("Historial de Cambios")
+    st.subheader("Historial de Cambios")
     	# Aquí se podría mostrar un registro de cambios (agregar a base de datos o lista)
-    	if st.button("Ver Historial de Cambios"):
-        	st.write("Historial de Cambios: en desarrollo...")
+    if st.button("Ver Historial de Cambios"):
+        st.write("Historial de Cambios: en desarrollo...")
 	    
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
