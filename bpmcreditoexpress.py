@@ -1294,6 +1294,9 @@ url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/main/Imag
 # Mostrar el logo en la parte superior
 st.image(url_logo, caption='Logo ICETEX', use_column_width=True)
 
+# Encabezado personalizado
+st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
+
 # Inicializar el estado de la página seleccionada si aún no está configurado
 if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
@@ -1327,3 +1330,6 @@ elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()
 elif st.session_state.selected_page == "Gestión Ordenador del Gasto":
     gestion_ordenador_gasto()
+
+# Footer personalizado
+st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
