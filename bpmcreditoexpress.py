@@ -14,10 +14,12 @@ import base64
 import tempfile
 import csv
 
-# URL de la imagen
-url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/blob/main/Imagenes/Logo ICETEX definitivo-2024.png"
+# URL de la imagen con el formato raw
+url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/main/Imagenes/Logo%20ICETEX%20definitivo-2024.png"
+
 # Mostrar la imagen como encabezado
 st.image(url_logo, caption='Logo Icetex', use_column_width=True)
+
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
