@@ -1288,21 +1288,42 @@ def gestion_ordenador_gasto():
         st.success("Archivo CSV generado con éxito.")
 
 
+# URL de la imagen del logo
+url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/main/Imagenes/Logo%20ICETEX%20definitivo-2024.png"
 
-# Configurar el menú de la aplicación
-menu = st.sidebar.selectbox(
-    "Selecciona una página",
-    ["Consulta de Solicitudes", "Validación de Beneficiarios", "Enviar Oferta", "Gestión Comercial", "Gestión Ordenador del Gasto"]
-)
+# Mostrar el logo en la parte superior
+st.image(url_logo, caption='Logo ICETEX', use_column_width=True)
 
-# Ejecutar la página seleccionada
-if menu == "Consulta de Solicitudes":
+# Inicializar el estado de la página seleccionada si aún no está configurado
+if 'selected_page' not in st.session_state:
+    st.session_state.selected_page = "Consulta de Solicitudes"
+
+# Crear el menú de navegación con botones en la parte superior
+col1, col2, col3, col4, col5 = st.columns(5)
+with col1:
+    if st.button("Consulta de Solicitudes"):
+        st.session_state.selected_page = "Consulta de Solicitudes"
+with col2:
+    if st.button("Validación de Beneficiarios"):
+        st.session_state.selected_page = "Validación de Beneficiarios"
+with col3:
+    if st.button("Enviar Oferta"):
+        st.session_state.selected_page = "Enviar Oferta"
+with col4:
+    if st.button("Gestión Comercial"):
+        st.session_state.selected_page = "Gestión Comercial"
+with col5:
+    if st.button("Gestión Ordenador del Gasto"):
+        st.session_state.selected_page = "Gestión Ordenador del Gasto"
+
+# Ejecutar la función de la página seleccionada
+if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()
-elif menu == "Validación de Beneficiarios":
+elif st.session_state.selected_page == "Validación de Beneficiarios":
     validacion_beneficiarios()
-elif menu == "Enviar Oferta":
+elif st.session_state.selected_page == "Enviar Oferta":
     enviar_oferta()
-elif menu == "Gestión Comercial":
+elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()
-elif menu == "Gestión Ordenador del Gasto":
+elif st.session_state.selected_page == "Gestión Ordenador del Gasto":
     gestion_ordenador_gasto()
