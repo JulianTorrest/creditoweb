@@ -15,7 +15,7 @@ import tempfile
 import csv
 
 # URL de la imagen
-url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/blob/main/Imagenes/Logo%20ICETEX%20definitivo-2024.png"
+url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/blob/main/Imagenes/Logo ICETEX definitivo-2024.png"
 # Mostrar la imagen como encabezado
 st.image(url_logo, caption='Logo Icetex', use_column_width=True)
 
