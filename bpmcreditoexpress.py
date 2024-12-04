@@ -603,16 +603,6 @@ def enviar_oferta():
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
         etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
 
-        # Crear gráfico tipo embudo
-        fig, ax = plt.subplots()
-        ax.barh(etapas, fallos_validaciones, color='skyblue')
-        ax.set_xlabel('Número de Fallos')
-        ax.set_title('Embudo de Validaciones Fallidas')
-
-        # Mostrar el gráfico en Streamlit
-        st.pyplot(fig)
-
-
     # Mostrar gráficos adicionales
 
     # Gráfico 1: Cantidad de beneficiarios aprobados por semestre/año
