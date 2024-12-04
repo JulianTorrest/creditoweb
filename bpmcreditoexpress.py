@@ -876,7 +876,7 @@ def gestion_ordenador_gasto():
 
     # Control presupuestal
     control_presupuestal = pd.DataFrame({
-        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
+        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Disponible"],
         "Monto (Millones)": [presupuesto_disponible, presupuesto_comprometido, presupuesto_disponible - presupuesto_comprometido]
     })
     
@@ -1083,7 +1083,7 @@ def gestion_ordenador_gasto():
 
     # Control presupuestal
     control_presupuestal = pd.DataFrame({
-        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Girado"],
+        "Concepto": ["Presupuesto Disponible", "Presupuesto Comprometido", "Presupuesto Disponible"],
         "Monto (Millones)": [
             st.session_state.presupuesto_disponible,
             presupuesto_comprometido,
