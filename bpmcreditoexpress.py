@@ -603,63 +603,6 @@ def enviar_oferta():
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
         etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
 
-    	# Mostrar gráficos adicionales
-
-	# Gráfico: Cantidad de beneficiarios aprobados por año
-	st.subheader("Cantidad de beneficiarios aprobados por año")
-
-	# Asegurarse de que df_aprobados está disponible
-	if 'df_aprobados' in st.session_state and not st.session_state['df_aprobados'].empty:
-    		df_aprobados = st.session_state['df_aprobados']
-    		aprobados_por_año = df_aprobados.groupby('Año').size()
-
-   	 # Crear el gráfico
-    		fig2, ax2 = plt.subplots()
-    		aprobados_por_año.plot(kind='bar', ax=ax2, color='skyblue')
-    		ax2.set_xlabel('Año')
-    		ax2.set_ylabel('Cantidad de Beneficiarios Aprobados')
-    		ax2.set_title('Cantidad de Beneficiarios Aprobados por Año')
-    		ax2.set_xticks(range(len(aprobados_por_año.index)))
-    		ax2.set_xticklabels(aprobados_por_año.index, rotation=45)
-
-    # Mostrar el gráfico
-    		st.pyplot(fig2)
-	else:
-    		st.warning("No hay beneficiarios aprobados para mostrar.")
-
-st.subheader("Cantidad de beneficiarios con errores por tipo de error")
-
-	if len(beneficiarios_con_errores) > 0:
-    		errores_count = {
-        	"Score Crediticio": 0,
-        	"Capacidad de Pago": 0,
-        	"Estado Crédito": 0
-    	}
-
-    	for beneficiario in beneficiarios_con_errores:
-        	errores = realizar_validaciones(beneficiario)
-        if "El score crediticio debe ser de mínimo 610 puntos." in errores:
-            	errores_count["Score Crediticio"] += 1
-        if "Capacidad de pago insuficiente." in errores:
-            	errores_count["Capacidad de Pago"] += 1
-        if "Estado de Crédito no aprobado." in errores:
-            	errores_count["Estado Crédito"] += 1
-
-    fig2, ax2 = plt.subplots()
-    ax2.bar(errores_count.keys(), errores_count.values(), color=['red', 'orange', 'green'])
-    ax2.set_xlabel('Tipos de Errores')
-    ax2.set_ylabel('Cantidad de Beneficiarios')
-    ax2.set_title('Cantidad de Beneficiarios con Errores por Tipo')
-
-    # Mostrar valores sobre las barras
-    for i, v in enumerate(errores_count.values()):
-        ax2.text(i, v + 0.1, str(v), ha='center', fontsize=10)
-
-    st.pyplot(fig2)
-else:
-    st.info("No hay beneficiarios con errores para mostrar.")
-
-
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
