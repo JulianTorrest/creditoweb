@@ -603,6 +603,42 @@ def enviar_oferta():
         fallos_validaciones = [validacion1_fallos, validacion2_fallos, validacion3_fallos]
         etapas = ['Validación Score Crediticio', 'Validación Capacidad de Pago', 'Validación Antecedentes Crediticios']
 
+    # Mostrar gráficos adicionales
+
+    # Gráfico 1: Cantidad de beneficiarios aprobados por semestre/año
+    st.subheader("Cantidad de beneficiarios aprobados por semestre/año")
+    if not df_aprobados.empty:
+        aprobados_por_periodo = df_aprobados.groupby(['Año', 'Periodo']).size().unstack(fill_value=0)
+        fig1, ax1 = plt.subplots()
+        aprobados_por_periodo.plot(kind='bar', stacked=True, ax=ax1)
+        ax1.set_xlabel('Año')
+        ax1.set_ylabel('Cantidad de Aprobados')
+        ax1.set_title('Cantidad de Beneficiarios Aprobados por Año y Periodo')
+        st.pyplot(fig1)
+
+    # Gráfico 2: Cantidad de beneficiarios con errores
+    st.subheader("Cantidad de beneficiarios con errores por tipo de error")
+    errores_count = {
+        "Score Crediticio": 0,
+        "Capacidad de Pago": 0,
+        "Estado Crédito": 0
+    }
+    
+    for beneficiario in beneficiarios_con_errores:
+        errores = realizar_validaciones(beneficiario)
+        if "El score crediticio debe ser de mínimo 610 puntos." in errores:
+            errores_count["Score Crediticio"] += 1
+        if "Capacidad de pago insuficiente." in errores:
+            errores_count["Capacidad de Pago"] += 1
+        if "Estado de Crédito no aprobado." in errores:
+            errores_count["Estado Crédito"] += 1
+
+    fig2, ax2 = plt.subplots()
+    ax2.bar(errores_count.keys(), errores_count.values(), color='skyblue')
+    ax2.set_ylabel('Número de Beneficiarios')
+    ax2.set_title('Cantidad de Beneficiarios con Errores por Tipo')
+    st.pyplot(fig2)
+
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
