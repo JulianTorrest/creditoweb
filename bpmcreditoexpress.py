@@ -606,26 +606,26 @@ def enviar_oferta():
     	# Mostrar gráficos adicionales
 
 	# Gráfico: Cantidad de beneficiarios aprobados por año
-	st.subheader("Cantidad de beneficiarios aprobados por año")
+st.subheader("Cantidad de beneficiarios aprobados por año")
 
 	# Asegurarse de que df_aprobados está disponible
-	if 'df_aprobados' in st.session_state and not st.session_state['df_aprobados'].empty:
-    		df_aprobados = st.session_state['df_aprobados']
-    		aprobados_por_año = df_aprobados.groupby('Año').size()
+if 'df_aprobados' in st.session_state and not st.session_state['df_aprobados'].empty:
+    	df_aprobados = st.session_state['df_aprobados']
+    	aprobados_por_año = df_aprobados.groupby('Año').size()
 
    	 # Crear el gráfico
-    		fig2, ax2 = plt.subplots()
-    		aprobados_por_año.plot(kind='bar', ax=ax2, color='skyblue')
-    		ax2.set_xlabel('Año')
-    		ax2.set_ylabel('Cantidad de Beneficiarios Aprobados')
-    		ax2.set_title('Cantidad de Beneficiarios Aprobados por Año')
-    		ax2.set_xticks(range(len(aprobados_por_año.index)))
-    		ax2.set_xticklabels(aprobados_por_año.index, rotation=45)
+    	fig2, ax2 = plt.subplots()
+    	aprobados_por_año.plot(kind='bar', ax=ax2, color='skyblue')
+    	ax2.set_xlabel('Año')
+    	ax2.set_ylabel('Cantidad de Beneficiarios Aprobados')
+    	ax2.set_title('Cantidad de Beneficiarios Aprobados por Año')
+    	ax2.set_xticks(range(len(aprobados_por_año.index)))
+    	ax2.set_xticklabels(aprobados_por_año.index, rotation=45)
 
     # Mostrar el gráfico
-    		st.pyplot(fig2)
-	else:
-    		st.warning("No hay beneficiarios aprobados para mostrar.")
+    	st.pyplot(fig2)
+else:
+    	st.warning("No hay beneficiarios aprobados para mostrar.")
 
 
 
