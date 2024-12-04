@@ -606,25 +606,25 @@ def enviar_oferta():
     # Mostrar gráficos adicionales
 
     # Gráfico 1: Cantidad de beneficiarios aprobados por año
-	st.subheader("Cantidad de beneficiarios aprobados por año")
+    st.subheader("Cantidad de beneficiarios aprobados por año")
 
-	# Agrupar los datos por año (sin aplicar filtro por año seleccionado)
-	if not df_aprobados.empty:
-    		aprobados_por_año = df_aprobados.groupby('Año').size()
+    # Agrupar los datos por año (sin aplicar filtro por año seleccionado)
+    if not df_aprobados.empty:
+    	aprobados_por_año = df_aprobados.groupby('Año').size()
 
     	# Crear el gráfico
-    		fig2, ax2 = plt.subplots()
-    		aprobados_por_año.plot(kind='bar', ax=ax2, color='skyblue')
-    		ax2.set_xlabel('Año')
-    		ax2.set_ylabel('Cantidad de Beneficiarios Aprobados')
-    		ax2.set_title('Cantidad de Beneficiarios Aprobados por Año')
-    		ax2.set_xticks(range(len(aprobados_por_año.index)))
-   		 ax2.set_xticklabels(aprobados_por_año.index, rotation=45)
+    	fig2, ax2 = plt.subplots()
+    	aprobados_por_año.plot(kind='bar', ax=ax2, color='skyblue')
+    	ax2.set_xlabel('Año')
+    	ax2.set_ylabel('Cantidad de Beneficiarios Aprobados')
+    	ax2.set_title('Cantidad de Beneficiarios Aprobados por Año')
+    	ax2.set_xticks(range(len(aprobados_por_año.index)))
+   	ax2.set_xticklabels(aprobados_por_año.index, rotation=45)
 
     # Mostrar el gráfico
-   		 st.pyplot(fig2)
-	else:
-    		st.warning("No hay beneficiarios aprobados para mostrar.")
+   	st.pyplot(fig2)
+    else:
+    	st.warning("No hay beneficiarios aprobados para mostrar.")
 
     # Gráfico 2: Cantidad de beneficiarios con errores
     st.subheader("Cantidad de beneficiarios con errores por tipo de error")
