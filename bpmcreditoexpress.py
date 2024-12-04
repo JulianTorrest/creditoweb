@@ -606,7 +606,7 @@ def enviar_oferta():
     	# Mostrar gráficos adicionales
 
 	# Gráfico: Cantidad de beneficiarios aprobados por año
-st.subheader("Cantidad de beneficiarios aprobados por año")
+	st.subheader("Cantidad de beneficiarios aprobados por año")
 
 	# Asegurarse de que df_aprobados está disponible
 	if 'df_aprobados' in st.session_state and not st.session_state['df_aprobados'].empty:
