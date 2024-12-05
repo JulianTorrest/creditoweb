@@ -400,7 +400,8 @@ def captura_datos():
 
     # Filtros de Año y Periodo
     year = st.selectbox("Selecciona el año", options=[2024])
-    periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
+    periodo = st.selectbox("Selecciona el periodo", options=["Todos", "1er Semestre", "2do Semestre"])
+    tipo_solicitud = st.selectbox("Tipo de Solicitud", options=["Todos", "Adjudicación", "Renovación"])		
     st.subheader("Filtrar por Fecha")
     fecha_inicio = st.date_input("Fecha de Inicio", value=datetime.today())
     fecha_fin = st.date_input("Fecha de Fin", value=datetime.today())
