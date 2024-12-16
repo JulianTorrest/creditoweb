@@ -1299,29 +1299,24 @@ st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
 if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Crear el menú de navegación con botones en la parte superior
-col1, col2, col3, col4, col5 = st.columns(5)
+# Crear menú de navegación
+col1, col2, col3, col4 = st.columns(4)  # Reducir a 4 columnas para ocultar "Validación de Beneficiarios"
 with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
 with col2:
-    if st.button("Validación de Beneficiarios"):
-        st.session_state.selected_page = "Validación de Beneficiarios"
-with col3:
     if st.button("Enviar Oferta"):
         st.session_state.selected_page = "Enviar Oferta"
-with col4:
+with col3:
     if st.button("Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
-with col5:
-    if st.button("Gestión Ordenador del Gasto"):
-        st.session_state.selected_page = "Gestión Ordenador del Gasto"
+with col4:
+    if st.button("Gestión Presupuestal"):
+        st.session_state.selected_page = "Gestión Presupuestal"
 
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()
-elif st.session_state.selected_page == "Validación de Beneficiarios":
-    validacion_beneficiarios()
 elif st.session_state.selected_page == "Enviar Oferta":
     enviar_oferta()
 elif st.session_state.selected_page == "Gestión Comercial":
