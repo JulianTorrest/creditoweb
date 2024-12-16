@@ -452,8 +452,10 @@ def captura_datos():
             mostrar_graficos(df_beneficiarios)
 
     # Botón para ejecutar validación de beneficiarios
-    if st.button("Ejecutar Validación de Beneficiarios"):
-        # Ejecutar validación de todos los beneficiarios
+    if st.button("Ejecutar Validación de Postulantes"):
+        # Ejecutar validación de todos los Postulantes
+	resultado_validacion = st.empty()
+    
         beneficiarios_validados = []
         beneficiarios_con_errores = []
         
@@ -507,6 +509,10 @@ def validacion_beneficiarios():
     # Guardar las listas en el estado para usarlas en otras páginas
     st.session_state['beneficiarios_validados'] = beneficiarios_validados
     st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
+     # Mensaje visible al completar la validación
+    st.success("Se realizó la validación automática de postulantes.")
+
 
 # Función para realizar las validaciones
 def realizar_validaciones(beneficiario):
