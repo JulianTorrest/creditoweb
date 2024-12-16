@@ -1127,7 +1127,7 @@ if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
 # Crear menú de navegación
-col1, col2, col3, col4, col5 = st.columns(5)  # Agregar una columna adicional
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
@@ -1146,15 +1146,18 @@ with col5:  # Nueva opción para los gráficos
 
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
-    captura_datos()
+    captura_datos()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Enviar Oferta":
-    enviar_oferta()
+    enviar_oferta()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Comercial":
-    gestion_comercial()
+    gestion_comercial()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Presupuestal":
-    gestion_ordenador_gasto()
+    gestion_ordenador_gasto()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gráficos de Beneficiarios":
-    mostrar_graficos(df_beneficiarios)  # Se asume que df_beneficiarios está disponible
+    if 'df_beneficiarios' in locals() or 'df_beneficiarios' in globals():
+        mostrar_graficos(df_beneficiarios)
+    else:
+        st.error("El DataFrame de beneficiarios no está disponible.")
 
 # Footer personalizado
 st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
