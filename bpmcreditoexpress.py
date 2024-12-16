@@ -613,11 +613,11 @@ def enviar_oferta():
         except Exception as e:
             st.error(f"Ocurrió un error al descargar el archivo: {e}")
 
-    # Mostrar cuántos beneficiarios tienen errores
-    st.subheader(f"{len(beneficiarios_con_errores)} beneficiarios tienen errores")  # Aquí está la verificación
+    # Mostrar cuántos postulantes tienen errores
+    st.subheader(f"{len(beneficiarios_con_errores)} postulantes no aprobaron todas las validaciones")  # Aquí está la verificación
 
     if len(beneficiarios_con_errores) > 0:
-        st.info("No se enviarán ofertas a los beneficiarios con errores.")
+        st.info("No se enviarán ofertas a los postulantes que no aprobaron todas las validaciones.")
 
         # Generación de datos para el gráfico tipo embudo
         validacion1_fallos = 0
