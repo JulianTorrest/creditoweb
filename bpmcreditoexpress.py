@@ -454,7 +454,7 @@ def captura_datos():
     # Botón para ejecutar validación de beneficiarios
     if st.button("Ejecutar Validación de Postulantes"):
         # Ejecutar validación de todos los Postulantes
-	resultado_validacion = st.empty()
+        resultado_validacion = st.empty()
     
         beneficiarios_validados = []
         beneficiarios_con_errores = []
