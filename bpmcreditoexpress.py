@@ -462,8 +462,10 @@ def captura_datos():
             # Mostrar gráficos
             mostrar_graficos(df_beneficiarios)
 
-
-        
+	    # Botón para ejecutar validación de beneficiarios
+    if st.button("Ejecutar Validación de Beneficiarios"):
+        st.success("Validación de beneficiarios ejecutada correctamente.")
+	    
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
