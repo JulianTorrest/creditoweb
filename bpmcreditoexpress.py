@@ -558,11 +558,11 @@ def realizar_validaciones(beneficiario):
 
 # Página para enviar la oferta al beneficiario
 def enviar_oferta():
-    st.title("Enviar Oferta a los Beneficiarios")
+    st.title("Enviar Oferta a los Postulantes")
 
     # Verificar y establecer las variables de estado necesarias
     if 'beneficiarios_validados' not in st.session_state:
-        st.warning("No se ha realizado la validación de beneficiarios.")
+        st.warning("No se ha realizado la validación de Postulantes.")
         return
 
     if 'ofertas_en_proceso' not in st.session_state:
