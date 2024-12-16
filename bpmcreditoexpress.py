@@ -1325,64 +1325,47 @@ with col2:
 # Imagen de portada al inicio
 st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
 
-
 # Inicializar el estado de la página seleccionada si aún no está configurado
 if "selected_page" not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Crear menú de navegación con colores dinámicos
+# Crear un diccionario con los nombres de las páginas
+pages = {
+    "Consulta de Solicitudes": "Consulta de Solicitudes",
+    "Enviar Oferta": "Enviar Oferta",
+    "Gestión Comercial": "Gestión Comercial",
+    "Gestión Presupuestal": "Gestión Presupuestal",
+}
+
+# Crear menú de navegación con botones que cambian de color dinámicamente
 col1, col2, col3, col4 = st.columns(4)
 
-# Botón 1: Consulta de Solicitudes
+# Definir colores de los botones
+button_colors = {
+    "Consulta de Solicitudes": "#4CAF50" if st.session_state.selected_page == "Consulta de Solicitudes" else "#f0f0f0",
+    "Enviar Oferta": "#4CAF50" if st.session_state.selected_page == "Enviar Oferta" else "#f0f0f0",
+    "Gestión Comercial": "#4CAF50" if st.session_state.selected_page == "Gestión Comercial" else "#f0f0f0",
+    "Gestión Presupuestal": "#4CAF50" if st.session_state.selected_page == "Gestión Presupuestal" else "#f0f0f0",
+}
+
+# Crear los botones con colores dinámicos
 with col1:
-    if st.button(
-        "Consulta de Solicitudes",
-        key="consulta_solicitudes",
-    ):
+    if st.button("Consulta de Solicitudes", key="consulta_solicitudes", help="Ir a Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Botón 2: Enviar Oferta
 with col2:
-    if st.button(
-        "Enviar Oferta",
-        key="enviar_oferta",
-    ):
+    if st.button("Enviar Oferta", key="enviar_oferta", help="Ir a Enviar Oferta"):
         st.session_state.selected_page = "Enviar Oferta"
 
-# Botón 3: Gestión Comercial
 with col3:
-    if st.button(
-        "Gestión Comercial",
-        key="gestion_comercial",
-    ):
+    if st.button("Gestión Comercial", key="gestion_comercial", help="Ir a Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
 
-# Botón 4: Gestión Presupuestal
 with col4:
-    if st.button(
-        "Gestión Presupuestal",
-        key="gestion_presupuestal",
-    ):
+    if st.button("Gestión Presupuestal", key="gestion_presupuestal", help="Ir a Gestión Presupuestal"):
         st.session_state.selected_page = "Gestión Presupuestal"
 
-# Agregar estilo visual para el botón activo
-st.markdown(
-    f"""
-    <style>
-        div.stButton > button {{
-            background-color: #f0f0f0;  /* Color predeterminado */
-            color: black;
-        }}
-        div.stButton > button:nth-child({list(pages.keys()).index(st.session_state.selected_page) + 1}) {{
-            background-color: #4CAF50;  /* Color del botón activo */
-            color: white;
-        }}
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
-# Ejecutar la función de la página seleccionada
+# Mostrar la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
     st.write("Estás en **Consulta de Solicitudes**")
 elif st.session_state.selected_page == "Enviar Oferta":
@@ -1391,6 +1374,7 @@ elif st.session_state.selected_page == "Gestión Comercial":
     st.write("Estás en **Gestión Comercial**")
 elif st.session_state.selected_page == "Gestión Presupuestal":
     st.write("Estás en **Gestión Presupuestal**")
+
 
     
 # Footer personalizado
