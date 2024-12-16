@@ -1284,12 +1284,16 @@ url_portada = "https://github.com/JulianTorrest/creditoweb/blob/main/portada%20(
 url_gestion_comercial = "https://github.com/JulianTorrest/creditoweb/blob/main/Imagenes/gestion%20comercial.jpg"
 url_gestion_presupuestal = "https://github.com/JulianTorrest/creditoweb/blob/main/bpmcreditoexpress.py"
 
+# Logo en la esquina superior izquierda
+col1, col2 = st.columns([1, 8])
+with col1:
+    st.image(url_logo, width=100)
+with col2:
+    st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
 
-# Mostrar el logo en la parte superior
-st.image(url_logo, caption='Logo ICETEX', use_column_width=True)
+# Imagen de portada al inicio
+st.image(url_portada, caption="Sistema de Gestión", use_column_width=True)
 
-# Encabezado personalizado
-st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
 
 # Inicializar el estado de la página seleccionada si aún no está configurado
 if 'selected_page' not in st.session_state:
