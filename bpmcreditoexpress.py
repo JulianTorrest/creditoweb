@@ -644,6 +644,7 @@ def enviar_oferta():
 # Página de gestión comercial de ofertas
 def gestion_comercial():
     st.title("Gestión Comercial de Ofertas Enviadas")
+    st.image(url_gestion_comercial, caption="Gestión Comercial", use_container_width=True)
 
     # Verificar si hay ofertas enviadas
     if 'ofertas_en_proceso' not in st.session_state or not st.session_state.ofertas_en_proceso:
