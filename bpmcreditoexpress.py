@@ -400,7 +400,7 @@ def captura_datos():
     year = st.selectbox("Selecciona el año", options=[2024])
     periodo = st.selectbox("Selecciona el periodo", options=["Todos", "1er Semestre", "2do Semestre"])
     tipo_solicitud = st.selectbox("Tipo de Solicitud", options=["Todos", "Adjudicación", "Renovación"])        
-    
+
     st.subheader("Filtrar por Fecha")
     fecha_inicio = st.date_input("Fecha de Inicio", value=datetime.today())
     fecha_fin = st.date_input("Fecha de Fin", value=datetime.today())
@@ -445,7 +445,7 @@ def captura_datos():
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
-            st.write("Solicitudes encontrados:")
+            st.write("Solicitudes encontradas:")
             st.dataframe(df_beneficiarios)
 
             # Mostrar gráficos
@@ -453,30 +453,46 @@ def captura_datos():
 
     # Botón para ejecutar validación de beneficiarios
     if st.button("Ejecutar Validación de Postulantes"):
-        # Ejecutar validación de todos los Postulantes
-        resultado_validacion = st.empty()
-    
-        beneficiarios_validados = []
-        beneficiarios_con_errores = []
-        
-        for i, beneficiario in enumerate(beneficiarios_data):
-            errores = realizar_validaciones(beneficiario)
-            
-            if errores:
-                st.error(f"Errores encontrados para {beneficiario['Nombre']}:")
-                for error in errores:
-                    st.write(f"- {error}")
-                beneficiarios_con_errores.append(beneficiario)
-            else:
-                st.success(f"Beneficiario {beneficiario['Nombre']} pasó todas las validaciones.")
-                beneficiarios_validados.append(beneficiario)
-        
-        # Guardar las listas de beneficiarios validados y con errores
-        st.session_state['beneficiarios_validados'] = beneficiarios_validados
-        st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
-        
+        # Mostrar un spinner mientras se ejecuta el proceso
+        with st.spinner("Validando postulantes, por favor espera..."):
+            # Simular una ejecución oculta
+            beneficiarios_validados = []
+            beneficiarios_con_errores = []
+
+            for beneficiario in beneficiarios_data:
+                errores = realizar_validaciones(beneficiario)
+                if errores:
+                    beneficiarios_con_errores.append(beneficiario)
+                else:
+                    beneficiarios_validados.append(beneficiario)
+
+            # Guardar las listas en el estado de sesión
+            st.session_state['beneficiarios_validados'] = beneficiarios_validados
+            st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
+        # Mostrar el resultado final de la validación
         st.success("Validación de beneficiarios ejecutada correctamente.")
 
+        # Mostrar un resumen del resultado
+        total_validados = len(beneficiarios_validados)
+        total_errores = len(beneficiarios_con_errores)
+
+        st.write(f"✅ Postulantes validados: {total_validados}")
+        st.write(f"❌ Postulantes con errores: {total_errores}")
+
+        # Agregar un botón opcional para revisar detalles
+        if st.button("Revisar Detalles"):
+            st.subheader("Postulantes Validados")
+            if beneficiarios_validados:
+                st.write(beneficiarios_validados)
+            else:
+                st.write("No hay postulantes validados.")
+
+            st.subheader("Postulantes con Errores")
+            if beneficiarios_con_errores:
+                st.write(beneficiarios_con_errores)
+            else:
+                st.write("No hay postulantes con errores.")
 
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
