@@ -1127,7 +1127,7 @@ if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
 # Crear menú de navegación
-col1, col2, col3, col4 = st.columns(4)  # Reducir a 4 columnas para ocultar "Validación de Beneficiarios"
+col1, col2, col3, col4, col5 = st.columns(5)  # Agregar una columna adicional
 with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
@@ -1140,19 +1140,21 @@ with col3:
 with col4:
     if st.button("Gestión Presupuestal"):
         st.session_state.selected_page = "Gestión Presupuestal"
+with col5:  # Nueva opción para los gráficos
+    if st.button("Gráficos de Beneficiarios"):
+        st.session_state.selected_page = "Gráficos de Beneficiarios"
 
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()
-elif st.session_state.selected_page == "Validación de Beneficiarios":
-    validacion_beneficiarios()
 elif st.session_state.selected_page == "Enviar Oferta":
     enviar_oferta()
 elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()
 elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()
-
+elif st.session_state.selected_page == "Gráficos de Beneficiarios":
+    mostrar_graficos(df_beneficiarios)  # Se asume que df_beneficiarios está disponible
 
 # Footer personalizado
 st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
