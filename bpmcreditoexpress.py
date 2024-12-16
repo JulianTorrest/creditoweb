@@ -825,20 +825,6 @@ def gestion_comercial():
             pdf_output = f.read()
 
         st.download_button("Descargar PDF", data=pdf_output, file_name="ofertas.pdf", mime="application/pdf")
-
-    # Análisis de Tendencias
-    st.subheader("Análisis de Tendencias")
-
-    # Comparativa de Ofertas (simulación básica)
-    if st.button("Comparativa de Ofertas"):
-        # Aquí se podrían mostrar estadísticas comparativas
-        st.write("Comparativa de Ofertas: en desarrollo...")
-
-    	# Historial de Cambios
-    st.subheader("Historial de Cambios")
-    	# Aquí se podría mostrar un registro de cambios (agregar a base de datos o lista)
-    if st.button("Ver Historial de Cambios"):
-        st.write("Historial de Cambios: en desarrollo...")
 	    
 # Generación aleatoria de información bancaria
 def generar_info_bancaria():
