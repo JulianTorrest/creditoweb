@@ -424,7 +424,7 @@ def captura_datos():
         score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
         capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
 
-    if st.button("Mostrar datos de beneficiarios"):
+    if st.button("Mostrar datos de postulantes"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
 
         # Aplicar filtros
