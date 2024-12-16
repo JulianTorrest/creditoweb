@@ -1022,6 +1022,8 @@ def gestion_ordenador_gasto():
 
 def gestion_ordenador_gasto():
     st.title("Gestión Ordenador del Gasto")
+    st.image(url_gestion_presupuestal, caption="Gestión Presupuestal", use_container_width=True)
+
 
     # Inicialización de sesión
     if "ofertas_en_proceso" not in st.session_state or not st.session_state.ofertas_en_proceso:
