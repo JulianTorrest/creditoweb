@@ -1325,57 +1325,36 @@ with col2:
 # Imagen de portada al inicio
 st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
 
-# Inicializar el estado de la página seleccionada si aún no está configurado
-if "selected_page" not in st.session_state:
+if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Crear un diccionario con los nombres de las páginas
-pages = {
-    "Consulta de Solicitudes": "Consulta de Solicitudes",
-    "Enviar Oferta": "Enviar Oferta",
-    "Gestión Comercial": "Gestión Comercial",
-    "Gestión Presupuestal": "Gestión Presupuestal",
-}
-
-# Crear menú de navegación con botones que cambian de color dinámicamente
-col1, col2, col3, col4 = st.columns(4)
-
-# Definir colores de los botones
-button_colors = {
-    "Consulta de Solicitudes": "#4CAF50" if st.session_state.selected_page == "Consulta de Solicitudes" else "#f0f0f0",
-    "Enviar Oferta": "#4CAF50" if st.session_state.selected_page == "Enviar Oferta" else "#f0f0f0",
-    "Gestión Comercial": "#4CAF50" if st.session_state.selected_page == "Gestión Comercial" else "#f0f0f0",
-    "Gestión Presupuestal": "#4CAF50" if st.session_state.selected_page == "Gestión Presupuestal" else "#f0f0f0",
-}
-
-# Crear los botones con colores dinámicos
+# Crear menú de navegación
+col1, col2, col3, col4 = st.columns(4)  # Reducir a 4 columnas para ocultar "Validación de Beneficiarios"
 with col1:
-    if st.button("Consulta de Solicitudes", key="consulta_solicitudes", help="Ir a Consulta de Solicitudes"):
+    if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
-
 with col2:
-    if st.button("Enviar Oferta", key="enviar_oferta", help="Ir a Enviar Oferta"):
+    if st.button("Enviar Oferta"):
         st.session_state.selected_page = "Enviar Oferta"
-
 with col3:
-    if st.button("Gestión Comercial", key="gestion_comercial", help="Ir a Gestión Comercial"):
+    if st.button("Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
-
 with col4:
-    if st.button("Gestión Presupuestal", key="gestion_presupuestal", help="Ir a Gestión Presupuestal"):
+    if st.button("Gestión Presupuestal"):
         st.session_state.selected_page = "Gestión Presupuestal"
 
-# Mostrar la página seleccionada
+# Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
-    st.write("Estás en **Consulta de Solicitudes**")
+    captura_datos()
+elif st.session_state.selected_page == "Validación de Beneficiarios":
+    validacion_beneficiarios()
 elif st.session_state.selected_page == "Enviar Oferta":
-    st.write("Estás en **Enviar Oferta**")
+    enviar_oferta()
 elif st.session_state.selected_page == "Gestión Comercial":
-    st.write("Estás en **Gestión Comercial**")
-elif st.session_state.selected_page == "Gestión Presupuestal":
-    st.write("Estás en **Gestión Presupuestal**")
+    gestion_comercial()
+elif st.session_state.selected_page == "Gestión Ordenador del Gasto":
+    gestion_ordenador_gasto()
 
 
-    
 # Footer personalizado
 st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
