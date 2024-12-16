@@ -574,7 +574,7 @@ def enviar_oferta():
     beneficiarios_validados = st.session_state['beneficiarios_validados']
     beneficiarios_con_errores = st.session_state['beneficiarios_con_errores']
 
-    st.subheader(f"{len(beneficiarios_validados)} beneficiarios pasaron todas las validaciones")
+    st.subheader(f"{len(beneficiarios_validados)} postulantes pasaron todas las validaciones")
 
     # Filtros de año y periodo
     anio_actual = datetime.now().year
@@ -582,7 +582,7 @@ def enviar_oferta():
     año_seleccionado = st.selectbox("Seleccione un año:", anos)
     periodo_seleccionado = st.selectbox("Seleccione un periodo:", ["1 semestre", "2 semestre"])
 
-    if st.button("Enviar oferta a todos los beneficiarios validados"):
+    if st.button("Enviar oferta a todos los postulantes validados"):
         for beneficiario in beneficiarios_validados:
             oferta = beneficiario.copy()
             oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
