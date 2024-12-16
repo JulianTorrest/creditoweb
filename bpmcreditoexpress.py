@@ -809,10 +809,6 @@ def gestion_comercial():
 
     # Análisis de Tendencias
     st.subheader("Análisis de Tendencias")
-    # Agregar aquí la lógica para analizar tendencias (ejemplo: promedios por año, meses, etc.)
-
-    # Análisis de Tendencias
-    st.subheader("Análisis de Tendencias")
 
     # Comparativa de Ofertas (simulación básica)
     if st.button("Comparativa de Ofertas"):
