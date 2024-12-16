@@ -462,8 +462,10 @@ def captura_datos():
             # Mostrar gráficos
             mostrar_graficos(df_beneficiarios)
 
+    # Botón para ejecutar validación de beneficiarios
+    if st.button("Ejecutar Validación de Beneficiarios"):
+        st.success("Validación de beneficiarios ejecutada correctamente.")
 
-        
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
     st.title("Validaciones de Elegibilidad para ICETEX")
@@ -1280,34 +1282,39 @@ def gestion_ordenador_gasto():
 
 # URL de la imagen del logo
 url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/main/Imagenes/Logo%20ICETEX%20definitivo-2024.png"
+url_portada = "https://github.com/JulianTorrest/creditoweb/blob/main/portada%20(1).png"
+url_gestion_comercial = "https://github.com/JulianTorrest/creditoweb/blob/main/Imagenes/gestion%20comercial.jpg"
+url_gestion_presupuestal = "https://github.com/JulianTorrest/creditoweb/blob/main/bpmcreditoexpress.py"
 
-# Mostrar el logo en la parte superior
-st.image(url_logo, caption='Logo ICETEX', use_column_width=True)
+# Logo en la esquina superior izquierda
+col1, col2 = st.columns([1, 8])
+with col1:
+    st.image(url_logo, width=100)
+with col2:
+    st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
 
-# Encabezado personalizado
-st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
+# Imagen de portada al inicio
+st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
+
 
 # Inicializar el estado de la página seleccionada si aún no está configurado
 if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Crear el menú de navegación con botones en la parte superior
-col1, col2, col3, col4, col5 = st.columns(5)
+# Crear menú de navegación
+col1, col2, col3, col4 = st.columns(4)  # Reducir a 4 columnas para ocultar "Validación de Beneficiarios"
 with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
 with col2:
-    if st.button("Validación de Beneficiarios"):
-        st.session_state.selected_page = "Validación de Beneficiarios"
-with col3:
     if st.button("Enviar Oferta"):
         st.session_state.selected_page = "Enviar Oferta"
-with col4:
+with col3:
     if st.button("Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
-with col5:
-    if st.button("Gestión Ordenador del Gasto"):
-        st.session_state.selected_page = "Gestión Ordenador del Gasto"
+with col4:
+    if st.button("Gestión Presupuestal"):
+        st.session_state.selected_page = "Gestión Presupuestal"
 
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
