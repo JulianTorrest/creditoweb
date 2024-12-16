@@ -671,9 +671,6 @@ def gestion_comercial():
     # Seleccionar periodo (semestre)
     periodo_seleccionado = st.selectbox("Selecciona el periodo", ["1er Semestre", "2do Semestre"])
 
-    # Nuevo filtro para seleccionar la periodicidad
-    periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
-
     # Filtros para seleccionar el estado de las ofertas
     estado_filtrado = st.selectbox("Respuesta a oferta de pre-aprobación enviada", ["Todos", "Sí", "No", "Sí, pero después"])
 
