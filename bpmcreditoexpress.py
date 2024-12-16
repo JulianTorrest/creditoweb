@@ -1150,7 +1150,7 @@ elif st.session_state.selected_page == "Enviar Oferta":
     enviar_oferta()
 elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()
-elif st.session_state.selected_page == "Gestión Ordenador del Gasto":
+elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()
 
 
