@@ -1280,6 +1280,10 @@ def gestion_ordenador_gasto():
 
 # URL de la imagen del logo
 url_logo = "https://raw.githubusercontent.com/JulianTorrest/creditoweb/main/Imagenes/Logo%20ICETEX%20definitivo-2024.png"
+url_portada = "https://github.com/JulianTorrest/creditoweb/blob/main/portada%20(1).png"
+url_gestion_comercial = "https://github.com/JulianTorrest/creditoweb/blob/main/Imagenes/gestion%20comercial.jpg"
+url_gestion_presupuestal = "https://github.com/JulianTorrest/creditoweb/blob/main/bpmcreditoexpress.py"
+
 
 # Mostrar el logo en la parte superior
 st.image(url_logo, caption='Logo ICETEX', use_column_width=True)
