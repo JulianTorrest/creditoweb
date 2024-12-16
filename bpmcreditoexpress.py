@@ -1292,7 +1292,7 @@ with col2:
     st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
 
 # Imagen de portada al inicio
-st.image(url_portada, caption="Sistema de Gestión", use_column_width=True)
+st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
 
 
 # Inicializar el estado de la página seleccionada si aún no está configurado
