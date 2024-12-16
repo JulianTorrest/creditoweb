@@ -1330,55 +1330,67 @@ st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
 if "selected_page" not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
 
-# Función para renderizar botones estilizados
-def styled_button(label, active, key):
-    # Estilos para botones activos e inactivos
-    base_style = "padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;"
-    active_style = base_style + "background-color: #007BFF; color: white;"  # Botón activo
-    inactive_style = base_style + "background-color: #E0E0E0; color: black;"  # Botón inactivo
-
-    # Estilo según estado activo o no
-    style = active_style if active else inactive_style
-
-    # Renderizar botón como HTML con estilo dinámico
-    clicked = st.markdown(
-        f"""
-        <div style="text-align: center;">
-            <button style="{style}" onclick="window.location.href='#{key}'">
-                {label}
-            </button>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # Simular comportamiento del botón en Streamlit
-    if active:
-        st.session_state.selected_page = label
-
-
-# Menú de navegación
-st.write("### Menú de Navegación")
+# Crear menú de navegación con colores dinámicos
 col1, col2, col3, col4 = st.columns(4)
 
+# Botón 1: Consulta de Solicitudes
 with col1:
-    styled_button("Consulta de Solicitudes", st.session_state.selected_page == "Consulta de Solicitudes", "consulta")
+    if st.button(
+        "Consulta de Solicitudes",
+        key="consulta_solicitudes",
+    ):
+        st.session_state.selected_page = "Consulta de Solicitudes"
+
+# Botón 2: Enviar Oferta
 with col2:
-    styled_button("Enviar Oferta", st.session_state.selected_page == "Enviar Oferta", "oferta")
+    if st.button(
+        "Enviar Oferta",
+        key="enviar_oferta",
+    ):
+        st.session_state.selected_page = "Enviar Oferta"
+
+# Botón 3: Gestión Comercial
 with col3:
-    styled_button("Gestión Comercial", st.session_state.selected_page == "Gestión Comercial", "comercial")
+    if st.button(
+        "Gestión Comercial",
+        key="gestion_comercial",
+    ):
+        st.session_state.selected_page = "Gestión Comercial"
+
+# Botón 4: Gestión Presupuestal
 with col4:
-    styled_button("Gestión Presupuestal", st.session_state.selected_page == "Gestión Presupuestal", "presupuestal")
+    if st.button(
+        "Gestión Presupuestal",
+        key="gestion_presupuestal",
+    ):
+        st.session_state.selected_page = "Gestión Presupuestal"
+
+# Agregar estilo visual para el botón activo
+st.markdown(
+    f"""
+    <style>
+        div.stButton > button {{
+            background-color: #f0f0f0;  /* Color predeterminado */
+            color: black;
+        }}
+        div.stButton > button:nth-child({list(pages.keys()).index(st.session_state.selected_page) + 1}) {{
+            background-color: #4CAF50;  /* Color del botón activo */
+            color: white;
+        }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
-    st.write("Página: Consulta de Solicitudes")
+    st.write("Estás en **Consulta de Solicitudes**")
 elif st.session_state.selected_page == "Enviar Oferta":
-    st.write("Página: Enviar Oferta")
+    st.write("Estás en **Enviar Oferta**")
 elif st.session_state.selected_page == "Gestión Comercial":
-    st.write("Página: Gestión Comercial")
+    st.write("Estás en **Gestión Comercial**")
 elif st.session_state.selected_page == "Gestión Presupuestal":
-    st.write("Página: Gestión Presupuestal")
+    st.write("Estás en **Gestión Presupuestal**")
 
     
 # Footer personalizado
