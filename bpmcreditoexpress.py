@@ -16,12 +16,46 @@ import csv
 
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
+    # Datos reales (fijos o quemados)
+    datos_fijos = [
+        {
+            "Nombre": "Carlos Pérez",
+            "Nacionalidad": "Colombiano",
+            "Edad": 35,
+            "Estado Crédito": "Ninguno",
+            "Lista SARLAFT": "No está en ninguna lista",
+            "Score Crediticio": 750,
+            "Capacidad de Pago (COP)": 10000000,
+            "Límite de Endeudamiento (COP)": 15000000,
+            "Fecha": "2024-01-15",
+            "Año": 2024,
+            "Mes": 1,
+            "Periodo": "1er Semestre"
+        },
+        {
+            "Nombre": "Ana María López",
+            "Nacionalidad": "Colombiano",
+            "Edad": 28,
+            "Estado Crédito": "Ninguno",
+            "Lista SARLAFT": "No está en ninguna lista",
+            "Score Crediticio": 680,
+            "Capacidad de Pago (COP)": 5000000,
+            "Límite de Endeudamiento (COP)": 8000000,
+            "Fecha": "2023-06-20",
+            "Año": 2023,
+            "Mes": 6,
+            "Periodo": "1er Semestre"
+        },
+        # Agrega más registros fijos si es necesario
+    ]
+    
+    # Generar datos dinámicos
     nombres = [f"Nombre_{i}" for i in range(n)]
     nacionalidades = ["Colombiano", "Otro"]
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
-    datos = []
+    datos = datos_fijos.copy()  # Inicializa la lista con los datos fijos
     for nombre in nombres:
         # Generar una fecha aleatoria en los últimos 10 años
         fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
