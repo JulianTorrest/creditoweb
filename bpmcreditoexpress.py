@@ -17,6 +17,7 @@ import csv
 # Crear una función para generar datos ficticios
 def generar_datos_ficticios(n):
     nombres = [f"Nombre_{i}" for i in range(n)]
+    nacionalidades = ["Colombiano", "Otro"]
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
@@ -32,6 +33,7 @@ def generar_datos_ficticios(n):
         
         datos.append({
             "Nombre": nombre,
+            "Nacionalidad": random.choice(nacionalidades),
             "Edad": random.randint(18, 65),
             "Estado Crédito": random.choice(estados_credito),
             "Lista SARLAFT": random.choice(listas_sarlaft),
@@ -44,8 +46,6 @@ def generar_datos_ficticios(n):
             "Periodo": periodo
         })
     return datos
-
-
     
 # Inicializar datos
 beneficiarios_data = generar_datos_ficticios(500)
@@ -59,6 +59,10 @@ def validar_deudor(deudor):
     # Asignar valor por defecto si el Estado de Crédito está vacío
     if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
         deudor['Estado Crédito'] = 'Ninguno'  # Asignar 'Ninguno' si falta
+
+    # Validar nacionalidad
+    if deudor['Nacionalidad'] != 'Colombiano':
+        return False, "No es colombiano"
     
     # Validar edad
     if deudor['Edad'] >= 65:
@@ -97,9 +101,15 @@ def realizar_validaciones(deudor):
     
     return errores
 
+def validar_nacionalidad(deudor):
+    if deudor['Nacionalidad'] != 'Colombiano':
+        return False, "Nacionalidad no es colombiana"
+    return True, ""
+
 # Procesar validaciones y estadísticas
 def procesar_validaciones(beneficiarios):
     validaciones = {
+        "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
         "Validación 3": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
@@ -109,6 +119,14 @@ def procesar_validaciones(beneficiarios):
         # Verificar y asignar Estado de Crédito
         if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
             deudor['Estado Crédito'] = 'Ninguno'  # Asegúrate de asignarlo aquí también
+
+        # Validación Nacionalidad
+        valido_nacionalidad, motivo_nacionalidad = validar_nacionalidad(deudor)
+        if valido_nacionalidad:
+            validaciones["Validación Nacionalidad"]["Aprobados"] += 1
+        else:
+            validaciones["Validación Nacionalidad"]["No Aprobados"] += 1
+            validaciones["Validación Nacionalidad"]["Motivo No Aprobación"].append(motivo_nacionalidad)
 
         # Validación 1
         valido1, motivo1 = validar_deudor(deudor)
@@ -147,6 +165,47 @@ def procesar_validaciones(beneficiarios):
 # Funciones de la aplicación
 def firma_garantias(oferta):
     st.write(f"Firmando garantías para {oferta['Nombre']}...")
+
+# Página de captura de datos
+def generar_datos_ficticios(n):
+    nombres = [f"Nombre_{i}" for i in range(n)]
+    nacionalidades = ["Colombiano", "Otro"]
+    estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
+    listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
+    
+    datos = []
+    for nombre in nombres:
+        fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
+        año = fecha_random.year
+        mes = fecha_random.month
+        periodo = "1er Semestre" if mes <= 6 else "2do Semestre"
+        # Generar periodicidad aleatoria
+        periodicidad = random.choice(['Anual', 'Semestral'])
+
+        
+        datos.append({
+            "Nombre": nombre,
+            "Nacionalidad": random.choice(nacionalidades),
+            "Edad": random.randint(18, 65),
+            "Estado Crédito": random.choice(estados_credito),
+            "Lista SARLAFT": random.choice(listas_sarlaft),
+            "Score Crediticio": random.randint(150, 900),
+            "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
+            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
+            "Fecha": fecha_random.strftime("%Y-%m-%d"),
+            "Año": año,
+            "Mes": mes,
+            "Periodo": periodo,
+            "Periodicidad": periodicidad  # Nuevo campo Periodicidad
+        })
+    return datos
+
+# Inicializar datos
+beneficiarios_data = generar_datos_ficticios(500)
+if "ofertas_enviadas" not in st.session_state:
+    st.session_state.ofertas_enviadas = []
+if "ofertas_en_proceso" not in st.session_state:
+    st.session_state.ofertas_en_proceso = []
 
 # Procesar y mostrar gráficos
 def mostrar_graficos(df_beneficiarios):
@@ -338,10 +397,11 @@ def captura_datos():
 
     # Filtros de Año y Periodo
     st.subheader("Filtros de búsqueda")
-    year = st.selectbox("Selecciona el año", options=[2024])
-    periodo = st.selectbox("Selecciona el periodo", options=["Todos", "1er Semestre", "2do Semestre"])
-    tipo_solicitud = st.selectbox("Tipo de Solicitud", options=["Todos", "Adjudicación", "Renovación"])        
 
+    # Filtros de Año y Periodo
+    year = st.selectbox("Selecciona el año", options=[2024])
+    periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
+    periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
     st.subheader("Filtrar por Fecha")
     fecha_inicio = st.date_input("Fecha de Inicio", value=datetime.today())
     fecha_fin = st.date_input("Fecha de Fin", value=datetime.today())
@@ -356,26 +416,47 @@ def captura_datos():
     fecha_solicitud = st.date_input("Fecha de Solicitud", value=datetime.today())
     estado_solicitud = st.selectbox("Estado de Solicitud", ["Pendiente", "Aprobada", "Rechazada"])
 
-    # Campos adicionales
+    # Inicializar variables de campos adicionales
+    nacionalidad = []
+    estado_credito = []
+    lista_sarlaft = []
+    
+    # Opción para mostrar/ocultar campos adicionales
     if st.checkbox("Mostrar campos adicionales"):
+        # Campos ocultos
+        nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
         edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
         estado_credito = st.multiselect("Estado del crédito anterior (en caso de tener alguno)", ["Ninguno", "Castigado", "En mora y castigado"])
         lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
         score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
         capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
+        limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
+        deudor = st.text_input("Nombre del deudor")
+        fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
+        fecha_aplicación = st.date_input("Fecha de aplicación", value=datetime.today())
 
-    if st.button("Mostrar datos de postulantes"):
+    if st.button("Mostrar datos de beneficiarios"):
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
 
         # Aplicar filtros
+        if nacionalidad:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
+        if estado_credito:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
+        if lista_sarlaft:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
         if year:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
+
+        # Eliminar la columna de "Nacionalidad"
+        df_beneficiarios = df_beneficiarios.drop(columns=["Nacionalidad"], errors='ignore')
+
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
-            st.write("Solicitudes encontradas:")
+            st.write("Solicitudes encontrados:")
             st.dataframe(df_beneficiarios)
 
             # Mostrar gráficos
