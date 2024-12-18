@@ -151,7 +151,6 @@ def firma_garantias(oferta):
 # Página de captura de datos
 def generar_datos_ficticios(n):
     nombres = [f"Nombre_{i}" for i in range(n)]
-    nacionalidades = ["Colombiano", "Otro"]
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
@@ -167,7 +166,6 @@ def generar_datos_ficticios(n):
         
         datos.append({
             "Nombre": nombre,
-            "Nacionalidad": random.choice(nacionalidades),
             "Edad": random.randint(18, 65),
             "Estado Crédito": random.choice(estados_credito),
             "Lista SARLAFT": random.choice(listas_sarlaft),
