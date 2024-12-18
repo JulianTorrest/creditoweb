@@ -1124,8 +1124,7 @@ elif st.session_state.selected_page == "Gestión Comercial":
 elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gráficos de Beneficiarios":
-    if 'df_beneficiarios' in locals() or 'df_beneficiarios' in globals():
-        mostrar_graficos(df_beneficiarios)
+	mostrar_graficos()
     else:
         st.error("El DataFrame de beneficiarios no está disponible.")
 
