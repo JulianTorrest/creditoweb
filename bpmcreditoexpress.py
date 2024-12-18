@@ -97,15 +97,9 @@ def realizar_validaciones(deudor):
     
     return errores
 
-def validar_nacionalidad(deudor):
-    if deudor['Nacionalidad'] != 'Colombiano':
-        return False, "Nacionalidad no es colombiana"
-    return True, ""
-
 # Procesar validaciones y estadísticas
 def procesar_validaciones(beneficiarios):
     validaciones = {
-        "Validación Nacionalidad": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 1": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
         "Validación 2": {"Aprobados": 0, "No Aprobados": 0},
         "Validación 3": {"Aprobados": 0, "No Aprobados": 0, "Motivo No Aprobación": []},
@@ -115,14 +109,6 @@ def procesar_validaciones(beneficiarios):
         # Verificar y asignar Estado de Crédito
         if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
             deudor['Estado Crédito'] = 'Ninguno'  # Asegúrate de asignarlo aquí también
-
-        # Validación Nacionalidad
-        valido_nacionalidad, motivo_nacionalidad = validar_nacionalidad(deudor)
-        if valido_nacionalidad:
-            validaciones["Validación Nacionalidad"]["Aprobados"] += 1
-        else:
-            validaciones["Validación Nacionalidad"]["No Aprobados"] += 1
-            validaciones["Validación Nacionalidad"]["Motivo No Aprobación"].append(motivo_nacionalidad)
 
         # Validación 1
         valido1, motivo1 = validar_deudor(deudor)
