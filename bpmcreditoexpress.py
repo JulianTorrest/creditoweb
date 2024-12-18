@@ -418,6 +418,9 @@ def captura_datos():
             st.write("Solicitudes encontrados:")
             st.dataframe(df_beneficiarios)
 
+	 # Almacenar los datos filtrados en session_state
+            st.session_state.df_beneficiarios = df_beneficiarios
+	
             # Mostrar gráficos
             mostrar_graficos(df_beneficiarios)
 
@@ -463,6 +466,16 @@ def captura_datos():
                 st.write(beneficiarios_con_errores)
             else:
                 st.write("No hay postulantes con errores.")
+
+# Función para mostrar los gráficos (en el módulo de gráficos)
+def mostrar_graficos_beneficiarios():
+    if "df_beneficiarios" in st.session_state:
+        df_beneficiarios = st.session_state.df_beneficiarios
+        # Llamar a la función que muestra los gráficos
+        mostrar_graficos(df_beneficiarios)
+    else:
+        st.warning("Primero debes consultar los datos de los beneficiarios.")
+
 
 # Página de validación de beneficiarios
 def validacion_beneficiarios():
@@ -1124,7 +1137,7 @@ elif st.session_state.selected_page == "Gestión Comercial":
 elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gráficos de Beneficiarios":
-	mostrar_graficos(df_beneficiarios)
+    mostrar_graficos_beneficiarios()
 	
 # Footer personalizado
 st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
