@@ -368,7 +368,7 @@ def captura_datos():
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
 
         # Aplicar filtros
-	if estado_credito:  # Solo filtra si hay algo seleccionado
+        if estado_credito:  # Solo filtra si hay algo seleccionado
     	    df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
 	if lista_sarlaft:  # Solo filtra si hay algo seleccionado
 	    df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
