@@ -148,45 +148,6 @@ def procesar_validaciones(beneficiarios):
 def firma_garantias(oferta):
     st.write(f"Firmando garantías para {oferta['Nombre']}...")
 
-# Página de captura de datos
-def generar_datos_ficticios(n):
-    nombres = [f"Nombre_{i}" for i in range(n)]
-    estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
-    listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
-    
-    datos = []
-    for nombre in nombres:
-        fecha_random = datetime.now() - timedelta(days=random.randint(0, 3650))
-        año = fecha_random.year
-        mes = fecha_random.month
-        periodo = "1er Semestre" if mes <= 6 else "2do Semestre"
-        # Generar periodicidad aleatoria
-        periodicidad = random.choice(['Anual', 'Semestral'])
-
-        
-        datos.append({
-            "Nombre": nombre,
-            "Edad": random.randint(18, 65),
-            "Estado Crédito": random.choice(estados_credito),
-            "Lista SARLAFT": random.choice(listas_sarlaft),
-            "Score Crediticio": random.randint(150, 900),
-            "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
-            "Límite de Endeudamiento (COP)": random.randint(1500000, 20000000),
-            "Fecha": fecha_random.strftime("%Y-%m-%d"),
-            "Año": año,
-            "Mes": mes,
-            "Periodo": periodo,
-            "Periodicidad": periodicidad  # Nuevo campo Periodicidad
-        })
-    return datos
-
-# Inicializar datos
-beneficiarios_data = generar_datos_ficticios(500)
-if "ofertas_enviadas" not in st.session_state:
-    st.session_state.ofertas_enviadas = []
-if "ofertas_en_proceso" not in st.session_state:
-    st.session_state.ofertas_en_proceso = []
-
 # Procesar y mostrar gráficos
 def mostrar_graficos(df_beneficiarios):
     # Gráfico 2: Distribución del estado de crédito
