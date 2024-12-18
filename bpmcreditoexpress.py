@@ -422,7 +422,7 @@ def captura_datos():
             st.session_state.df_beneficiarios = df_beneficiarios
 	
             # Mostrar gráficos
-            mostrar_graficos(df_beneficiarios)
+            #mostrar_graficos(df_beneficiarios)
 
     # Botón para ejecutar validación de beneficiarios
     if st.button("Ejecutar Validación de Postulantes"):
