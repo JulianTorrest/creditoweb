@@ -372,11 +372,10 @@ def captura_datos():
     	    df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
         if lista_sarlaft:  # Solo filtra si hay algo seleccionado
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
-	if year:
+        if year:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
-		
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
