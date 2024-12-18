@@ -1125,7 +1125,7 @@ elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gráficos de Beneficiarios":
 	mostrar_graficos()
-    else:
+     else:
         st.error("El DataFrame de beneficiarios no está disponible.")
 
 # Footer personalizado
