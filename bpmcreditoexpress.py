@@ -415,10 +415,7 @@ def captura_datos():
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
-
-        # Eliminar la columna de "Nacionalidad"
-        df_beneficiarios = df_beneficiarios.drop(columns=["Nacionalidad"], errors='ignore')
-
+		
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
