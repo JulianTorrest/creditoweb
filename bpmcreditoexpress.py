@@ -23,27 +23,27 @@ def generar_datos_ficticios(n):
     
     # Datos fijos (reales)
     datos_fijos = [
-        {"Nombre": "Juan Pérez", "Nacionalidad": "Colombiano", "Edad": 30, "Estado Crédito": "Ninguno", 
+        {"ID Solicitud":101, "Nombre": "Juan Pérez", "Nacionalidad": "Colombiano", "Edad": 30, "Estado Crédito": "Ninguno", 
          "Lista SARLAFT": "No está en ninguna lista", "Score Crediticio": 750, 
          "Capacidad de Pago (COP)": 5000000, "Límite de Endeudamiento (COP)": 10000000, 
-         "Fecha": "2023-05-15", "Año": 2023, "Mes": 5, "Periodo": "2do Semestre"},
+         "Fecha": "2023-05-15", "Año": 2023, "Mes": 7, "Periodo": "2do Semestre"},
         
-        {"Nombre": "María López", "Nacionalidad": "Colombiano", "Edad": 45, "Estado Crédito": "Castigado", 
+        {"ID Solicitud":102, "Nombre": "María López", "Nacionalidad": "Colombiano", "Edad": 45, "Estado Crédito": "Castigado", 
          "Lista SARLAFT": "Restrictivas", "Score Crediticio": 400, 
          "Capacidad de Pago (COP)": 10000000, "Límite de Endeudamiento (COP)": 15000000, 
          "Fecha": "2022-08-10", "Año": 2022, "Mes": 8, "Periodo": "2do Semestre"},
         
-        {"Nombre": "Carlos Gómez", "Nacionalidad": "Colombiano", "Edad": 37, "Estado Crédito": "En mora y castigado", 
+        {"ID Solicitud":103, "Nombre": "Carlos Gómez", "Nacionalidad": "Colombiano", "Edad": 37, "Estado Crédito": "En mora y castigado", 
          "Lista SARLAFT": "Vinculantes", "Score Crediticio": 620, 
          "Capacidad de Pago (COP)": 7000000, "Límite de Endeudamiento (COP)": 12000000, 
          "Fecha": "2021-12-01", "Año": 2021, "Mes": 12, "Periodo": "2do Semestre"},
         
-        {"Nombre": "Ana Rodríguez", "Nacionalidad": "Otro", "Edad": 28, "Estado Crédito": "Ninguno", 
+        {"ID Solicitud":104, "Nombre": "Ana Rodríguez", "Nacionalidad": "Otro", "Edad": 28, "Estado Crédito": "Ninguno", 
          "Lista SARLAFT": "No está en ninguna lista", "Score Crediticio": 780, 
          "Capacidad de Pago (COP)": 3000000, "Límite de Endeudamiento (COP)": 5000000, 
-         "Fecha": "2020-06-20", "Año": 2020, "Mes": 6, "Periodo": "1er Semestre"},
+         "Fecha": "2020-06-20", "Año": 2020, "Mes": 4, "Periodo": "1er Semestre"},
         
-        {"Nombre": "Luis Martínez", "Nacionalidad": "Colombiano", "Edad": 50, "Estado Crédito": "Castigado", 
+        {"ID Solicitud":105, "Nombre": "Luis Martínez", "Nacionalidad": "Colombiano", "Edad": 50, "Estado Crédito": "Castigado", 
          "Lista SARLAFT": "Restrictivas", "Score Crediticio": 500, 
          "Capacidad de Pago (COP)": 6000000, "Límite de Endeudamiento (COP)": 8000000, 
          "Fecha": "2019-03-05", "Año": 2019, "Mes": 3, "Periodo": "1er Semestre"}
@@ -641,7 +641,7 @@ def captura_datos():
         if df_beneficiarios.empty:
             st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
         else:
-            st.write("Solicitudes encontrados:")
+            st.write("Solicitudes encontradas:")
             st.dataframe(df_beneficiarios)
 
 	 # Almacenar los datos filtrados en session_state
