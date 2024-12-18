@@ -21,6 +21,35 @@ def generar_datos_ficticios(n):
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
+    # Datos fijos (reales)
+    datos_fijos = [
+        {"Nombre": "Juan Pérez", "Nacionalidad": "Colombiano", "Edad": 30, "Estado Crédito": "Ninguno", 
+         "Lista SARLAFT": "No está en ninguna lista", "Score Crediticio": 750, 
+         "Capacidad de Pago (COP)": 5000000, "Límite de Endeudamiento (COP)": 10000000, 
+         "Fecha": "2023-05-15", "Año": 2023, "Mes": 5, "Periodo": "2do Semestre"},
+        
+        {"Nombre": "María López", "Nacionalidad": "Colombiano", "Edad": 45, "Estado Crédito": "Castigado", 
+         "Lista SARLAFT": "Restrictivas", "Score Crediticio": 400, 
+         "Capacidad de Pago (COP)": 10000000, "Límite de Endeudamiento (COP)": 15000000, 
+         "Fecha": "2022-08-10", "Año": 2022, "Mes": 8, "Periodo": "2do Semestre"},
+        
+        {"Nombre": "Carlos Gómez", "Nacionalidad": "Colombiano", "Edad": 37, "Estado Crédito": "En mora y castigado", 
+         "Lista SARLAFT": "Vinculantes", "Score Crediticio": 620, 
+         "Capacidad de Pago (COP)": 7000000, "Límite de Endeudamiento (COP)": 12000000, 
+         "Fecha": "2021-12-01", "Año": 2021, "Mes": 12, "Periodo": "2do Semestre"},
+        
+        {"Nombre": "Ana Rodríguez", "Nacionalidad": "Otro", "Edad": 28, "Estado Crédito": "Ninguno", 
+         "Lista SARLAFT": "No está en ninguna lista", "Score Crediticio": 780, 
+         "Capacidad de Pago (COP)": 3000000, "Límite de Endeudamiento (COP)": 5000000, 
+         "Fecha": "2020-06-20", "Año": 2020, "Mes": 6, "Periodo": "1er Semestre"},
+        
+        {"Nombre": "Luis Martínez", "Nacionalidad": "Colombiano", "Edad": 50, "Estado Crédito": "Castigado", 
+         "Lista SARLAFT": "Restrictivas", "Score Crediticio": 500, 
+         "Capacidad de Pago (COP)": 6000000, "Límite de Endeudamiento (COP)": 8000000, 
+         "Fecha": "2019-03-05", "Año": 2019, "Mes": 3, "Periodo": "1er Semestre"}
+    ]
+    
+    # Generar datos aleatorios
     datos = []
     for nombre in nombres:
         # Generar una fecha aleatoria en los últimos 10 años
@@ -45,7 +74,10 @@ def generar_datos_ficticios(n):
             "Mes": mes,
             "Periodo": periodo
         })
-    return datos
+    
+    # Combinar los datos fijos con los generados aleatoriamente (hasta llegar a 'n' elementos)
+    return datos_fijos + datos[:n - 5]  # Agregar los 5 datos fijos al inicio
+
     
 # Inicializar datos
 beneficiarios_data = generar_datos_ficticios(500)
