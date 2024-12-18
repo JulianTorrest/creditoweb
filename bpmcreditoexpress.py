@@ -59,10 +59,6 @@ def validar_deudor(deudor):
     # Asignar valor por defecto si el Estado de Crédito está vacío
     if 'Estado Crédito' not in deudor or not deudor['Estado Crédito']:
         deudor['Estado Crédito'] = 'Ninguno'  # Asignar 'Ninguno' si falta
-
-    # Validar nacionalidad
-    if deudor['Nacionalidad'] != 'Colombiano':
-        return False, "No es colombiano"
     
     # Validar edad
     if deudor['Edad'] >= 65:
