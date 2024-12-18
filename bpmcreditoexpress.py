@@ -662,11 +662,89 @@ def captura_datos():
                 st.write("No hay postulantes con errores.")
 
 # Función para mostrar los gráficos (en el módulo de gráficos)
+#def mostrar_graficos_beneficiarios():
+#    if "df_beneficiarios" in st.session_state:
+#        df_beneficiarios = st.session_state.df_beneficiarios
+#        # Llamar a la función que muestra los gráficos
+#        mostrar_graficos(df_beneficiarios)
+#    else:
+#        st.warning("Primero debes consultar los datos de los beneficiarios.")
+
+# Función para mostrar los gráficos seleccionados
 def mostrar_graficos_beneficiarios():
     if "df_beneficiarios" in st.session_state:
         df_beneficiarios = st.session_state.df_beneficiarios
-        # Llamar a la función que muestra los gráficos
-        mostrar_graficos(df_beneficiarios)
+        
+        # Crear una lista desplegable para seleccionar el gráfico
+        opcion = st.selectbox("Selecciona un gráfico para ver", 
+                              [
+                                  "Gráfico 1: Distribución del Estado de Crédito", 
+                                  "Gráfico 2: Relación entre Score Crediticio y Capacidad de Pago", 
+                                  "Gráfico 3: Distribución de las Edades", 
+                                  "Gráfico 4: Relación entre Capacidad de Pago y Límite de Endeudamiento", 
+                                  "Gráfico 5: Beneficiarios por Periodo", 
+                                  "Gráfico 6: Distribución del Estado de Crédito", 
+                                  "Gráfico 7: Beneficiarios por Lista SARLAFT", 
+                                  "Gráfico 8: Relación entre Edad y Score Crediticio", 
+                                  "Gráfico 9: Distribución del Score Crediticio por Estado de Crédito", 
+                                  "Gráfico 10: Heatmap de Correlación", 
+                                  "Gráfico 11: Evolución de la Capacidad de Pago Promedio por Año", 
+                                  "Gráfico 12: Estado de Crédito por Grupo de Edad", 
+                                  "Gráfico 13: Comparación del Score Crediticio Promedio entre Semestres", 
+                                  "Gráfico 14: Límite de Endeudamiento Promedio por Estado de Crédito", 
+                                  "Gráfico 15: Relación entre Límite de Endeudamiento y Capacidad de Pago", 
+                                  "Gráfico 16: Distribución del Score Crediticio", 
+                                  "Gráfico 17: Evolución del Score Crediticio Promedio por Año", 
+                                  "Gráfico 18: Edad Promedio por Lista SARLAFT", 
+                                  "Gráfico 19: Capacidad de Pago por Lista SARLAFT (Boxplot)", 
+                                  "Gráfico 20: Estado de Crédito por Periodo", 
+                                  "Gráfico 21: Relación entre Score Crediticio y Límite de Endeudamiento"
+                              ])
+        
+        # Llamar a la función correspondiente según la opción seleccionada
+        if opcion == "Gráfico 1: Distribución del Estado de Crédito":
+            grafico_estado_credito(df_beneficiarios)
+        elif opcion == "Gráfico 2: Relación entre Score Crediticio y Capacidad de Pago":
+            grafico_relacion_score_pago(df_beneficiarios)
+        elif opcion == "Gráfico 3: Distribución de las Edades":
+            grafico_distribucion_edades(df_beneficiarios)
+        elif opcion == "Gráfico 4: Relación entre Capacidad de Pago y Límite de Endeudamiento":
+            grafico_relacion_pago_limite(df_beneficiarios)
+        elif opcion == "Gráfico 5: Beneficiarios por Periodo":
+            grafico_beneficiarios_periodo(df_beneficiarios)
+        elif opcion == "Gráfico 6: Distribución del Estado de Crédito":
+            grafico_estado_credito_nuevo(df_beneficiarios)
+        elif opcion == "Gráfico 7: Beneficiarios por Lista SARLAFT":
+            grafico_beneficiarios_sarlaft(df_beneficiarios)
+        elif opcion == "Gráfico 8: Relación entre Edad y Score Crediticio":
+            grafico_edad_score_crediticio(df_beneficiarios)
+        elif opcion == "Gráfico 9: Distribución del Score Crediticio por Estado de Crédito":
+            grafico_score_crediticio_estado(df_beneficiarios)
+        elif opcion == "Gráfico 10: Heatmap de Correlación":
+            grafico_heatmap_correlacion(df_beneficiarios)
+        elif opcion == "Gráfico 11: Evolución de la Capacidad de Pago Promedio por Año":
+            grafico_evolucion_pago(df_beneficiarios)
+        elif opcion == "Gráfico 12: Estado de Crédito por Grupo de Edad":
+            grafico_estado_credito_grupo_edad(df_beneficiarios)
+        elif opcion == "Gráfico 13: Comparación del Score Crediticio Promedio entre Semestres":
+            grafico_comparacion_score_crediticio(df_beneficiarios)
+        elif opcion == "Gráfico 14: Límite de Endeudamiento Promedio por Estado de Crédito":
+            grafico_limite_endeudamiento(df_beneficiarios)
+        elif opcion == "Gráfico 15: Relación entre Límite de Endeudamiento y Capacidad de Pago":
+            grafico_relacion_limite_pago(df_beneficiarios)
+        elif opcion == "Gráfico 16: Distribución del Score Crediticio":
+            grafico_distribucion_score_crediticio(df_beneficiarios)
+        elif opcion == "Gráfico 17: Evolución del Score Crediticio Promedio por Año":
+            grafico_evolucion_score_crediticio(df_beneficiarios)
+        elif opcion == "Gráfico 18: Edad Promedio por Lista SARLAFT":
+            grafico_edad_promedio_sarlaft(df_beneficiarios)
+        elif opcion == "Gráfico 19: Capacidad de Pago por Lista SARLAFT (Boxplot)":
+            grafico_pago_sarlaft(df_beneficiarios)
+        elif opcion == "Gráfico 20: Estado de Crédito por Periodo":
+            grafico_estado_credito_periodo(df_beneficiarios)
+        elif opcion == "Gráfico 21: Relación entre Género y Cargo":
+            grafico_relacion_score_crediticio_limite(df_beneficiarios)
+
     else:
         st.warning("Primero debes consultar los datos de los beneficiarios.")
 
