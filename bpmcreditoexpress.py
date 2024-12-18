@@ -397,7 +397,6 @@ def captura_datos():
 
     # Campos adicionales
     if st.checkbox("Mostrar campos adicionales"):
-        nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
         edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
         estado_credito = st.multiselect("Estado del crédito anterior (en caso de tener alguno)", ["Ninguno", "Castigado", "En mora y castigado"])
         lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
@@ -408,8 +407,6 @@ def captura_datos():
         df_beneficiarios = pd.DataFrame(beneficiarios_data)
 
         # Aplicar filtros
-        if nacionalidad:
-            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
         if estado_credito:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
         if lista_sarlaft:
