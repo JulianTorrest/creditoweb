@@ -634,6 +634,13 @@ def captura_datos():
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
         if periodo:
             df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
+	if id_solicitud:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["ID Solicitud"].str.contains(id_solicitud, case=False, na=False)]
+    	if nombre:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nombre"].str.contains(nombre, case=False, na=False)]
+    	if apellido:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Apellido"].str.contains(apellido, case=False, na=False)]
+
 
         # Eliminar la columna de "Nacionalidad"
         df_beneficiarios = df_beneficiarios.drop(columns=["Nacionalidad"], errors='ignore')
