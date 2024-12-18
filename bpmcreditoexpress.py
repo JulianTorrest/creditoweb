@@ -1124,7 +1124,7 @@ elif st.session_state.selected_page == "Gestión Comercial":
 elif st.session_state.selected_page == "Gestión Presupuestal":
     gestion_ordenador_gasto()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gráficos de Beneficiarios":
-	mostrar_graficos()
+	mostrar_graficos(df_beneficiarios)
 	
 # Footer personalizado
 st.markdown("<footer style='text-align: center; color: gray;'>© 2024 ICETEX - Todos los derechos reservados.</footer>", unsafe_allow_html=True)
