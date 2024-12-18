@@ -865,7 +865,7 @@ def gestion_ordenador_gasto():
 
     # Presupuesto comprometido
     presupuesto_comprometido = st.number_input(
-        "Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=1500, key="presupuesto_comprometido"
+        "Define el Presupuesto Comprometido (millones de pesos)", min_value=0, value=45000, key="presupuesto_comprometido"
     )
     st.write(f"Presupuesto Comprometido: {presupuesto_comprometido} millones de pesos")
 
