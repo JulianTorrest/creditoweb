@@ -1428,7 +1428,7 @@ col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
-#with col2:
+with col2:
     if st.button("Enviar Oferta"):
         st.session_state.selected_page = "Enviar Oferta"
 with col3:
