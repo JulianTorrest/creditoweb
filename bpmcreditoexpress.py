@@ -18,6 +18,7 @@ import csv
 def generar_datos_ficticios(n):
     nombres = [f"Nombre_{i}" for i in range(n)]
     nacionalidades = ["Colombiano", "Otro"]
+    genero = ["Masculino", "Femenino"]
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
