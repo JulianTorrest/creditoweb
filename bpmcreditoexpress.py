@@ -1429,8 +1429,8 @@ with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
 #with col2:
-#    if st.button("Enviar Oferta"):
-#        st.session_state.selected_page = "Enviar Oferta"
+    if st.button("Enviar Oferta"):
+        st.session_state.selected_page = "Enviar Oferta"
 with col3:
     if st.button("Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
@@ -1445,7 +1445,7 @@ with col5:  # Nueva opción para los gráficos
 if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()  # Asegúrate de que esta función esté definida
 #elif st.session_state.selected_page == "Enviar Oferta":
-#    enviar_oferta()  # Asegúrate de que esta función esté definida
+    enviar_oferta()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Presupuestal":
