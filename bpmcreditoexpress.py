@@ -601,6 +601,8 @@ def captura_datos():
     numero_documento = st.text_input("Número de Documento")
     fecha_solicitud = st.date_input("Fecha de Solicitud", value=datetime.today())
     estado_solicitud = st.selectbox("Estado de Solicitud", ["Pendiente", "Aprobada", "Rechazada"])
+    genero = st.multiselect("Genero", ["Masculino", "Femenino"])
+	
 
     # Inicializar variables de campos adicionales
     nacionalidad = []
