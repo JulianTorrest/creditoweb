@@ -20,6 +20,7 @@ def generar_datos_ficticios(n):
     nacionalidades = ["Colombiano", "Otro"]
     genero = ["Masculino", "Femenino"]
     estados_credito = ["Ninguno", "Castigado", "En mora y castigado"]
+    estado_solicitud = ["Garantia Fimrada", "No Interesado", "Garantia No Firmada","Rechazado"]
     listas_sarlaft = ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"]
     
     # Datos fijos (reales)
@@ -66,6 +67,8 @@ def generar_datos_ficticios(n):
             "Nacionalidad": random.choice(nacionalidades),
             "Edad": random.randint(18, 65),
             "Estado Crédito": random.choice(estados_credito),
+	    "Estado de Solicitud":random.choice(estado_solicitud),
+	    "Genero":random.choice(genero),
             "Lista SARLAFT": random.choice(listas_sarlaft),
             "Score Crediticio": random.randint(150, 900),
             "Capacidad de Pago (COP)": random.randint(1500000, 20000000),
