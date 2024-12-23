@@ -1005,6 +1005,11 @@ def gestion_comercial():
     if buscador:
         df_ofertas = df_ofertas[df_ofertas['id_solicitud'].str.contains(buscador, case=False, na=False)]
 
+    # Buscador de Ofertas
+    buscador_2 = st.text_input("Buscar oferta por Numero de Identidad:")
+    if buscador:
+        df_ofertas = df_ofertas[df_ofertas['id_solicitud'].str.contains(buscador, case=False, na=False)]
+
     # Filtrar por año y semestre
     if 'Fecha' in df_ofertas.columns:
         df_ofertas['Fecha'] = pd.to_datetime(df_ofertas['Fecha'])
