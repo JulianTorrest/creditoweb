@@ -854,7 +854,7 @@ def realizar_validaciones(beneficiario):
     return errores
 
 # Página para enviar la oferta al beneficiario
-#def enviar_oferta():
+def enviar_oferta():
     st.title("Enviar Oferta a los Postulantes")
 
     # Verificar y establecer las variables de estado necesarias
