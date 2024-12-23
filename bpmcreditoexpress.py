@@ -1001,9 +1001,9 @@ def gestion_comercial():
         estado_garantia_filtrado = st.selectbox("Estado de Garantías", ["Todas", "Garantías Firmadas", "Garantías No Firmadas"])
 
     # Buscador de Ofertas
-    buscador = st.text_input("Buscar oferta por nombre:")
+    buscador = st.text_input("Buscar oferta por ID de Solicitud:")
     if buscador:
-        df_ofertas = df_ofertas[df_ofertas['Nombre'].str.contains(buscador, case=False, na=False)]
+        df_ofertas = df_ofertas[df_ofertas['id_solicitud'].str.contains(buscador, case=False, na=False)]
 
     # Filtrar por año y semestre
     if 'Fecha' in df_ofertas.columns:
