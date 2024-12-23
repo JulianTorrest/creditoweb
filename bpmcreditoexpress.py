@@ -1444,8 +1444,8 @@ with col5:  # Nueva opción para los gráficos
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()  # Asegúrate de que esta función esté definida
-elif st.session_state.selected_page == "Enviar Oferta":
-    enviar_oferta()  # Asegúrate de que esta función esté definida
+#elif st.session_state.selected_page == "Enviar Oferta":
+#    enviar_oferta()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Presupuestal":
