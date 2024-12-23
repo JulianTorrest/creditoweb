@@ -1412,10 +1412,10 @@ col1, col2 = st.columns([1, 8])
 with col1:
     st.image(url_logo, width=100)
 with col2:
-    st.markdown("<h1 style='text-align: center; color: #4B72FA;'>Sistema de Gestión ICETEX</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: #4B72FA;'>  </h1>", unsafe_allow_html=True)
 
 # Imagen de portada al inicio
-st.image(url_portada, caption="Sistema de Gestión", use_container_width=True)
+st.image(url_portada, caption=" ", use_container_width=True)
 
 if 'selected_page' not in st.session_state:
     st.session_state.selected_page = "Consulta de Solicitudes"
