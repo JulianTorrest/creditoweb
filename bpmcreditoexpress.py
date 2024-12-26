@@ -698,16 +698,16 @@ def captura_datos():
             oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
             oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
             oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
-            oferta["Año"] = año_seleccionado
-            oferta["Periodo"] = periodo_seleccionado
+            #oferta["Año"] = año_seleccionado
+            #oferta["Periodo"] = periodo_seleccionado
             st.session_state['ofertas_en_proceso'].append(oferta)
 
     st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
 
     # Crear un DataFrame con los beneficiarios aprobados
     df_aprobados = pd.DataFrame(beneficiarios_validados)
-    df_aprobados['Año'] = año_seleccionado
-    df_aprobados['Periodo'] = periodo_seleccionado
+    #df_aprobados['Año'] = año_seleccionado
+    #df_aprobados['Periodo'] = periodo_seleccionado
 
     	# Botón para descargar ofertas aprobadas
     if st.button("Descargar Excel con ofertas aprobadas"):
