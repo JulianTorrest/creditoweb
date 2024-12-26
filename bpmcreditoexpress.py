@@ -694,8 +694,8 @@ def captura_datos():
 
 	# Enviar ofertas a los beneficiarios validados
         for beneficiario in beneficiarios_validados:
-	 oferta = beneficiario.copy()
-	 oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
+		oferta = beneficiario.copy()
+	 	oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
 	 oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
 	 oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
 	 oferta["Año"] = año_seleccionado
