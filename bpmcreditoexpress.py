@@ -685,7 +685,11 @@ def captura_datos():
         # Mostrar el resultado final de la validación
         st.success("Validación de beneficiarios ejecutada correctamente.")
 
-        # Mostrar un resumen del resultado
+        # Inicializar las listas antes de cualquier operación
+	beneficiarios_validados = []
+	beneficiarios_con_errores = []
+
+	# Mostrar un resumen del resultado
         total_validados = len(beneficiarios_validados)
         total_errores = len(beneficiarios_con_errores)
 
