@@ -685,6 +685,13 @@ def captura_datos():
         # Mostrar el resultado final de la validación
         st.success("Validación de beneficiarios ejecutada correctamente.")
 
+        # Asegúrate de inicializar las listas en st.session_state si aún no existen
+        if 'beneficiarios_validados' not in st.session_state:
+            st.session_state['beneficiarios_validados'] = []
+
+        if 'beneficiarios_con_errores' not in st.session_state:
+            st.session_state['beneficiarios_con_errores'] = []
+
 	# Mostrar un resumen del resultado
         total_validados = len(beneficiarios_validados)
         total_errores = len(beneficiarios_con_errores)
