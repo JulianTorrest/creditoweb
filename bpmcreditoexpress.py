@@ -1383,7 +1383,7 @@ def gestion_ordenador_gasto():
         st.session_state.ofertas_en_proceso = df_ofertas.to_dict('records')
 
     umbral_presupuesto = st.number_input(
-        "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0, key="umbral_presupuesto"
+        "Define el umbral de advertencia para el presupuesto (millones de pesos):", min_value=0, value=30000, key="umbral_presupuesto"
     )
 
     # Inicializar presupuesto en estado de sesión si no está definido
