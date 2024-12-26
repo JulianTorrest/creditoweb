@@ -710,18 +710,18 @@ def captura_datos():
     df_aprobados['Periodo'] = periodo_seleccionado
 
     	# Botón para descargar ofertas aprobadas
-    	if st.button("Descargar Excel con ofertas aprobadas"):
+    if st.button("Descargar Excel con ofertas aprobadas"):
         # Crear el archivo Excel
-        	try:
-            		st.download_button(
-                		label="Descargar Excel",
-                		data=df_aprobados.to_csv(index=False).encode('utf-8'),
-                		file_name="ofertas_aprobadas.csv",
-                		mime="text/csv"
-            		)
-            		st.success("Archivo Excel listo para descargar.")
-        	except Exception as e:
-            		st.error(f"Ocurrió un error al descargar el archivo: {e}")
+        try:
+            	st.download_button(
+                	label="Descargar Excel",
+                	data=df_aprobados.to_csv(index=False).encode('utf-8'),
+                	file_name="ofertas_aprobadas.csv",
+                	mime="text/csv"
+            	)
+            	st.success("Archivo Excel listo para descargar.")
+        except Exception as e:
+            	st.error(f"Ocurrió un error al descargar el archivo: {e}")
 
     # Mostrar cuántos postulantes tienen errores
     	st.subheader(f"{len(beneficiarios_con_errores)} postulantes no aprobaron todas las validaciones")  # Aquí está la verificación
