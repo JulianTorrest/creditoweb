@@ -584,17 +584,6 @@ def firma_garantias(oferta):
 def captura_datos():
     st.title("Consulta Postulantes")
 
-    # Filtros de Año y Periodo
-    st.subheader("Filtros de búsqueda")
-
-    # Filtros de Año y Periodo
-    year = st.selectbox("Selecciona el año", options=[2024])
-    periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
-    #periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
-    st.subheader("Filtrar por Fecha")
-    fecha_inicio = st.date_input("Fecha de Inicio", value=datetime.today())
-    fecha_fin = st.date_input("Fecha de Fin", value=datetime.today())
-
     # Formulario actual de captura de datos
     st.subheader("Datos del Postulante")
     id_solicitud = st.text_input("ID Solicitud")
@@ -603,9 +592,6 @@ def captura_datos():
     tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
     numero_documento = st.text_input("Número de Documento")
     fecha_solicitud = st.date_input("Fecha de Solicitud", value=datetime.today())
-    estado_solicitud = st.selectbox("Estado de Solicitud", ["Pendiente", "Aprobada", "Rechazada"])
-    genero = st.multiselect("Genero", ["Masculino", "Femenino"])
-	
 
     # Inicializar variables de campos adicionales
     nacionalidad = []
