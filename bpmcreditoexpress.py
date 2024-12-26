@@ -906,15 +906,6 @@ def busqueda_masiva():
             else:
                 st.write("No hay postulantes con errores.")
 
-# Función para mostrar los gráficos (en el módulo de gráficos)
-#def mostrar_graficos_beneficiarios():
-#    if "df_beneficiarios" in st.session_state:
-#        df_beneficiarios = st.session_state.df_beneficiarios
-#        # Llamar a la función que muestra los gráficos
-#        mostrar_graficos(df_beneficiarios)
-#    else:
-#        st.warning("Primero debes consultar los datos de los beneficiarios.")
-
 # Función para mostrar los gráficos seleccionados
 def mostrar_graficos_beneficiarios():
     if "df_beneficiarios" in st.session_state:
