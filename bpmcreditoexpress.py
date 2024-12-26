@@ -1648,7 +1648,7 @@ if 'selected_page' not in st.session_state:
 # Crear menú de navegación
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    if st.button("Consulta de Solicitudes"):
+    if st.button("Consulta de Solicitudes Individual"):
         st.session_state.selected_page = "Consulta de Solicitudes Individual"
 with col2:
     if st.button("Busqueda Masiva"):
