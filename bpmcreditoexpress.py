@@ -1389,7 +1389,7 @@ def gestion_ordenador_gasto():
     # Inicializar presupuesto en estado de sesión si no está definido
     if "presupuesto_disponible" not in st.session_state:
         st.session_state.presupuesto_disponible = st.number_input(
-            "Define el Presupuesto Inicial (millones de pesos)", min_value=0, value=100000, key="presupuesto_disponible"
+            "Define el Presupuesto Disponible (millones de pesos)", min_value=0, value=100000, key="presupuesto_disponible"
         )
     else:
         st.write(f"Presupuesto Disponible: {st.session_state.presupuesto_disponible} millones de pesos")
