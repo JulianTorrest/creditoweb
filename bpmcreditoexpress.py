@@ -1643,13 +1643,13 @@ with col2:
 st.image(url_portada, caption=" ", use_container_width=True)
 
 if 'selected_page' not in st.session_state:
-    st.session_state.selected_page = "Consulta de Solicitudes"
+    st.session_state.selected_page = "Consulta de Solicitudes Individual"
 
 # Crear menú de navegación
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     if st.button("Consulta de Solicitudes"):
-        st.session_state.selected_page = "Consulta de Solicitudes"
+        st.session_state.selected_page = "Consulta de Solicitudes Individual"
 with col2:
     if st.button("Busqueda Masiva"):
         st.session_state.selected_page = "Busqueda Masiva"
@@ -1664,7 +1664,7 @@ with col5:  # Nueva opción para los gráficos
         st.session_state.selected_page = "Gráficos de Beneficiarios"
 
 # Ejecutar la función de la página seleccionada
-if st.session_state.selected_page == "Consulta de Solicitudes":
+if st.session_state.selected_page == "Consulta de Solicitudes Individual":
     captura_datos()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Busqueda Masiva":
     busqueda_masiva()  # Asegúrate de que esta función esté definida
