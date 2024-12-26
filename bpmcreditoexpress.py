@@ -752,6 +752,174 @@ def captura_datos():
             else:
                 st.write("No hay postulantes con errores.")
 
+# Página de captura de datos
+def busqueda_masiva():
+    st.title("Busqueda Masiva")
+
+    # Filtros de Año y Periodo
+    st.subheader("Filtros de búsqueda")
+
+    # Filtros de Año y Periodo
+    year = st.selectbox("Selecciona el año", options=[2024])
+    periodo = st.selectbox("Selecciona el periodo", options=["1er Semestre", "2do Semestre"])
+    #periodicidad = st.selectbox("Selecciona la periodicidad", options=["Anual", "Semestral"])
+    st.subheader("Filtrar por Fecha")
+    fecha_inicio = st.date_input("Fecha de Inicio", value=datetime.today())
+    fecha_fin = st.date_input("Fecha de Fin", value=datetime.today())
+
+    # Formulario actual de captura de datos
+    st.subheader("Datos del Postulante")
+    tipo_documento = st.selectbox("Tipo de Documento", ["Tarjeta de Identidad", "Cédula de Ciudadanía"])
+    fecha_solicitud = st.date_input("Fecha de Solicitud", value=datetime.today())
+    estado_solicitud = st.selectbox("Estado de Solicitud", ["Pendiente", "Aprobada", "Rechazada"])
+    genero = st.multiselect("Genero", ["Masculino", "Femenino"])
+	
+
+    # Inicializar variables de campos adicionales
+    nacionalidad = []
+    estado_credito = []
+    lista_sarlaft = []
+    
+    # Opción para mostrar/ocultar campos adicionales
+    if st.checkbox("Mostrar campos adicionales"):
+        # Campos ocultos
+        nacionalidad = st.multiselect("Nacionalidad", ["Colombiano", "Otro"])
+        edad = st.slider("Edad", min_value=18, max_value=65, value=(18, 65), step=1)
+        estado_credito = st.multiselect("Estado del crédito anterior (en caso de tener alguno)", ["Ninguno", "Castigado", "En mora y castigado"])
+        lista_sarlaft = st.multiselect("Lista SARLAFT", ["No está en ninguna lista", "Vinculantes", "Restrictivas", "Informativas"])
+        score_credito = st.slider("Score crediticio", min_value=150, max_value=900, value=(150, 900), step=1)
+        capacidad_pago = st.slider("Capacidad de pago (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
+        limite_endeudamiento = st.slider("Límite de endeudamiento (en COP)", min_value=1500000, max_value=20000000, value=(1500000, 20000000), step=10000)
+        deudor = st.text_input("Nombre del deudor")
+        fecha_antecedentes = st.date_input("Fecha de antecedentes crediticios", value=datetime.today())
+        fecha_aplicación = st.date_input("Fecha de aplicación", value=datetime.today())
+
+    if st.button("Mostrar datos de beneficiarios"):
+        df_beneficiarios = pd.DataFrame(beneficiarios_data)
+
+        # Aplicar filtros
+        if nacionalidad:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nacionalidad"].isin(nacionalidad)]
+        if estado_credito:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Estado Crédito"].isin(estado_credito)]
+        if lista_sarlaft:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Lista SARLAFT"].isin(lista_sarlaft)]
+        if year:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Año"] == year]
+        if periodo:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Periodo"] == periodo]
+        if id_solicitud:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["ID Solicitud"].str.contains(id_solicitud, case=False, na=False)]
+        if nombre:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Nombre"].str.contains(nombre, case=False, na=False)]
+        if apellido:
+            df_beneficiarios = df_beneficiarios[df_beneficiarios["Apellido"].str.contains(apellido, case=False, na=False)]
+
+
+        # Eliminar la columna de "Nacionalidad"
+        df_beneficiarios = df_beneficiarios.drop(columns=["Nacionalidad"], errors='ignore')
+
+        if df_beneficiarios.empty:
+            st.warning("No se encontraron beneficiarios que cumplan con los filtros.")
+        else:
+            st.write("Solicitudes encontradas:")
+            st.dataframe(df_beneficiarios)
+
+	 # Almacenar los datos filtrados en session_state
+            st.session_state.df_beneficiarios = df_beneficiarios
+	
+            # Mostrar gráficos
+            #mostrar_graficos(df_beneficiarios)
+
+    # Botón para ejecutar validación de beneficiarios
+    if st.button("Ejecutar Validación de Postulantes"):
+        # Mostrar un spinner mientras se ejecuta el proceso
+        with st.spinner("Validando postulantes, por favor espera..."):
+            # Simular una ejecución oculta
+            beneficiarios_validados = []
+            beneficiarios_con_errores = []
+
+            for beneficiario in beneficiarios_data:
+                errores = realizar_validaciones(beneficiario)
+                if errores:
+                    beneficiarios_con_errores.append(beneficiario)
+                else:
+                    beneficiarios_validados.append(beneficiario)
+
+            # Guardar las listas en el estado de sesión
+            st.session_state['beneficiarios_validados'] = beneficiarios_validados
+            st.session_state['beneficiarios_con_errores'] = beneficiarios_con_errores
+
+        # Mostrar el resultado final de la validación
+        st.success("Validación de beneficiarios ejecutada correctamente.")
+
+        # Asegúrate de inicializar las listas en st.session_state si aún no existen
+        if 'beneficiarios_validados' not in st.session_state:
+            st.session_state['beneficiarios_validados'] = []
+
+        if 'beneficiarios_con_errores' not in st.session_state:
+            st.session_state['beneficiarios_con_errores'] = []
+
+	# Mostrar un resumen del resultado
+        total_validados = len(st.session_state['beneficiarios_validados'])
+        total_errores = len(st.session_state['beneficiarios_con_errores'])
+
+        st.write(f"✅ Postulantes validados: {total_validados}")
+        st.write(f"❌ Postulantes con errores: {total_errores}")
+
+	# Enviar ofertas a los beneficiarios validados
+        for beneficiario in st.session_state['beneficiarios_validados']:
+            oferta = beneficiario.copy()
+            oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
+            oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
+            oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
+            #oferta["Año"] = año_seleccionado
+            #oferta["Periodo"] = periodo_seleccionado
+            st.session_state['ofertas_en_proceso'].append(oferta)
+
+    st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+
+    # Crear un DataFrame con los beneficiarios aprobados
+    df_aprobados = pd.DataFrame(st.session_state['beneficiarios_validados'])
+    #df_aprobados['Año'] = año_seleccionado
+    #df_aprobados['Periodo'] = periodo_seleccionado
+
+    	# Botón para descargar ofertas aprobadas
+    if st.button("Descargar Excel con ofertas aprobadas"):
+        # Crear el archivo Excel
+        try:
+            	st.download_button(
+                	label="Descargar Excel",
+                	data=df_aprobados.to_csv(index=False).encode('utf-8'),
+                	file_name="ofertas_aprobadas.csv",
+                	mime="text/csv"
+            	)
+            	st.success("Archivo Excel listo para descargar.")
+        except Exception as e:
+            	st.error(f"Ocurrió un error al descargar el archivo: {e}")
+
+    # Mostrar cuántos postulantes tienen errores
+    st.subheader(f"{len(st.session_state['beneficiarios_con_errores'])} postulantes no aprobaron todas las validaciones")
+
+
+    if len(st.session_state['beneficiarios_con_errores']) > 0:
+        st.info("No se enviarán ofertas a los postulantes que no aprobaron todas las validaciones.")
+
+    
+        # Agregar un botón opcional para revisar detalles
+        if st.button("Revisar Detalles"):
+            st.subheader("Postulantes Validados")
+            if st.session_state['beneficiarios_validados']:
+                st.write(st.session_state['beneficiarios_validados'])
+            else:
+                st.write("No hay postulantes validados.")
+
+            st.subheader("Postulantes con Errores")
+            if st.session_state['beneficiarios_con_errores']:
+                st.write(st.session_state['beneficiarios_con_errores'])
+            else:
+                st.write("No hay postulantes con errores.")
+
 # Función para mostrar los gráficos (en el módulo de gráficos)
 #def mostrar_graficos_beneficiarios():
 #    if "df_beneficiarios" in st.session_state:
@@ -1483,8 +1651,8 @@ with col1:
     if st.button("Consulta de Solicitudes"):
         st.session_state.selected_page = "Consulta de Solicitudes"
 with col2:
-    if st.button("Enviar Oferta"):
-        st.session_state.selected_page = "Enviar Oferta"
+    if st.button("Busqueda Masiva"):
+        st.session_state.selected_page = "Busqueda Masiva"
 with col3:
     if st.button("Gestión Comercial"):
         st.session_state.selected_page = "Gestión Comercial"
@@ -1498,8 +1666,8 @@ with col5:  # Nueva opción para los gráficos
 # Ejecutar la función de la página seleccionada
 if st.session_state.selected_page == "Consulta de Solicitudes":
     captura_datos()  # Asegúrate de que esta función esté definida
-elif st.session_state.selected_page == "Enviar Oferta":
-    enviar_oferta()  # Asegúrate de que esta función esté definida
+elif st.session_state.selected_page == "Busqueda Masiva":
+    busqueda_masiva()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Comercial":
     gestion_comercial()  # Asegúrate de que esta función esté definida
 elif st.session_state.selected_page == "Gestión Presupuestal":
