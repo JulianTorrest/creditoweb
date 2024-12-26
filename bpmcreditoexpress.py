@@ -692,6 +692,44 @@ def captura_datos():
         st.write(f"✅ Postulantes validados: {total_validados}")
         st.write(f"❌ Postulantes con errores: {total_errores}")
 
+	# Enviar ofertas a los beneficiarios validados
+    	for beneficiario in beneficiarios_validados:
+        	oferta = beneficiario.copy()
+        	oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
+        	oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
+        	oferta["Valor"] = random.randint(3000000, beneficiario["Capacidad de Pago (COP)"])
+        	oferta["Año"] = año_seleccionado
+        	oferta["Periodo"] = periodo_seleccionado
+        	st.session_state['ofertas_en_proceso'].append(oferta)
+
+    	st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
+
+    	# Crear un DataFrame con los beneficiarios aprobados
+    	df_aprobados = pd.DataFrame(beneficiarios_validados)
+    	df_aprobados['Año'] = año_seleccionado
+    	df_aprobados['Periodo'] = periodo_seleccionado
+
+    	# Botón para descargar ofertas aprobadas
+    	if st.button("Descargar Excel con ofertas aprobadas"):
+        # Crear el archivo Excel
+        	try:
+            		st.download_button(
+                		label="Descargar Excel",
+                		data=df_aprobados.to_csv(index=False).encode('utf-8'),
+                		file_name="ofertas_aprobadas.csv",
+                		mime="text/csv"
+            		)
+            		st.success("Archivo Excel listo para descargar.")
+        	except Exception as e:
+            		st.error(f"Ocurrió un error al descargar el archivo: {e}")
+
+    # Mostrar cuántos postulantes tienen errores
+    	st.subheader(f"{len(beneficiarios_con_errores)} postulantes no aprobaron todas las validaciones")  # Aquí está la verificación
+
+    	if len(beneficiarios_con_errores) > 0:
+        	st.info("No se enviarán ofertas a los postulantes que no aprobaron todas las validaciones.")
+
+    
         # Agregar un botón opcional para revisar detalles
         if st.button("Revisar Detalles"):
             st.subheader("Postulantes Validados")
