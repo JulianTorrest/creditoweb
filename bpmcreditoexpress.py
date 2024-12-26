@@ -731,23 +731,24 @@ def captura_datos():
             	st.error(f"Ocurrió un error al descargar el archivo: {e}")
 
     # Mostrar cuántos postulantes tienen errores
-    st.subheader(f"{len(beneficiarios_con_errores)} postulantes no aprobaron todas las validaciones")  # Aquí está la verificación
+    st.subheader(f"{len(st.session_state['beneficiarios_con_errores'])} postulantes no aprobaron todas las validaciones")
 
-    if len(beneficiarios_con_errores) > 0:
+
+    if len(st.session_state['beneficiarios_con_errores']) > 0:
         st.info("No se enviarán ofertas a los postulantes que no aprobaron todas las validaciones.")
 
     
         # Agregar un botón opcional para revisar detalles
         if st.button("Revisar Detalles"):
             st.subheader("Postulantes Validados")
-            if beneficiarios_validados:
-                st.write(beneficiarios_validados)
+            if st.session_state['beneficiarios_validados']:
+                st.write(st.session_state['beneficiarios_validados'])
             else:
                 st.write("No hay postulantes validados.")
 
             st.subheader("Postulantes con Errores")
-            if beneficiarios_con_errores:
-                st.write(beneficiarios_con_errores)
+            if st.session_state['beneficiarios_con_errores']:
+                st.write(st.session_state['beneficiarios_con_errores'])
             else:
                 st.write("No hay postulantes con errores.")
 
