@@ -693,14 +693,14 @@ def captura_datos():
             st.session_state['beneficiarios_con_errores'] = []
 
 	# Mostrar un resumen del resultado
-        total_validados = len(beneficiarios_validados)
-        total_errores = len(beneficiarios_con_errores)
+        total_validados = len(st.session_state['beneficiarios_validados'])
+        total_errores = len(st.session_state['beneficiarios_con_errores'])
 
         st.write(f"✅ Postulantes validados: {total_validados}")
         st.write(f"❌ Postulantes con errores: {total_errores}")
 
 	# Enviar ofertas a los beneficiarios validados
-        for beneficiario in beneficiarios_validados:
+        for beneficiario in st.session_state['beneficiarios_validados']:
             oferta = beneficiario.copy()
             oferta["Interesado"] = random.choice(["Sí", "No", "Sí, pero después"])  # Asignar interés aleatorio
             oferta["GarantiaFirmada"] = random.choice([True, False])  # Asignar garantía aleatoria
@@ -712,7 +712,7 @@ def captura_datos():
     st.success("Ofertas enviadas a todos los beneficiarios que pasaron las validaciones.")
 
     # Crear un DataFrame con los beneficiarios aprobados
-    df_aprobados = pd.DataFrame(beneficiarios_validados)
+    df_aprobados = pd.DataFrame(st.session_state['beneficiarios_validados'])
     #df_aprobados['Año'] = año_seleccionado
     #df_aprobados['Periodo'] = periodo_seleccionado
 
